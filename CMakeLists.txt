@@ -1,0 +1,28 @@
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+PROJECT(mehstation)
+
+SET(
+        MEHSTATION_SOURCES
+        src/main.c
+)
+
+ADD_EXECUTABLE(
+    ${PROJECT_NAME}
+    ${MEHSTATION_SOURCES}
+)
+
+INCLUDE(FindPkgConfig)
+PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
+
+include_directories(
+    ${SDL2_INCLUDE_DIRS}
+)
+
+# sources
+TARGET_LINK_LIBRARIES(
+    ${PROJECT_NAME}
+    ${SDL2_LIBRARIES}
+)
+
