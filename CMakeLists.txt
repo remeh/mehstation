@@ -7,6 +7,7 @@ SET(
         MEHSTATION_SOURCES
         src/main.c
         src/view/window.c
+        src/system/settings.c
 )
 
 ADD_EXECUTABLE(

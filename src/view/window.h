@@ -10,7 +10,7 @@ typedef struct {
 	guint width;
 	guint height;
 	gboolean fullscreen;
-	const SDL_Window* sdl_window;
+	SDL_Window* sdl_window;
 } Window;
 
-const Window* meh_create_window(guint width, guint height, gboolean fullscreen);
+Window* meh_create_window(guint width, guint height, gboolean fullscreen);

@@ -1,6 +1,9 @@
 #include "window.h"
 
-const Window* meh_create_window(guint width, guint height, gboolean fullscreen) {
+/*
+ * meh_create_window deals with the creation of the opengl window.
+ */
+Window* meh_create_window(guint width, guint height, gboolean fullscreen) {
 	Window* w = (Window*)malloc(sizeof(Window));	
 
 	w->width = width;
@@ -26,6 +29,20 @@ const Window* meh_create_window(guint width, guint height, gboolean fullscreen) 
 		return NULL;
 	}
 
-	g_message("Window created.");
+	g_message("Window %d:%d %s created.", w->width, w->height, (w->fullscreen == TRUE ? "fullscreen" : "windowed"));
 	return w;
+}
+
+/*
+ * meh_destroy_window frees the resources of the given window.
+ */
+gboolean meh_destroy_window(Window* window) {
+	if (window == NULL) {
+		return FALSE;
+	}
+
+	SDL_DestroyWindow(window->sdl_window);
+	free(window);
+
+	return TRUE;
 }
