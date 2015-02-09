@@ -19,7 +19,6 @@ int meh_app_init(App* app) {
 	}
 
 	g_message("SDL init OK.");
-	atexit(SDL_Quit);
 
 	/* Read the settings */
 	Settings settings;
@@ -37,6 +36,10 @@ int meh_app_init(App* app) {
 	return 0;
 }
 
+/*
+ * meh_app_destroy frees the resources of the given app
+ * and closes every system (SDL, ...)
+ */
 int meh_app_destroy(App* app) {
 	g_assert(app != NULL);
 
@@ -45,6 +48,9 @@ int meh_app_destroy(App* app) {
 	app->small_font = NULL;
 	meh_window_destroy(app->window);
 	app->window = NULL;
+
+	SDL_Quit();
+	TTF_Quit();
 
 	return 0;
 }

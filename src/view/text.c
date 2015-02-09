@@ -1,6 +1,6 @@
 #include "glib-2.0/glib.h"
 
-#include "text.h"
+#include "view/text.h"
 
 /*
  * meh_font_open reads the given filename as a font with the given size.
@@ -37,16 +37,24 @@ void meh_font_destroy(Font* font) {
  *
  * The returned surface should be freed by the caller.
  */
-SDL_Surface* meh_font_render_on_surface(Font* font, const char* text, SDL_Color color) {
+SDL_Texture* meh_font_render_on_texture(SDL_Renderer* renderer, Font* font, const char* text, SDL_Color color) {
 	g_assert(font != NULL);
 	g_assert(text != NULL);
 
 	SDL_Surface* surface = TTF_RenderText_Solid(font->sdl_font, text, color);
+	SDL_Texture* texture = NULL;
 
 	if (surface == NULL) {
 		g_warning("Unable to render the text '%s' on a SDL_Surface: %s\n", SDL_GetError());
 		return NULL;
 	}
 
-	return surface;
+	texture = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_FreeSurface(surface);
+
+	if (texture == NULL) {
+		g_critical("Unable to create a texture from the text '%s' : %s\n", text, SDL_GetError());
+	}
+	
+	return texture;
 }

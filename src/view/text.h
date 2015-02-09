@@ -9,5 +9,5 @@ typedef struct {
 
 Font* meh_font_open(const char* filename, guint size);
 void meh_font_destroy(Font* font);
-SDL_Surface* meh_font_render_on_surface(Font* font, const gchar* text, SDL_Color color);
+SDL_Texture* meh_font_render_on_texture(SDL_Renderer* renderer, Font* font, const gchar* text, SDL_Color color);
 
