@@ -7,6 +7,7 @@ SET(
         MEHSTATION_SOURCES
         src/main.c
         src/view/window.c
+        src/view/text.c
         src/system/settings.c
 )
 
@@ -16,11 +17,13 @@ ADD_EXECUTABLE(
 )
 
 INCLUDE(FindPkgConfig)
-PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
+PKG_SEARCH_MODULE(SDL2 REQUIRED SDL2)
+PKG_SEARCH_MODULE(SDL2_ttf REQUIRED SDL2_ttf)
 PKG_CHECK_MODULES(GLIB REQUIRED glib-2.0>=2.0.0)
 
 include_directories(
     ${SDL2_INCLUDE_DIRS}
+    ${SDL2_ttf_INCLUDE_DIRS}
     ${GLIB_INCLUDE_DIRS}
 )
 
@@ -30,6 +33,7 @@ LINK_DIRECTORIES(${mehstation_BINARY_DIR}/src)
 TARGET_LINK_LIBRARIES(
     ${PROJECT_NAME}
     ${SDL2_LIBRARIES}
+    ${SDL2_ttf_LIBRARIES}
     ${GLIB_LIBRARIES}
 )
 
