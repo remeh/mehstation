@@ -8,8 +8,9 @@ SET(
         src/main.c
         src/system/app.c
         src/system/settings.c
-        src/view/window.c
+        src/view/image.c
         src/view/text.c
+        src/view/window.c
 )
 
 ADD_EXECUTABLE(
@@ -20,11 +21,13 @@ ADD_EXECUTABLE(
 INCLUDE(FindPkgConfig)
 PKG_SEARCH_MODULE(SDL2 REQUIRED SDL2)
 PKG_SEARCH_MODULE(SDL2_ttf REQUIRED SDL2_ttf)
+PKG_SEARCH_MODULE(SDL2_image REQUIRED SDL2_image)
 PKG_CHECK_MODULES(GLIB REQUIRED glib-2.0>=2.0.0)
 
 include_directories(
     ${SDL2_INCLUDE_DIRS}
     ${SDL2_ttf_INCLUDE_DIRS}
+    ${SDL2_image_INCLUDE_DIRS}
     ${GLIB_INCLUDE_DIRS}
     ${mehstation_BINARY_DIR}/src
 )
@@ -41,6 +44,7 @@ TARGET_LINK_LIBRARIES(
     ${PROJECT_NAME}
     ${SDL2_LIBRARIES}
     ${SDL2_ttf_LIBRARIES}
+    ${SDL2_image_LIBRARIES}
     ${GLIB_LIBRARIES}
 )
 

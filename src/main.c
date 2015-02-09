@@ -1,6 +1,7 @@
 #include "SDL2/SDL.h"
 #include "glib-2.0/glib.h"
 
+#include "view/image.h"
 #include "view/text.h"
 #include "view/window.h"
 #include "system/settings.h"
@@ -11,10 +12,14 @@ int main(int argc, char* argv[]) {
 	meh_app_init(app);
 
 	SDL_Color black = { 0, 0, 0 };
-	SDL_Color green = { 0, 0, 120 };
 	meh_window_clear(app->window, black);
 
-	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", green, 50, 50);
+	SDL_Texture* texture = meh_image_load_file(app->window->sdl_renderer, "./image.png");
+	SDL_Rect rect = { 0, 0, 500, 500 };
+	meh_window_render_texture(app->window, texture, rect);
+	SDL_DestroyTexture(texture);
+
+	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", black, 50, 50);
 
 	meh_window_render(app->window);
 

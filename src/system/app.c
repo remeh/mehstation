@@ -1,3 +1,4 @@
+#include "SDL2/SDL_image.h"
 #include "glib-2.0/glib.h"
 #include "system/app.h"
 
@@ -13,8 +14,14 @@ int meh_app_init(App* app) {
 		g_critical("Can't init the SDL: %s", SDL_GetError());
 		return 1;
 	}
+
 	if (TTF_Init() == -1) {
 		g_critical("TTF can't initialize: %s\n", TTF_GetError());
+		return 1;
+	}
+
+	if ( !(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) ) {
+		g_critical("SDL_image can't initialize: %s\n", TTF_GetError());
 		return 1;
 	}
 
