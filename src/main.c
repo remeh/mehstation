@@ -17,15 +17,15 @@ int main(int argc, char* argv[]) {
 
 	/* Read the settings */
 	Settings settings;
-	meh_read_settings(&settings, "mehstation.conf");
+	meh_settings_read(&settings, "mehstation.conf");
 
 	/* Open the main window */
-	Window* window = meh_create_window(settings.width, settings.height, settings.fullscreen);
+	Window* window = meh_window_create(settings.width, settings.height, settings.fullscreen);
 
 	SDL_Delay(1000);
 
 	/* Free the resource */
-	meh_destroy_window(window);
+	meh_window_destroy(window);
 	window = NULL;
 
 	return 0;

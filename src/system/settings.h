@@ -8,4 +8,4 @@ typedef struct {
 	gboolean fullscreen;
 } Settings;
 
-gboolean meh_read_settings(Settings *settings, const gchar *filename);
+gboolean meh_settings_read(Settings *settings, const gchar *filename);

@@ -3,9 +3,9 @@
 #include "text.h"
 
 /*
- * meh_open_font reads the given filename as a font with the given size.
+ * meh_font_open reads the given filename as a font with the given size.
  */
-Font* meh_open_font(const char* filename, uint size) {
+Font* meh_font_open(const char* filename, guint size) {
 	Font* font = NULL;
 
 	TTF_Font* sdl_font = TTF_OpenFont(filename, size);
@@ -21,9 +21,9 @@ Font* meh_open_font(const char* filename, uint size) {
 }
 
 /*
- * meh_destroy_font frees the resources of the given font.
+ * meh_font_destroy frees the resources of the given font.
  */
-void meh_destroy_font(Font* font) {
+void meh_font_destroy(Font* font) {
 	g_assert(font != NULL);
 
 	TTF_CloseFont(font->sdl_font);

@@ -29,6 +29,11 @@ include_directories(
 
 LINK_DIRECTORIES(${mehstation_BINARY_DIR}/src)
 
+# Use Clang
+SET (CMAKE_C_COMPILER             "/usr/bin/clang")
+SET (CMAKE_C_FLAGS                "-Wall -std=c99")
+SET (CMAKE_C_FLAGS_DEBUG          "-g")
+
 # sources
 TARGET_LINK_LIBRARIES(
     ${PROJECT_NAME}

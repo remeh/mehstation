@@ -7,6 +7,7 @@ typedef struct {
 	TTF_Font* sdl_font;
 } Font;
 
-Font* meh_open_font(const char* filename, uint size);
+Font* meh_font_open(const char* filename, guint size);
 
-void meh_destroy_font(Font* font);
+void meh_font_destroy(Font* font);
+

@@ -3,7 +3,7 @@
 /*
  * meh_create_window deals with the creation of the opengl window.
  */
-Window* meh_create_window(guint width, guint height, gboolean fullscreen) {
+Window* meh_window_create(guint width, guint height, gboolean fullscreen) {
 	Window* w = (Window*)malloc(sizeof(Window));	
 
 	w->width = width;
@@ -36,7 +36,7 @@ Window* meh_create_window(guint width, guint height, gboolean fullscreen) {
 /*
  * meh_destroy_window frees the resources of the given window.
  */
-gboolean meh_destroy_window(Window* window) {
+gboolean meh_window_destroy(Window* window) {
 	if (window == NULL) {
 		return FALSE;
 	}

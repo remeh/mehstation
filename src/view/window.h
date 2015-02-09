@@ -13,6 +13,6 @@ typedef struct {
 	SDL_Window* sdl_window;
 } Window;
 
-Window* meh_create_window(guint width, guint height, gboolean fullscreen);
+Window* meh_window_create(guint width, guint height, gboolean fullscreen);
 
-gboolean meh_destroy_window(Window* window);
+gboolean meh_window_destroy(Window* window);

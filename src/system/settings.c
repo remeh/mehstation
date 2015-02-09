@@ -7,7 +7,7 @@
  * meh_read_settings opens the given file and read its content
  * to fill the provided settings.
  */
-gboolean meh_read_settings(Settings *settings, const char *filename) {
+gboolean meh_settings_read(Settings *settings, const char *filename) {
 	g_assert(settings != NULL);
 	g_assert(filename != NULL);
 	g_assert(strlen(filename) > 0);
@@ -35,4 +35,6 @@ gboolean meh_read_settings(Settings *settings, const char *filename) {
 	settings->width = g_key_file_get_integer(keyfile, "mehstation", "width", NULL);
 	settings->height = g_key_file_get_integer(keyfile, "mehstation", "height", NULL);
 	settings->fullscreen = g_key_file_get_boolean(keyfile, "mehstation", "fullscreen", NULL);
+
+	return TRUE;
 }
