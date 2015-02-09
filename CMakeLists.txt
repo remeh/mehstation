@@ -6,9 +6,10 @@ PROJECT(mehstation)
 SET(
         MEHSTATION_SOURCES
         src/main.c
+        src/system/app.c
+        src/system/settings.c
         src/view/window.c
         src/view/text.c
-        src/system/settings.c
 )
 
 ADD_EXECUTABLE(
@@ -25,6 +26,7 @@ include_directories(
     ${SDL2_INCLUDE_DIRS}
     ${SDL2_ttf_INCLUDE_DIRS}
     ${GLIB_INCLUDE_DIRS}
+    ${mehstation_BINARY_DIR}/src
 )
 
 LINK_DIRECTORIES(${mehstation_BINARY_DIR}/src)
