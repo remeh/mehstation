@@ -14,3 +14,5 @@ typedef struct {
 } Window;
 
 Window* meh_create_window(guint width, guint height, gboolean fullscreen);
+
+gboolean meh_destroy_window(Window* window);

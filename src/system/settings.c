@@ -3,6 +3,10 @@
 
 #include "settings.h"
 
+/*
+ * meh_read_settings opens the given file and read its content
+ * to fill the provided settings.
+ */
 gboolean meh_read_settings(Settings *settings, const char *filename) {
 	g_assert(settings != NULL);
 	g_assert(filename != NULL);

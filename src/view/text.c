@@ -2,6 +2,9 @@
 
 #include "text.h"
 
+/*
+ * meh_open_font reads the given filename as a font with the given size.
+ */
 Font* meh_open_font(const char* filename, uint size) {
 	Font* font = NULL;
 
@@ -17,6 +20,9 @@ Font* meh_open_font(const char* filename, uint size) {
 	return font;
 }
 
+/*
+ * meh_destroy_font frees the resources of the given font.
+ */
 void meh_destroy_font(Font* font) {
 	g_assert(font != NULL);
 
