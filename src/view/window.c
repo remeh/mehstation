@@ -1,4 +1,5 @@
-#include "window.h"
+#include "view/window.h"
+#include "view/text.h"
 
 /*
  * meh_create_window deals with the creation of the opengl window.
@@ -87,4 +88,38 @@ void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect vi
 
 	SDL_RenderSetViewport(window->sdl_renderer, &viewport);
 	SDL_RenderCopy(window->sdl_renderer, texture, NULL, NULL);
+}
+
+/*
+ * meh_window_render_text directly renders text on the rendered with the given font
+ * at the given position.
+ * Returns:
+ *  0 if everything succeed
+ *  -1 if an error occurred
+ */
+int meh_window_render_text(Window* window, Font* font, const char* text, SDL_Color color, int x, int y) {
+	g_assert(window != NULL);
+	g_assert(font != NULL);
+	g_assert(text != NULL);
+
+	if (text == '\0') {
+		return -1;
+	}
+
+	SDL_Texture* texture = meh_font_render_on_texture(window->sdl_renderer, font, text, color);
+	if (texture == NULL) {
+		g_critical("Can't render text on the window.\n");
+		return -1;
+	}
+
+	/* Renders at the good position */
+	int w, h;
+	SDL_QueryTexture(texture, NULL, NULL, &w, &h);
+	SDL_Rect viewport = { x, y, w, h };
+	meh_window_render_texture(window, texture, viewport);
+
+	/* Free the texture. */
+	SDL_DestroyTexture(texture);
+
+	return 0;
 }

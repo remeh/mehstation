@@ -10,16 +10,12 @@ int main(int argc, char* argv[]) {
 	App* app = meh_app_create();
 	meh_app_init(app);
 
-	SDL_Color pink = { 255, 0, 255 };
-	SDL_Texture* texture = meh_font_render_on_texture(app->window->sdl_renderer, app->small_font, "mehstation 1.0", pink);
-
 	SDL_Color black = { 0, 0, 0 };
+	SDL_Color green = { 0, 0, 120 };
 	meh_window_clear(app->window, black);
 
-	SDL_Rect viewport = { 0, 0, 250, 150 };
-	meh_window_render_texture(app->window, texture, viewport);
+	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", green, 50, 50);
 
-	SDL_DestroyTexture(texture);
 	meh_window_render(app->window);
 
 	SDL_Delay(3000);
