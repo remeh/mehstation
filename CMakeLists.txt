@@ -7,8 +7,11 @@ SET(
         MEHSTATION_SOURCES
         src/main.c
         src/system/app.c
+        src/system/input.c
         src/system/settings.c
         src/view/image.c
+        src/view/screen.c
+        src/view/screen/starting.c
         src/view/text.c
         src/view/window.c
 )
@@ -35,9 +38,9 @@ include_directories(
 LINK_DIRECTORIES(${mehstation_BINARY_DIR}/src)
 
 # Use Clang
-# SET (CMAKE_C_COMPILER             "/usr/bin/clang")
-# SET (CMAKE_C_FLAGS                "-Wall -std=c99")
-# SET (CMAKE_C_FLAGS_DEBUG          "-g")
+SET (CMAKE_C_COMPILER             "/usr/bin/clang")
+SET (CMAKE_C_FLAGS                "-Wall -std=c99")
+SET (CMAKE_C_FLAGS_DEBUG          "-g")
 
 # sources
 TARGET_LINK_LIBRARIES(

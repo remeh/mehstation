@@ -1,6 +1,11 @@
 #include "SDL2/SDL_image.h"
 #include "glib-2.0/glib.h"
+
+#include "view/image.h"
+#include "view/screen.h"
+#include "view/screen/starting.h"
 #include "system/app.h"
+#include "system/input.h"
 #include "system/settings.h"
 
 App* meh_app_create() {
@@ -43,6 +48,15 @@ int meh_app_init(App* app) {
 	Font* font = meh_font_open("res/fonts/FreeMonoBold.ttf", 16);
 	app->small_font = font;
 
+	/* Sets the starting screen as the current screen */
+	Screen* starting_screen = meh_screen_starting_new();
+	if (starting_screen == NULL) {
+		g_critical("Can't init the starting screen.");
+		return 1;
+	} 
+
+	meh_app_set_current_screen(app, starting_screen);
+
 	return 0;
 }
 
@@ -65,3 +79,82 @@ int meh_app_destroy(App* app) {
 	return 0;
 }
 
+void meh_app_set_current_screen(App* app, Screen* screen) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
+
+	g_message("Setting the current screen to : %s", screen->name);
+	app->current_screen = screen;
+}
+
+/*
+ * meh_app_main_loop is the main loop running for the whole time 
+ * of the process.
+ */
+int meh_app_main_loop(App* app) {
+	g_assert(app != NULL);
+
+	int last_time = SDL_GetTicks();
+	app->mainloop.running = TRUE;
+
+	/* application lifecycle */
+	while (app->mainloop.running) {
+		meh_app_main_loop_event(app);
+		meh_app_main_loop_render(app);
+	}
+
+	return 0;
+}
+
+/*
+ * meh_app_main_loop_event is the event handling part
+ * of the pipeline.
+ */
+void meh_app_main_loop_event(App* app) {
+	g_assert(app != NULL);
+
+	SDL_Event* event = &(app->mainloop.event);
+	while (SDL_PollEvent(event)) {
+		switch (event->type) {
+			case SDL_KEYUP:
+			case SDL_KEYDOWN:
+				meh_input_read_event(app, event);
+				break;
+			case SDL_QUIT:
+				app->mainloop.running = FALSE;
+				break;
+		}
+	}
+}
+
+/*
+ * meh_app_main_loop_render is the rendering part of the pipeline.
+ */
+void meh_app_main_loop_render(App* app) {
+	g_assert(app != NULL);
+
+	SDL_Color black = { 0, 0, 0 };
+	meh_window_clear(app->window, black);
+
+	SDL_Texture* texture = meh_image_load_file(app->window->sdl_renderer, "./image.png");
+	SDL_Rect rect = { 0, 0, 500, 500 };
+	meh_window_render_texture(app->window, texture, rect);
+	SDL_DestroyTexture(texture);
+
+	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", black, 50, 50);
+
+	meh_window_render(app->window);
+	SDL_Delay(10); /* TODO */
+}
+
+void meh_app_send_event(App* app, Event* event) {
+	g_assert(app != NULL);
+
+	if (event == NULL) {
+		g_warning("NULL event has been seen in meh_app_send_event");
+		return;
+	}
+
+	/* route the event to the screen. */
+	app->current_screen->events_handler((struct Screen*)app->current_screen, event);
+}
