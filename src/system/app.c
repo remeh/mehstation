@@ -40,7 +40,7 @@ int meh_app_init(App* app) {
 	app->window = window;
 
 	/* Opens some font. */
-	Font* font = meh_font_open("/usr/share/fonts/TTF/arial.ttf", 16);
+	Font* font = meh_font_open("res/fonts/FreeMonoBold.ttf", 16);
 	app->small_font = font;
 
 	return 0;

@@ -19,7 +19,7 @@ ADD_EXECUTABLE(
 )
 
 INCLUDE(FindPkgConfig)
-PKG_SEARCH_MODULE(SDL2 REQUIRED SDL2)
+PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 PKG_SEARCH_MODULE(SDL2_ttf REQUIRED SDL2_ttf)
 PKG_SEARCH_MODULE(SDL2_image REQUIRED SDL2_image)
 PKG_CHECK_MODULES(GLIB REQUIRED glib-2.0>=2.0.0)
@@ -35,9 +35,9 @@ include_directories(
 LINK_DIRECTORIES(${mehstation_BINARY_DIR}/src)
 
 # Use Clang
-SET (CMAKE_C_COMPILER             "/usr/bin/clang")
-SET (CMAKE_C_FLAGS                "-Wall -std=c99")
-SET (CMAKE_C_FLAGS_DEBUG          "-g")
+# SET (CMAKE_C_COMPILER             "/usr/bin/clang")
+# SET (CMAKE_C_FLAGS                "-Wall -std=c99")
+# SET (CMAKE_C_FLAGS_DEBUG          "-g")
 
 # sources
 TARGET_LINK_LIBRARIES(
