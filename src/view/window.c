@@ -13,7 +13,7 @@ Window* meh_window_create(guint width, guint height, gboolean fullscreen) {
 
 	int flags = SDL_WINDOW_OPENGL;
 	if (w->fullscreen) {
-		flags |= SDL_WINDOW_FULLSCREEN;
+		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 	}
 
 	/* Create the SDL window */
