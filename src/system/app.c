@@ -1,6 +1,7 @@
 #include "SDL2/SDL_image.h"
 #include "glib-2.0/glib.h"
 #include "system/app.h"
+#include "system/settings.h"
 
 App* meh_app_create() {
 	return g_new(App, 1);
@@ -26,6 +27,8 @@ int meh_app_init(App* app) {
 	}
 
 	g_message("SDL init OK.");
+
+	meh_settings_print_system_infos();
 
 	/* Read the settings */
 	Settings settings;

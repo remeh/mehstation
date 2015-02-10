@@ -1,5 +1,6 @@
 #include <string.h>
 #include "glib-2.0/glib.h"
+#include "SDL2/SDL.h"
 
 #include "settings.h"
 
@@ -37,4 +38,21 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 	settings->fullscreen = g_key_file_get_boolean(keyfile, "mehstation", "fullscreen", NULL);
 
 	return TRUE;
+}
+
+/*
+ * Display some system information on the standart output.
+ */
+void meh_settings_print_system_infos() {
+	SDL_DisplayMode display_mode;
+	int i;
+
+	g_message("Available displays: %d", SDL_GetNumVideoDisplays());
+	for (i = 0; i < SDL_GetNumVideoDisplays(); i++) {
+		if (SDL_GetCurrentDisplayMode(i, &display_mode) == 0) {
+			g_message("Display #%d: display mode is %dx%d@%dhz.", i, display_mode.w, display_mode.h, display_mode.refresh_rate);
+		}
+	}
+
+	g_message("Video driver: %s", SDL_GetCurrentVideoDriver());
 }

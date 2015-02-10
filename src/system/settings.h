@@ -9,3 +9,4 @@ typedef struct {
 } Settings;
 
 gboolean meh_settings_read(Settings *settings, const gchar *filename);
+void meh_settings_print_system_infos();
