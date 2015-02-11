@@ -57,6 +57,10 @@ void meh_input_manager_keyboard_read_event(InputManager* input_manager, SDL_Even
 	}
 }
 
+/*
+ * meh_input_manager_generate_events transforms the input manager
+ * states (button pressed) in events and returns them in a list.
+ */
 GSList* meh_input_manager_generate_events(InputManager* input_manager) {
 	GSList* list = NULL;
 
@@ -66,6 +70,7 @@ GSList* meh_input_manager_generate_events(InputManager* input_manager) {
 		if (input_manager->pressed_buttons[i] == TRUE) {
 			switch (i) {
 				case MEH_INPUT_SPECIAL_ESCAPE:
+					/* FIXME maybe we should send directly an Event */
 					e = g_new(int, 1); *e = MEH_EVENT_ESCAPE;
 					list = g_slist_append(list, e);
 			}
