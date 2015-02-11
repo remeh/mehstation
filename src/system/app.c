@@ -48,6 +48,10 @@ int meh_app_init(App* app) {
 	Font* font = meh_font_open("res/fonts/FreeMonoBold.ttf", 16);
 	app->small_font = font;
 
+	/* Input manager */
+	InputManager* input_manager = meh_input_manager_new();
+	app->input_manager = input_manager;
+
 	/* Sets the starting screen as the current screen */
 	Screen* starting_screen = meh_screen_starting_new();
 	if (starting_screen == NULL) {
@@ -94,12 +98,13 @@ void meh_app_set_current_screen(App* app, Screen* screen) {
 int meh_app_main_loop(App* app) {
 	g_assert(app != NULL);
 
-	int last_time = SDL_GetTicks();
+	//int last_time = SDL_GetTicks();
 	app->mainloop.running = TRUE;
 
 	/* application lifecycle */
 	while (app->mainloop.running) {
 		meh_app_main_loop_event(app);
+		meh_app_main_loop_update(app);
 		meh_app_main_loop_render(app);
 	}
 
@@ -118,14 +123,30 @@ void meh_app_main_loop_event(App* app) {
 		switch (event->type) {
 			case SDL_KEYUP:
 			case SDL_KEYDOWN:
-				meh_input_read_event(app, event);
+				meh_input_manager_keyboard_read_event(app->input_manager, event);
 				break;
 			case SDL_QUIT:
 				app->mainloop.running = FALSE;
 				break;
 		}
 	}
+
+	/* Generate events from input */
+	GSList* list_events = meh_input_manager_generate_events(app->input_manager);
+
+	int i = 0;
+	for (i = 0; i < g_slist_length(list_events); i++) {
+		/* create the Event */
+		int* event_id = g_slist_nth_data(list_events, i);
+		Event* event = g_new(Event, 1);
+		event->id = *event_id;
+		/* send it to the current screen */
+		meh_app_send_event(app, event);
+	}
+
+	g_slist_free(list_events);
 }
+
 
 /*
  * meh_app_main_loop_render is the rendering part of the pipeline.
@@ -144,7 +165,16 @@ void meh_app_main_loop_render(App* app) {
 	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", black, 50, 50);
 
 	meh_window_render(app->window);
-	SDL_Delay(10); /* TODO */
+	SDL_Delay(10); /* TODO delta */
+}
+
+void meh_app_main_loop_update(App* app) {
+	g_assert(app != NULL);
+
+	if (app->current_screen != NULL) {
+		/* TODO delta_time */
+		app->current_screen->update(app->current_screen, 0);
+	}
 }
 
 void meh_app_send_event(App* app, Event* event) {
@@ -156,5 +186,5 @@ void meh_app_send_event(App* app, Event* event) {
 	}
 
 	/* route the event to the screen. */
-	app->current_screen->events_handler((struct Screen*)app->current_screen, event);
+	app->current_screen->events_handler(app->current_screen, event);
 }
