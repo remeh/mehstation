@@ -23,6 +23,7 @@ typedef struct App {
 
 App* meh_app_create();
 int meh_app_init();
+void meh_app_exit(App* app);
 int meh_app_destroy(App* app);
 void meh_app_set_current_screen(App* app, Screen* screen);
 int meh_app_main_loop(App* app);

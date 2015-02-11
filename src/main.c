@@ -15,6 +15,9 @@ int main(int argc, char* argv[]) {
 	/* entering the main loop. */
 	meh_app_main_loop(app);
 
+	/* the app may has some thing to do before closing everything. */
+	meh_app_exit(app);
+
 	/* clean behind us. */
 	meh_app_destroy(app);
 	return 0;

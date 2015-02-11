@@ -1,5 +1,6 @@
 #include "glib-2.0/glib.h"
 
+#include "system/app.h"
 #include "system/consts.h"
 #include "system/event.h"
 #include "view/screen.h"
@@ -15,16 +16,16 @@ Screen* meh_screen_starting_new() {
 	return screen;
 }
 
-int meh_screen_starting_events_handler(Screen* screen, Event* event) {
+int meh_screen_starting_events_handler(App* app, Screen* screen, Event* event) {
 	g_assert(screen != NULL);
 
 	if (event == NULL) {
 		return 0;
 	}
 
-	g_message("%s received: %d\n", screen->name, event->id);
 	switch (event->id) {
 		case MEH_EVENT_ESCAPE:
+			app->mainloop.running = FALSE;
 			break;
 	}
 

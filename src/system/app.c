@@ -65,6 +65,13 @@ int meh_app_init(App* app) {
 }
 
 /*
+ * meh_app_exit is called just before freeing all the resources.
+ */
+void meh_app_exit(App* app) {
+	g_message("mehstation is closing.");
+}
+
+/*
  * meh_app_destroy frees the resources of the given app
  * and closes every system (SDL, ...)
  */
@@ -186,5 +193,5 @@ void meh_app_send_event(App* app, Event* event) {
 	}
 
 	/* route the event to the screen. */
-	app->current_screen->events_handler(app->current_screen, event);
+	app->current_screen->events_handler(app, app->current_screen, event);
 }
