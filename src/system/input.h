@@ -4,7 +4,7 @@
 #include "SDL2/SDL.h"
 
 #include "system/consts.h"
-#include "system/event.h"
+#include "system/message.h"
 
 /*
  * InputManager role is to receive events from
@@ -23,5 +23,5 @@ typedef struct {
 InputManager* meh_input_manager_new();
 void meh_input_manager_destroy(InputManager* input_manager);
 void meh_input_manager_keyboard_read_event(InputManager* input_manager, SDL_Event* event);
-GSList* meh_input_manager_generate_events(InputManager* input_manager);
+GSList* meh_input_manager_generate_messages(InputManager* input_manager);
 GHashTable* meh_input_create_default_keyboard_mapping();

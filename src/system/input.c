@@ -1,7 +1,7 @@
 #include "SDL2/SDL.h"
 #include "glib-2.0/glib.h"
 
-#include "system/event.h"
+#include "system/message.h"
 #include "system/input.h"
 #include "system/app.h"
 
@@ -59,21 +59,22 @@ void meh_input_manager_keyboard_read_event(InputManager* input_manager, SDL_Even
 }
 
 /*
- * meh_input_manager_generate_events transforms the input manager
- * states (button pressed) in events and returns them in a list.
+ * meh_input_manager_generate_messages transforms the input manager
+ * states (button pressed) in messages and returns them in a list.
  */
-GSList* meh_input_manager_generate_events(InputManager* input_manager) {
+GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 	GSList* list = NULL;
 
 	int i = 0;
-	Event *e = NULL;
+	Message *m = NULL;
 	for (i = 0; i < MEH_INPUT_END; i++) {
 		if (input_manager->pressed_buttons[i] == TRUE) {
-			switch (i) {
-				case MEH_INPUT_SPECIAL_ESCAPE:
-					e = g_new(Event, 1); e->id = MEH_EVENT_ESCAPE;
-					list = g_slist_append(list, e);
-			}
+			m = g_new(Message, 1);
+			m->id = MEH_MSG_BUTTON_PRESSED;
+			m->data = g_new(int, 1);
+			m->data = GINT_TO_POINTER(i);
+			list = g_slist_append(list, m);
+			break;
 		}
 	}
 

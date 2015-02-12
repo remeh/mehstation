@@ -5,7 +5,7 @@
 #include "view/screen.h"
 #include "view/screen/starting.h"
 #include "system/app.h"
-#include "system/event.h"
+#include "system/message.h"
 #include "system/input.h"
 #include "system/settings.h"
 
@@ -141,20 +141,20 @@ void meh_app_main_loop_event(App* app) {
 	}
 
 	/* Generate events from input */
-	GSList* list_events = meh_input_manager_generate_events(app->input_manager);
+	GSList* list_messages = meh_input_manager_generate_messages(app->input_manager);
 
 	int i = 0;
-	for (i = 0; i < g_slist_length(list_events); i++) {
-		/* create the Event */
-		Event* event = g_slist_nth_data(list_events, i);
+	for (i = 0; i < g_slist_length(list_messages); i++) {
+		/* create the Message */
+		Message* message = g_slist_nth_data(list_messages, i);
 		/* send it to the current screen */
-		meh_app_send_event(app, event);
-		/* release the event */
-		meh_event_destroy(event);
+		meh_app_send_message(app, message);
+		/* release the message */
+		meh_message_destroy(message);
 	}
 
 	/* release the memory of the list */
-	g_slist_free(list_events);
+	g_slist_free(list_messages);
 }
 
 
@@ -187,14 +187,14 @@ void meh_app_main_loop_update(App* app) {
 	}
 }
 
-void meh_app_send_event(App* app, Event* event) {
+void meh_app_send_message(App* app, Message* message) {
 	g_assert(app != NULL);
 
-	if (event == NULL) {
-		g_warning("NULL event has been seen in meh_app_send_event");
+	if (message == NULL) {
+		g_warning("NULL message has been seen in meh_app_send_message");
 		return;
 	}
 
-	/* route the event to the screen. */
-	app->current_screen->events_handler(app, app->current_screen, event);
+	/* route the message to the screen. */
+	app->current_screen->messages_handler(app, app->current_screen, message);
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "system/event.h"
+#include "system/message.h"
 #include "system/input.h"
 #include "system/settings.h"
 #include "view/text.h"
@@ -30,4 +30,4 @@ int meh_app_main_loop(App* app);
 void meh_app_main_loop_event(App* app);
 void meh_app_main_loop_update(App* app);
 void meh_app_main_loop_render(App* app);
-void meh_app_send_event(App* app, Event* event);
+void meh_app_send_message(App* app, Message* message);

@@ -19,5 +19,5 @@
 
 /* Event */
 
-#define MEH_EVENT_ESCAPE 0
-#define MEH_EVENT_END 1
+#define MEH_MSG_BUTTON_PRESSED 0
+#define MEH_MSG_END 1

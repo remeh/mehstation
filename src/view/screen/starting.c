@@ -2,7 +2,7 @@
 
 #include "system/app.h"
 #include "system/consts.h"
-#include "system/event.h"
+#include "system/message.h"
 #include "view/screen.h"
 #include "view/screen/starting.h"
 
@@ -10,26 +10,39 @@ Screen* meh_screen_starting_new() {
 	Screen* screen = g_new(Screen, 1);
 
 	screen->name = g_strdup("Starting screen");
-	screen->events_handler = &meh_screen_starting_events_handler;
+	screen->messages_handler = &meh_screen_starting_messages_handler;
 	screen->update = &meh_screen_starting_update;
 
 	return screen;
 }
 
-int meh_screen_starting_events_handler(App* app, Screen* screen, Event* event) {
+int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* message) {
 	g_assert(screen != NULL);
 
-	if (event == NULL) {
+	if (message == NULL) {
 		return 0;
 	}
 
-	switch (event->id) {
-		case MEH_EVENT_ESCAPE:
-			app->mainloop.running = FALSE;
+	switch (message->id) {
+		case MEH_MSG_BUTTON_PRESSED:
+			meh_screen_starting_button_pressed(app, screen, message);
 			break;
 	}
 
 	return 0;
+}
+
+/*
+ * meh_screen_starting_button_pressed is called when we received a button pressed
+ * message.
+ */
+void meh_screen_starting_button_pressed(App* app, Screen* screen, Message* message) {
+	int button_id = GPOINTER_TO_INT(message->data);
+	switch (button_id) {
+		case MEH_INPUT_SPECIAL_ESCAPE:
+			app->mainloop.running = FALSE;
+			break;
+	}
 }
 
 /*
