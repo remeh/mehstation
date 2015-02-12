@@ -1,6 +1,7 @@
 #include "SDL2/SDL.h"
 #include "glib-2.0/glib.h"
 
+#include "system/event.h"
 #include "system/input.h"
 #include "system/app.h"
 
@@ -65,13 +66,12 @@ GSList* meh_input_manager_generate_events(InputManager* input_manager) {
 	GSList* list = NULL;
 
 	int i = 0;
-	int *e = NULL;
+	Event *e = NULL;
 	for (i = 0; i < MEH_INPUT_END; i++) {
 		if (input_manager->pressed_buttons[i] == TRUE) {
 			switch (i) {
 				case MEH_INPUT_SPECIAL_ESCAPE:
-					/* FIXME maybe we should send directly an Event */
-					e = g_new(int, 1); *e = MEH_EVENT_ESCAPE;
+					e = g_new(Event, 1); e->id = MEH_EVENT_ESCAPE;
 					list = g_slist_append(list, e);
 			}
 		}

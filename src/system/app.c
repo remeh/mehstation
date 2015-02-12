@@ -5,6 +5,7 @@
 #include "view/screen.h"
 #include "view/screen/starting.h"
 #include "system/app.h"
+#include "system/event.h"
 #include "system/input.h"
 #include "system/settings.h"
 
@@ -133,6 +134,7 @@ void meh_app_main_loop_event(App* app) {
 				meh_input_manager_keyboard_read_event(app->input_manager, event);
 				break;
 			case SDL_QUIT:
+				/* directly stop the app */
 				app->mainloop.running = FALSE;
 				break;
 		}
@@ -144,13 +146,14 @@ void meh_app_main_loop_event(App* app) {
 	int i = 0;
 	for (i = 0; i < g_slist_length(list_events); i++) {
 		/* create the Event */
-		int* event_id = g_slist_nth_data(list_events, i);
-		Event* event = g_new(Event, 1);
-		event->id = *event_id;
+		Event* event = g_slist_nth_data(list_events, i);
 		/* send it to the current screen */
 		meh_app_send_event(app, event);
+		/* release the event */
+		meh_event_destroy(event);
 	}
 
+	/* release the memory of the list */
 	g_slist_free(list_events);
 }
 

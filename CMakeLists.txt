@@ -7,6 +7,7 @@ SET(
         MEHSTATION_SOURCES
         src/main.c
         src/system/app.c
+        src/system/event.c
         src/system/input.c
         src/system/settings.c
         src/view/image.c

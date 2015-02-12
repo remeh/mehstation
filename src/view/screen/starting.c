@@ -29,9 +29,6 @@ int meh_screen_starting_events_handler(App* app, Screen* screen, Event* event) {
 			break;
 	}
 
-	/* we consumed it */
-	g_free(event);
-
 	return 0;
 }
 
