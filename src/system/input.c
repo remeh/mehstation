@@ -69,10 +69,9 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 	Message *m = NULL;
 	for (i = 0; i < MEH_INPUT_END; i++) {
 		if (input_manager->pressed_buttons[i] == TRUE) {
-			m = g_new(Message, 1);
-			m->id = MEH_MSG_BUTTON_PRESSED;
-			m->data = g_new(int, 1);
-			m->data = GINT_TO_POINTER(i);
+			int* data = g_new(int, 1);
+			*data = i;
+			m = meh_message_new(MEH_MSG_BUTTON_PRESSED, data);
 			list = g_slist_append(list, m);
 			break;
 		}

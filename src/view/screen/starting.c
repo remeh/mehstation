@@ -37,8 +37,9 @@ int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* mess
  * message.
  */
 void meh_screen_starting_button_pressed(App* app, Screen* screen, Message* message) {
-	int button_id = GPOINTER_TO_INT(message->data);
-	switch (button_id) {
+	int* data = (int*)message->data;
+	switch (*data) {
+		/* Escape on the starting screen quit the app */
 		case MEH_INPUT_SPECIAL_ESCAPE:
 			app->mainloop.running = FALSE;
 			break;

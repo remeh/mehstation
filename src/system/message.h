@@ -4,7 +4,8 @@
 
 typedef struct {
 	int id;
-	gpointer data;
+	void* data;
 } Message;
 
+Message* meh_message_new(int message_id, void* data);
 void meh_message_destroy(Message* message);
