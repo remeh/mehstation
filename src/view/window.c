@@ -1,3 +1,4 @@
+#include "glib-2.0/glib.h"
 #include "view/window.h"
 #include "view/text.h"
 
@@ -5,7 +6,7 @@
  * meh_create_window deals with the creation of the opengl window.
  */
 Window* meh_window_create(guint width, guint height, gboolean fullscreen) {
-	Window* w = (Window*)malloc(sizeof(Window));	
+	Window* w = g_new(Window, 1);
 
 	w->width = width;
 	w->height = height;
@@ -57,7 +58,7 @@ gboolean meh_window_destroy(Window* window) {
 		window->sdl_renderer = NULL;
 	}
 
-	free(window);
+	g_free(window);
 
 	return TRUE;
 }
