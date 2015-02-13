@@ -11,6 +11,10 @@
 InputManager* meh_input_manager_new() {
 	InputManager* input_manager = g_new(InputManager, 1);
 
+	for (int i = 0; i < MEH_INPUT_END; i++) {
+		input_manager->pressed_buttons[i] = FALSE;
+	}
+
 	input_manager->keyboard_mapping = meh_input_create_default_keyboard_mapping();
 
 	return input_manager;
@@ -63,10 +67,12 @@ void meh_input_manager_keyboard_read_event(InputManager* input_manager, SDL_Even
  * states (button pressed) in messages and returns them in a list.
  */
 GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
-	GSList* list = NULL;
+	g_assert(input_manager != NULL);
 
-	int i = 0;
+	GSList* list = NULL;
 	Message *m = NULL;
+	int i = 0;
+
 	for (i = 0; i < MEH_INPUT_END; i++) {
 		if (input_manager->pressed_buttons[i] == TRUE) {
 			int* data = g_new(int, 1);
