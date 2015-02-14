@@ -6,6 +6,10 @@
 #include "system/consts.h"
 #include "system/message.h"
 
+#define MEH_INPUT_NOT_PRESSED 0
+#define MEH_INPUT_JUST_PRESSED 1
+#define MEH_INPUT_PRESSED 2
+
 /*
  * InputManager role is to receive events from
  * keyboard, gamepads, ..., and to deal with them.
@@ -15,7 +19,9 @@ typedef struct {
 	GHashTable*  keyboard_mapping;
 
 	/* contains all the pressed buttons after reading of the events */
-	gboolean pressed_buttons[MEH_INPUT_END];
+	guint buttons_state[MEH_INPUT_END];
+	/* time at which the key has been pressed. */
+	gboolean hold_buttons[MEH_INPUT_END];
 } InputManager;
 
 

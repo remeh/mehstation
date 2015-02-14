@@ -5,6 +5,8 @@
 #include "system/input.h"
 #include "system/app.h"
 
+#define MEH_INPUT_REPEAT_AFTER 2000 // TODO configuration
+
 /*
  * meh_input_manager_new creates a new InputManager.
  */
@@ -12,7 +14,8 @@ InputManager* meh_input_manager_new() {
 	InputManager* input_manager = g_new(InputManager, 1);
 
 	for (int i = 0; i < MEH_INPUT_END; i++) {
-		input_manager->pressed_buttons[i] = FALSE;
+		input_manager->buttons_state[i] = MEH_INPUT_NOT_PRESSED;
+		input_manager->hold_buttons[i] = FALSE;
 	}
 
 	input_manager->keyboard_mapping = meh_input_create_default_keyboard_mapping();
@@ -43,6 +46,8 @@ void meh_input_manager_keyboard_read_event(InputManager* input_manager, SDL_Even
 
 	int sdl_button = sdl_event->key.keysym.sym;
 
+	printf("%i\n", sdl_event->key.repeat);
+
 	/* Look wheter the pressed key is in the mapping of the keyboard */
 	int* pressed = g_hash_table_lookup(input_manager->keyboard_mapping, &sdl_button);	
 
@@ -51,13 +56,17 @@ void meh_input_manager_keyboard_read_event(InputManager* input_manager, SDL_Even
 		return;
 	}
 
+	int key_pressed = *pressed;
+
 	/* This is a known key set it as pressed / unpressed */
 	switch (sdl_event->type) {
 		case SDL_KEYDOWN:
-			input_manager->pressed_buttons[*pressed] = TRUE;
+			input_manager->hold_buttons[key_pressed] = FALSE;
+			input_manager->buttons_state[key_pressed] = MEH_INPUT_JUST_PRESSED;
 			break;
 		case SDL_KEYUP:
-			input_manager->pressed_buttons[*pressed] = FALSE;
+			input_manager->hold_buttons[key_pressed] = FALSE;
+			input_manager->buttons_state[key_pressed] = MEH_INPUT_NOT_PRESSED;
 			break;
 	}
 }
@@ -74,12 +83,30 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 	int i = 0;
 
 	for (i = 0; i < MEH_INPUT_END; i++) {
-		if (input_manager->pressed_buttons[i] == TRUE) {
+		/* the key is hold down, send a message. */
+		if (input_manager->hold_buttons[i] == TRUE) {
 			int* data = g_new(int, 1);
 			*data = i;
 			m = meh_message_new(MEH_MSG_BUTTON_PRESSED, data);
 			list = g_slist_append(list, m);
-			break;
+		}
+
+		int* data;
+
+		/* If the key has been just pressed, send a message immediatly */
+		switch (input_manager->buttons_state[i]) {
+			case MEH_INPUT_JUST_PRESSED:
+				data = g_new(int, 1);
+				*data = i;
+				m = meh_message_new(MEH_MSG_BUTTON_PRESSED, data);
+				list = g_slist_append(list, m);
+				input_manager->buttons_state[i] = SDL_GetTicks()+MEH_INPUT_REPEAT_AFTER;
+				break;
+			case MEH_INPUT_PRESSED:
+				if (SDL_GetTicks() > input_manager->buttons_state[i]) {
+					input_manager->hold_buttons[i] = TRUE;
+				}
+				break;
 		}
 	}
 
