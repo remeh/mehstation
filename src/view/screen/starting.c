@@ -5,6 +5,7 @@
 #include "system/message.h"
 #include "view/screen.h"
 #include "view/screen/starting.h"
+#include "view/screen/system_list.h"
 
 Screen* meh_screen_starting_new() {
 	Screen* screen = g_new(Screen, 1);
@@ -38,18 +39,32 @@ int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* mess
  */
 void meh_screen_starting_button_pressed(App* app, Screen* screen, Message* message) {
 	int* data = (int*)message->data;
+	g_message("Key pressed: %d\n", *data);
 	switch (*data) {
 		/* Escape on the starting screen quit the app */
 		case MEH_INPUT_SPECIAL_ESCAPE:
 			app->mainloop.running = FALSE;
 			break;
+		case MEH_INPUT_BUTTON_START:
+			app->current_screen = meh_screen_starting_create_next_screen(screen);
+			break;
 	}
+}
+
+/*
+ * meh_screen_starting_create_next_screen allocates the next screen and returns it
+ */
+Screen* meh_screen_starting_create_next_screen(Screen* screen) {
+	Screen* system_list_screen = meh_screen_system_list_new();
+	system_list_screen->parent_screen = screen;
+	return system_list_screen;
 }
 
 /*
  * meh_screen_starting_update received a call by the main_loop when we 
  * can update this screen.
  */
-int meh_screen_starting_update(struct Screen* screen, int delta_time) {
+int meh_screen_starting_update(Screen* screen, int delta_time) {
+	g_message("Update %s\n", screen->name);
 	return 0;
 }
