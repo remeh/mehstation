@@ -33,11 +33,39 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 		g_error_free(error);
 	}
 
-	settings->width = g_key_file_get_integer(keyfile, "mehstation", "width", NULL);
-	settings->height = g_key_file_get_integer(keyfile, "mehstation", "height", NULL);
-	settings->fullscreen = g_key_file_get_boolean(keyfile, "mehstation", "fullscreen", NULL);
+	settings->width = meh_settings_read_int(keyfile, "mehstation", "width", 640);
+	settings->height = meh_settings_read_int(keyfile, "mehstation", "height", 480);
+	settings->fullscreen = meh_settings_read_bool(keyfile, "mehstation", "fullscreen", FALSE);
+
+	settings->input_repeat_delay = meh_settings_read_int(keyfile, "mehstation", "input_repeat_delay", 300);
+	settings->input_repeat_frequency = meh_settings_read_int(keyfile, "mehstation", "input_repeat_frequency", 50);
+
+	printf("Input repeat delay: %d\n",settings->input_repeat_delay);
+	printf("Input repeat frequency: %d\n",settings->input_repeat_frequency);
 
 	return TRUE;
+}
+
+int meh_settings_read_int(GKeyFile* keyfile, const gchar* group_name, const gchar* key, int default_value) {
+	g_assert(keyfile != NULL);
+
+	GError* error = NULL;
+	int value = g_key_file_get_integer(keyfile, group_name, key, &error);
+	if (error != NULL) {
+		return default_value;
+	}
+	return value;
+}
+
+gboolean meh_settings_read_bool(GKeyFile* keyfile, const gchar* group_name, const gchar* key, gboolean default_value) {
+	g_assert(keyfile != NULL);
+
+	GError* error = NULL;
+	gboolean value = g_key_file_get_boolean(keyfile, group_name, key, &error);
+	if (error != NULL) {
+		return default_value;
+	}
+	return value;
 }
 
 /*

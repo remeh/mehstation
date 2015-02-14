@@ -5,22 +5,22 @@
 
 #include "system/consts.h"
 #include "system/message.h"
+#include "system/settings.h"
 
 #define MEH_INPUT_NOT_PRESSED 0
 #define MEH_INPUT_JUST_PRESSED 1
 #define MEH_INPUT_HOLD 2
-
-#define MEH_INPUT_REPEAT_AFTER 300 // TODO configuration
-#define MEH_INPUT_REPEAT_FREQUENCY 50 // TODO configuration
 
 /*
  * InputManager role is to receive events from
  * keyboard, gamepads, ..., and to deal with them.
  */
 typedef struct {
-	struct App* app;
-	GHashTable*  keyboard_mapping;
+	/* application settings */
+	Settings settings;
 
+	/* set keyboard mapping */
+	GHashTable*  keyboard_mapping;
 	/* contains all the pressed buttons after reading of the events */
 	guint buttons_state[MEH_INPUT_END];
 	/* time at which the key produce a new message */
@@ -29,7 +29,7 @@ typedef struct {
 
 
 /* input manager */
-InputManager* meh_input_manager_new();
+InputManager* meh_input_manager_new(Settings settings);
 void meh_input_manager_destroy(InputManager* input_manager);
 void meh_input_manager_keyboard_read_event(InputManager* input_manager, SDL_Event* event);
 GSList* meh_input_manager_generate_messages(InputManager* input_manager);

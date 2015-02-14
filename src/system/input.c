@@ -3,20 +3,23 @@
 
 #include "system/message.h"
 #include "system/input.h"
-#include "system/app.h"
+#include "system/settings.h"
 
 /*
  * meh_input_manager_new creates a new InputManager.
  */
-InputManager* meh_input_manager_new() {
+InputManager* meh_input_manager_new(Settings settings) {
 	InputManager* input_manager = g_new(InputManager, 1);
+	input_manager->settings = settings;
 
 	for (int i = 0; i < MEH_INPUT_END; i++) {
 		input_manager->buttons_state[i] = MEH_INPUT_NOT_PRESSED;
 		input_manager->buttons_next_message[i] = MEH_INPUT_NOT_PRESSED;
 	}
 
+	/* default key board mapping */
 	input_manager->keyboard_mapping = meh_input_create_default_keyboard_mapping();
+
 
 	return input_manager;
 }
@@ -82,7 +85,7 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 		switch (input_manager->buttons_state[i]) {
 			case MEH_INPUT_JUST_PRESSED:
 				/* Just pressed, we'll immediatly send a message */
-				input_manager->buttons_next_message[i] = SDL_GetTicks()+MEH_INPUT_REPEAT_AFTER;
+				input_manager->buttons_next_message[i] = SDL_GetTicks() + input_manager->settings.input_repeat_delay;
 				input_manager->buttons_state[i] = MEH_INPUT_HOLD;
 				/* creates/appends a button pressed message */
 				list = meh_input_manager_append_button_pressed(list, i);
@@ -92,7 +95,7 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 					/* creates/appends a button pressed message */
 					list = meh_input_manager_append_button_pressed(list, i);
 					/* compute the next message time */
-					input_manager->buttons_next_message[i] = SDL_GetTicks()+MEH_INPUT_REPEAT_FREQUENCY;
+					input_manager->buttons_next_message[i] = SDL_GetTicks() + input_manager->settings.input_repeat_frequency;
 				}
 				break;
 		}
