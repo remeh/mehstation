@@ -157,6 +157,17 @@ void meh_app_main_loop_event(App* app) {
 	g_slist_free(list_messages);
 }
 
+void meh_app_main_loop_update(App* app) {
+	g_assert(app != NULL);
+
+	/* sends the update message */
+	int* delta_time = g_new(int, 1);
+	*delta_time = 0;
+	Message* message = meh_message_new(MEH_MSG_UPDATE, delta_time);
+	meh_app_send_message(app, message);
+	meh_message_destroy(message);
+	message = NULL;
+}
 
 /*
  * meh_app_main_loop_render is the rendering part of the pipeline.
@@ -164,27 +175,11 @@ void meh_app_main_loop_event(App* app) {
 void meh_app_main_loop_render(App* app) {
 	g_assert(app != NULL);
 
-	SDL_Color black = { 0, 0, 0 };
-	meh_window_clear(app->window, black);
-
-	SDL_Texture* texture = meh_image_load_file(app->window->sdl_renderer, "./image.png");
-	SDL_Rect rect = { 0, 0, 500, 500 };
-	meh_window_render_texture(app->window, texture, rect);
-	SDL_DestroyTexture(texture);
-
-	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", black, 50, 50);
-
-	meh_window_render(app->window);
-	SDL_Delay(10); /* TODO delta */
-}
-
-void meh_app_main_loop_update(App* app) {
-	g_assert(app != NULL);
-
-	if (app->current_screen != NULL) {
-		/* TODO delta_time */
-		app->current_screen->update(app->current_screen, 0);
-	}
+	/* sends the render message */
+	Message* message = meh_message_new(MEH_MSG_RENDER, NULL);
+	meh_app_send_message(app, message);
+	meh_message_destroy(message);
+	message = NULL;
 }
 
 void meh_app_send_message(App* app, Message* message) {
@@ -196,5 +191,7 @@ void meh_app_send_message(App* app, Message* message) {
 	}
 
 	/* route the message to the screen. */
-	app->current_screen->messages_handler(app, app->current_screen, message);
+	if (app->current_screen != NULL) {
+		app->current_screen->messages_handler(app, app->current_screen, message);
+	}
 }

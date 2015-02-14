@@ -20,4 +20,6 @@
 /* Event */
 
 #define MEH_MSG_BUTTON_PRESSED 0
-#define MEH_MSG_END 1
+#define MEH_MSG_UPDATE 1
+#define MEH_MSG_RENDER 2
+#define MEH_MSG_END 3
