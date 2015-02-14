@@ -57,6 +57,5 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, Message* me
 }
 
 int meh_screen_system_list_update(Screen* screen, int delta_time) {
-	g_message("Update %s\n", screen->name);
 	return 0;
 }

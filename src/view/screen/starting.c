@@ -65,6 +65,5 @@ Screen* meh_screen_starting_create_next_screen(Screen* screen) {
  * can update this screen.
  */
 int meh_screen_starting_update(Screen* screen, int delta_time) {
-	g_message("Update %s\n", screen->name);
 	return 0;
 }
