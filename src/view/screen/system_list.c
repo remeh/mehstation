@@ -7,7 +7,7 @@
 #include "view/screen/system_list.h"
 
 Screen* meh_screen_system_list_new() {
-	Screen* screen = g_new(Screen, 1);
+	Screen* screen = meh_screen_new();
 
 	screen->name = g_strdup("System list screen");
 	screen->messages_handler = &meh_screen_system_list_messages_handler;
@@ -57,10 +57,14 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, int pressed
 	switch (pressed_button) {
 		/* Return to the front page */
 		case MEH_INPUT_SPECIAL_ESCAPE:
-			/* Switch the current_screen to the parent screen */
-			meh_app_set_current_screen(app, screen->parent_screen);
-			/* this one won't be used anymore. */
-			g_free(screen);
+			/* Switch the current_screen to the parent screen if any */
+			if (screen->parent_screen != NULL) {
+				meh_app_set_current_screen(app, screen->parent_screen);
+				/* this one won't be used anymore. */
+				g_free(screen);
+			} else {
+				app->mainloop.running = FALSE;
+			}
 			break;
 	}
 }

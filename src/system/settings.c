@@ -40,9 +40,6 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 	settings->input_repeat_delay = meh_settings_read_int(keyfile, "mehstation", "input_repeat_delay", 300);
 	settings->input_repeat_frequency = meh_settings_read_int(keyfile, "mehstation", "input_repeat_frequency", 50);
 
-	printf("Input repeat delay: %d\n",settings->input_repeat_delay);
-	printf("Input repeat frequency: %d\n",settings->input_repeat_frequency);
-
 	return TRUE;
 }
 

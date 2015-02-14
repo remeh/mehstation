@@ -40,7 +40,7 @@ int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* mess
 					return 2;
 				}
 				int* delta_time = (int*)message->data;
-				meh_screen_starting_update(screen, *delta_time);
+				meh_screen_starting_update(app, screen, *delta_time);
 			}
 			break;
 		case MEH_MSG_RENDER:
@@ -51,6 +51,14 @@ int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* mess
 	}
 
 	return 0;
+}
+
+static void meh_screen_starting_go_to_system_list(App* app, Screen* screen) {
+	/* create and switch  to the system list screen. */
+	Screen* system_list_screen = meh_screen_system_list_new();
+	meh_app_set_current_screen(app, system_list_screen);
+	/* free the memory of the starting screen */
+	g_free(screen);
 }
 
 /*
@@ -64,28 +72,30 @@ void meh_screen_starting_button_pressed(App* app, Screen* screen, int pressed_bu
 			app->mainloop.running = FALSE;
 			break;
 		case MEH_INPUT_BUTTON_START:
-			meh_app_set_current_screen(app, meh_screen_starting_create_next_screen(screen));
+			meh_screen_starting_go_to_system_list(app, screen);
 			break;
 	}
-}
-
-/*
- * meh_screen_starting_create_next_screen allocates the next screen and returns it
- */
-Screen* meh_screen_starting_create_next_screen(Screen* screen) {
-	Screen* system_list_screen = meh_screen_system_list_new();
-	system_list_screen->parent_screen = screen;
-	return system_list_screen;
 }
 
 /*
  * meh_screen_starting_update received a call by the main_loop when we 
  * can update this screen.
  */
-int meh_screen_starting_update(Screen* screen, int delta_time) {
+int meh_screen_starting_update(App* app, Screen* screen, int delta_time) {
+
+	/*
+	 * Wait 5s before going to the system list selection.
+	 */
+	if (SDL_GetTicks() > 5000) {
+		meh_screen_starting_go_to_system_list(app, screen);
+	}
+
 	return 0;
 }
 
+/*
+ * meh_screen_starting_render is the rendering of the starting screen.
+ */
 void meh_screen_starting_render(App* app, Screen* screen) {
 	g_assert(screen != NULL);
 	g_assert(app != NULL);

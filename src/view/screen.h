@@ -12,4 +12,5 @@ typedef struct Screen {
 	/* TODO list of texture */
 } Screen;
 
+Screen* meh_screen_new();
 void meh_screen_destroy(Screen* screen);
