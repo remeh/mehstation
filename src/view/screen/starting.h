@@ -2,7 +2,6 @@
 
 #include "system/message.h"
 #include "view/screen.h"
-#include "view/window.h"
 
 /* cross-reference */
 struct App;

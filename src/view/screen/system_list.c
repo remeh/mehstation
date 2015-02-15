@@ -2,6 +2,7 @@
 
 #include "system/app.h"
 #include "system/consts.h"
+#include "system/input.h"
 #include "system/message.h"
 #include "view/screen.h"
 #include "view/screen/system_list.h"
@@ -64,6 +65,29 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, int pressed
 				g_free(screen);
 			} else {
 				app->mainloop.running = FALSE;
+			}
+			break;
+
+		case MEH_INPUT_BUTTON_START:
+			{
+				const gchar* working_dir = "/usr/bin";
+				gchar* argv[] = { "xterm",
+								  NULL };
+				int exit_status = 0;
+				GError* error = NULL;
+				g_spawn_sync(working_dir,
+							 argv,
+							 NULL,
+							 G_SPAWN_DEFAULT,
+							 NULL,
+							 NULL,
+							 NULL,
+							 NULL,
+							 &exit_status,
+							 &error);
+				/* when launching something, we may have missed some
+				 * input events, reset everything in case of. */
+				meh_input_manager_reset_buttons_state(app->input_manager);
 			}
 			break;
 	}
