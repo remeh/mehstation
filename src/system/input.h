@@ -31,6 +31,7 @@ typedef struct {
 /* input manager */
 InputManager* meh_input_manager_new(Settings settings);
 void meh_input_manager_destroy(InputManager* input_manager);
+void meh_input_manager_reset_buttons_state(InputManager* input_manager);
 void meh_input_manager_keyboard_read_event(InputManager* input_manager, SDL_Event* event);
 GSList* meh_input_manager_generate_messages(InputManager* input_manager);
 GSList* meh_input_manager_append_button_pressed(GSList* list, int pressed_button);
