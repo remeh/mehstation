@@ -51,6 +51,7 @@ int meh_screen_system_list_messages_handler(App* app, Screen* screen, Message* m
 		return 0;
 	}
 
+
 	switch (message->id) {
 		case MEH_MSG_BUTTON_PRESSED:
 			{
@@ -74,7 +75,7 @@ int meh_screen_system_list_messages_handler(App* app, Screen* screen, Message* m
 	return 0;
 }
 
-static void meh_screen_system_list_start_system(App* app) {
+static void meh_screen_system_list_start_platform(App* app) {
 	const gchar* working_dir = "/usr/bin";
 	gchar* argv[] = { "xterm",
 					  NULL };
@@ -93,6 +94,9 @@ static void meh_screen_system_list_start_system(App* app) {
 	/* when launching something, we may have missed some
 	 * input events, reset everything in case of. */
 	meh_input_manager_reset_buttons_state(app->input_manager);
+	/* FIXME When returning from the other app, if the user presses the same
+	 * FIXME key as the one used to start the system, it will considered it
+	 * FIXME as a repeatition. We should maybe generate a fake KEYUP event ?*/
 }
 
 /*
@@ -120,7 +124,7 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, int pressed
 			g_message("%d systems", g_slist_length(meh_screen_system_list_get_data(screen)->platforms));
 			break;
 		case MEH_INPUT_BUTTON_START:
-			meh_screen_system_list_start_system(app);
+			meh_screen_system_list_start_platform(app);
 			break;
 	}
 }
