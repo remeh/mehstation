@@ -62,9 +62,9 @@ GSList* meh_db_get_platforms(DB* db) {
 	 */
 	while (sqlite3_step(statement) == SQLITE_ROW) {
 		/* read column */
-		int id = sqlite3_column_int(statement, 1);
-		const char* name = (const char*)sqlite3_column_text(statement, 2);	
-		const char* command = (const char*)sqlite3_column_text(statement, 3);
+		int id = sqlite3_column_int(statement, 0);
+		const char* name = (const char*)sqlite3_column_text(statement, 1);	
+		const char* command = (const char*)sqlite3_column_text(statement, 2);
 		/* build the object */
 		Platform* platform = meh_model_platform_new(id, name, command);
 		/* append in the list */

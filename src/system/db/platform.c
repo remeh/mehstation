@@ -10,7 +10,7 @@ Platform* meh_model_platform_new(int id, const char* name, const char* command) 
 
 	platform->id = id;
 	platform->name = g_strdup(name);
-	platform->command = g_strdup(name);
+	platform->command = g_strdup(command);
 
 	return platform;
 }

@@ -8,6 +8,7 @@
 #include "system/message.h"
 #include "system/input.h"
 #include "system/settings.h"
+#include "system/db/models.h"
 
 App* meh_app_create() {
 	return g_new(App, 1);
@@ -41,13 +42,20 @@ int meh_app_init(App* app) {
 	meh_settings_read(&settings, "mehstation.conf");
 	app->settings = settings;
 
-	/* Read the DB */
+	/* Open the DB */
 	DB* db;
 	db = meh_db_open_or_create("database.db");
 	app->db = db;
 	if (db == NULL) {
 		return 2;
 	}
+
+	GSList* platforms = meh_db_get_platforms(db);
+	for (int i = 0; i <  g_slist_length(platforms); i++) {
+		Platform* platform = g_slist_nth_data(platforms, i);
+		g_message("Platform %s found.", platform->name);
+	}
+	meh_model_platforms_destroy(platforms);
 
 	/* Open the main window */
 	Window* window = meh_window_create(settings.width, settings.height, settings.fullscreen);
