@@ -101,6 +101,10 @@ int meh_app_destroy(App* app) {
 	meh_window_destroy(app->window);
 	app->window = NULL;
 
+	if (app->current_screen != NULL) {
+		meh_screen_destroy(app->current_screen);
+	}
+
 	SDL_Quit();
 	TTF_Quit();
 

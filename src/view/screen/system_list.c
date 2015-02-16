@@ -7,13 +7,40 @@
 #include "view/screen.h"
 #include "view/screen/system_list.h"
 
-Screen* meh_screen_system_list_new() {
+Screen* meh_screen_system_list_new(App* app) {
 	Screen* screen = meh_screen_new();
 
 	screen->name = g_strdup("System list screen");
 	screen->messages_handler = &meh_screen_system_list_messages_handler;
+	screen->destroy_data = &meh_screen_system_list_destroy_data;
+
+	/* read the platforms in DB */
+	SystemListData* data = g_new(SystemListData, 1);	
+	data->platforms = meh_db_get_platforms(app->db);
+	screen->data = data;
 
 	return screen;
+}
+
+/*
+ * meh_screen_system_list_destroy_data role is to delete the typed data of the screen
+ */
+void meh_screen_system_list_destroy_data(Screen* screen) {
+	g_assert(screen != NULL);
+
+	SystemListData* data = meh_screen_system_list_get_data(screen);
+	if (data != NULL) {
+		g_slist_free(data->platforms);
+	}
+	g_free(screen->data);
+}
+
+/*
+ * meh_screen_system_list_data returns the data of the system_list screen
+ */
+SystemListData* meh_screen_system_list_get_data(Screen* screen) {
+	SystemListData* data = (SystemListData*) screen->data;
+	return data;
 }
 
 int meh_screen_system_list_messages_handler(App* app, Screen* screen, Message* message) {
@@ -47,6 +74,27 @@ int meh_screen_system_list_messages_handler(App* app, Screen* screen, Message* m
 	return 0;
 }
 
+static void meh_screen_system_list_start_system(App* app) {
+	const gchar* working_dir = "/usr/bin";
+	gchar* argv[] = { "xterm",
+					  NULL };
+	int exit_status = 0;
+	GError* error = NULL;
+	g_spawn_sync(working_dir,
+				 argv,
+				 NULL,
+				 G_SPAWN_DEFAULT,
+				 NULL,
+				 NULL,
+				 NULL,
+				 NULL,
+				 &exit_status,
+				 &error);
+	/* when launching something, we may have missed some
+	 * input events, reset everything in case of. */
+	meh_input_manager_reset_buttons_state(app->input_manager);
+}
+
 /*
  * meh_screen_system_list_button_pressed is called when we received a button pressed
  * message.
@@ -68,27 +116,11 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, int pressed
 			}
 			break;
 
+		case MEH_INPUT_BUTTON_UP:
+			g_message("%d systems", g_slist_length(meh_screen_system_list_get_data(screen)->platforms));
+			break;
 		case MEH_INPUT_BUTTON_START:
-			{
-				const gchar* working_dir = "/usr/bin";
-				gchar* argv[] = { "xterm",
-								  NULL };
-				int exit_status = 0;
-				GError* error = NULL;
-				g_spawn_sync(working_dir,
-							 argv,
-							 NULL,
-							 G_SPAWN_DEFAULT,
-							 NULL,
-							 NULL,
-							 NULL,
-							 NULL,
-							 &exit_status,
-							 &error);
-				/* when launching something, we may have missed some
-				 * input events, reset everything in case of. */
-				meh_input_manager_reset_buttons_state(app->input_manager);
-			}
+			meh_screen_system_list_start_system(app);
 			break;
 	}
 }

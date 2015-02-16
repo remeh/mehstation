@@ -55,7 +55,7 @@ int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* mess
 
 static void meh_screen_starting_go_to_system_list(App* app, Screen* screen) {
 	/* create and switch  to the system list screen. */
-	Screen* system_list_screen = meh_screen_system_list_new();
+	Screen* system_list_screen = meh_screen_system_list_new(app);
 	meh_app_set_current_screen(app, system_list_screen);
 	/* free the memory of the starting screen */
 	g_free(screen);
