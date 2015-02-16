@@ -110,7 +110,7 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, int pressed
 			if (screen->parent_screen != NULL) {
 				meh_app_set_current_screen(app, screen->parent_screen);
 				/* this one won't be used anymore. */
-				g_free(screen);
+				meh_screen_destroy(screen);
 			} else {
 				app->mainloop.running = FALSE;
 			}

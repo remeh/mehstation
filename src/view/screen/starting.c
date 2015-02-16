@@ -10,7 +10,7 @@
 #include "view/window.h"
 
 Screen* meh_screen_starting_new() {
-	Screen* screen = g_new(Screen, 1);
+	Screen* screen = meh_screen_new();
 
 	screen->name = g_strdup("Starting screen");
 	screen->messages_handler = &meh_screen_starting_messages_handler;
@@ -58,7 +58,7 @@ static void meh_screen_starting_go_to_system_list(App* app, Screen* screen) {
 	Screen* system_list_screen = meh_screen_system_list_new(app);
 	meh_app_set_current_screen(app, system_list_screen);
 	/* free the memory of the starting screen */
-	g_free(screen);
+	meh_screen_destroy(screen);
 }
 
 /*
