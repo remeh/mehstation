@@ -1,5 +1,5 @@
-#include "SDL2/SDL_image.h"
-#include "glib-2.0/glib.h"
+#include <SDL2/SDL_image.h>
+#include <glib-2.0/glib.h>
 
 #include "view/image.h"
 #include "view/screen.h"
@@ -40,6 +40,14 @@ int meh_app_init(App* app) {
 	Settings settings;
 	meh_settings_read(&settings, "mehstation.conf");
 	app->settings = settings;
+
+	/* Read the DB */
+	DB* db;
+	db = meh_db_open_or_create("database.db");
+	app->db = db;
+	if (db == NULL) {
+		return 2;
+	}
 
 	/* Open the main window */
 	Window* window = meh_window_create(settings.width, settings.height, settings.fullscreen);

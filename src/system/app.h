@@ -1,7 +1,8 @@
 #pragma once
 
-#include "system/message.h"
+#include "system/db.h"
 #include "system/input.h"
+#include "system/message.h"
 #include "system/settings.h"
 #include "view/text.h"
 #include "view/screen.h"
@@ -16,6 +17,7 @@ typedef struct App {
 	Window* window;
 	Screen* current_screen;
 	Font* small_font;
+	DB* db;
 	InputManager* input_manager;
 	Settings settings;
 	Mainloop mainloop;
@@ -31,3 +33,4 @@ void meh_app_main_loop_event(App* app);
 void meh_app_main_loop_update(App* app);
 void meh_app_main_loop_render(App* app);
 void meh_app_send_message(App* app, Message* message);
+gboolean meh_app_open_or_create_db(App*  app);
