@@ -8,6 +8,7 @@ struct App;
 
 typedef struct SystemListData {
 	GSList* platforms;
+	int selected_platform;
 } SystemListData;
 
 Screen* meh_screen_system_list_new(struct App* app);

@@ -62,7 +62,7 @@ int meh_app_init(App* app) {
 	app->window = window;
 
 	/* Opens some font. */
-	Font* font = meh_font_open("res/fonts/FreeMonoBold.ttf", 16);
+	Font* font = meh_font_open("res/fonts/OpenSans-Regular.ttf", 24);
 	app->small_font = font;
 
 	/* Input manager */

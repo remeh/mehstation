@@ -46,7 +46,7 @@ Window* meh_window_create(guint width, guint height, gboolean fullscreen) {
 /*
  * meh_destroy_window frees the resources of the given window.
  */
-gboolean meh_window_destroy(Window* window) {
+void meh_window_destroy(Window* window) {
 	g_assert(window != NULL);
 
 	if (window->sdl_window != NULL) {
@@ -59,8 +59,6 @@ gboolean meh_window_destroy(Window* window) {
 	}
 
 	g_free(window);
-
-	return TRUE;
 }
 
 /*

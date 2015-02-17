@@ -4,6 +4,7 @@
 #include "system/consts.h"
 #include "system/input.h"
 #include "system/message.h"
+#include "system/db/models.h"
 #include "view/screen.h"
 #include "view/screen/system_list.h"
 
@@ -14,9 +15,10 @@ Screen* meh_screen_system_list_new(App* app) {
 	screen->messages_handler = &meh_screen_system_list_messages_handler;
 	screen->destroy_data = &meh_screen_system_list_destroy_data;
 
-	/* read the platforms in DB */
+	/* init the custom data. */
 	SystemListData* data = g_new(SystemListData, 1);	
 	data->platforms = meh_db_get_platforms(app->db);
+	data->selected_platform = 0;
 	screen->data = data;
 
 	return screen;
@@ -36,7 +38,7 @@ void meh_screen_system_list_destroy_data(Screen* screen) {
 }
 
 /*
- * meh_screen_system_list_data returns the data of the system_list screen
+ * meh_screen_system_list_get_data returns the data of the system_list screen
  */
 SystemListData* meh_screen_system_list_get_data(Screen* screen) {
 	SystemListData* data = (SystemListData*) screen->data;
@@ -107,6 +109,8 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, int pressed
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
+	SystemListData* data = meh_screen_system_list_get_data(screen);
+
 	switch (pressed_button) {
 		/* Return to the front page */
 		case MEH_INPUT_SPECIAL_ESCAPE:
@@ -121,7 +125,18 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, int pressed
 			break;
 
 		case MEH_INPUT_BUTTON_UP:
-			g_message("%d systems", g_slist_length(meh_screen_system_list_get_data(screen)->platforms));
+			if (data->selected_platform == 0) {
+				data->selected_platform = g_slist_length(meh_screen_system_list_get_data(screen)->platforms)-1;
+			} else {
+				data->selected_platform -= 1;
+			}
+			break;
+		case MEH_INPUT_BUTTON_DOWN:
+			if (data->selected_platform == g_slist_length(meh_screen_system_list_get_data(screen)->platforms)-1) {
+				data->selected_platform = 0;
+			} else {
+				data->selected_platform += 1;
+			}
 			break;
 		case MEH_INPUT_BUTTON_START:
 			meh_screen_system_list_start_platform(app);
@@ -144,7 +159,15 @@ int meh_screen_system_list_render(App* app, Screen* screen) {
 
 	SDL_Color white = { 255, 255, 255 };
 	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, 50, 50);
-	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, 100, 100);
+
+	SystemListData* data = meh_screen_system_list_get_data(screen);
+	int i = 0;
+	for (i = 0; i < g_slist_length(data->platforms); i++) {
+		Platform* platform = g_slist_nth_data(data->platforms, i);
+		meh_window_render_text(app->window, app->small_font, platform->name, white, 100, 100 + i*30);
+	}
+
+	meh_window_render_text(app->window, app->small_font, "->", white, 80, 100 + (30*data->selected_platform));
 	
 	meh_window_render(app->window);
 	SDL_Delay(10); /* TODO delta */
