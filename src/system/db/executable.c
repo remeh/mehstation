@@ -2,12 +2,12 @@
 
 #include "system/db/executable.h"
 
-Executable* meh_model_executable_new(int id, gchar* display_name, gchar* command) {
+Executable* meh_model_executable_new(int id, const gchar* display_name, const gchar* filepath) {
 	Executable* executable = g_new(Executable, 1);
 
 	executable->id = id;
 	executable->display_name = g_strdup(display_name);
-	executable->command = g_strdup(command);
+	executable->filepath = g_strdup(filepath);
 
 	return executable;
 }
@@ -16,11 +16,11 @@ void meh_model_executable_destroy(Executable* executable) {
 	g_assert(executable != NULL);
 
 	g_free(executable->display_name);
-	g_free(executable->command);
+	g_free(executable->filepath);
 	g_free(executable);
 }
 
-void meh_model_executables_destroy(GSList* executable) {
+void meh_model_executables_destroy(GSList* executables) {
 	int i = 0;
 	for (i = 0; i < g_slist_length(executables); i++) {
 		Executable* executable = g_slist_nth_data(executables, i);

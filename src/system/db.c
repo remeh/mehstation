@@ -87,8 +87,9 @@ GSList* meh_db_get_platform_executables(DB* db, const Platform* platform) {
 	GSList* executables = NULL;
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\" FROM executable";
+	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\" FROM executable WHERE platform_id = ?1";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	sqlite3_bind_int(statement, 1, platform->id);
 	if (return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
 		return NULL;

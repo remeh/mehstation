@@ -3,6 +3,8 @@
 #include <glib-2.0/glib.h>
 #include <sqlite3.h>
 
+struct Platform;
+
 typedef struct DB {
 	/* filename of the DB to use. */
 	const char* filename;
@@ -13,3 +15,4 @@ typedef struct DB {
 DB* meh_db_open_or_create(const char* filename);
 void meh_db_close(DB* db);
 GSList* meh_db_get_platforms(DB* db);
+GSList* meh_db_get_platform_executables(DB* db, const struct Platform* platform);

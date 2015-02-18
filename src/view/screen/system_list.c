@@ -16,7 +16,7 @@ Screen* meh_screen_system_list_new(App* app) {
 	screen->destroy_data = &meh_screen_system_list_destroy_data;
 
 	/* init the custom data. */
-	SystemListData* data = g_new(SystemListData, 1);	
+	PlatformListData* data = g_new(PlatformListData, 1);	
 	data->platforms = meh_db_get_platforms(app->db);
 	data->selected_platform = 0;
 	screen->data = data;
@@ -30,7 +30,7 @@ Screen* meh_screen_system_list_new(App* app) {
 void meh_screen_system_list_destroy_data(Screen* screen) {
 	g_assert(screen != NULL);
 
-	SystemListData* data = meh_screen_system_list_get_data(screen);
+	PlatformListData* data = meh_screen_system_list_get_data(screen);
 	if (data != NULL) {
 		g_slist_free(data->platforms);
 	}
@@ -40,8 +40,8 @@ void meh_screen_system_list_destroy_data(Screen* screen) {
 /*
  * meh_screen_system_list_get_data returns the data of the system_list screen
  */
-SystemListData* meh_screen_system_list_get_data(Screen* screen) {
-	SystemListData* data = (SystemListData*) screen->data;
+PlatformListData* meh_screen_system_list_get_data(Screen* screen) {
+	PlatformListData* data = (PlatformListData*) screen->data;
 	return data;
 }
 
@@ -77,28 +77,36 @@ int meh_screen_system_list_messages_handler(App* app, Screen* screen, Message* m
 	return 0;
 }
 
-static void meh_screen_system_list_start_platform(App* app) {
-	const gchar* working_dir = "/usr/bin";
-	gchar* argv[] = { "xterm",
-					  NULL };
-	int exit_status = 0;
-	GError* error = NULL;
-	g_spawn_sync(working_dir,
-				 argv,
-				 NULL,
-				 G_SPAWN_DEFAULT,
-				 NULL,
-				 NULL,
-				 NULL,
-				 NULL,
-				 &exit_status,
-				 &error);
-	/* when launching something, we may have missed some
-	 * input events, reset everything in case of. */
-	meh_input_manager_reset_buttons_state(app->input_manager);
-	/* FIXME When returning from the other app, if the user presses the same
-	 * FIXME key as the one used to start the system, it will considered it
-	 * FIXME as a repeatition. We should maybe generate a fake KEYUP event ?*/
+static void meh_screen_system_list_start_platform(App* app, Screen* screen) {
+
+	/* get the platform */
+	PlatformListData* data = meh_screen_system_list_get_data(screen);
+	Platform* platform = g_slist_nth_data(data->platforms, data->selected_platform);
+
+	/* starts the executable list */
+	// TODO
+
+	// const gchar* working_dir = "/usr/bin";
+	// gchar* argv[] = { "xterm",
+	// 				  NULL };
+	// int exit_status = 0;
+	// GError* error = NULL;
+	// g_spawn_sync(working_dir,
+	// 			 argv,
+	// 			 NULL,
+	// 			 G_SPAWN_DEFAULT,
+	// 			 NULL,
+	// 			 NULL,
+	// 			 NULL,
+	// 			 NULL,
+	// 			 &exit_status,
+	// 			 &error);
+	// /* when launching something, we may have missed some
+	//  * input events, reset everything in case of. */
+	// meh_input_manager_reset_buttons_state(app->input_manager);
+	// /* FIXME When returning from the other app, if the user presses the same
+	//  * FIXME key as the one used to start the system, it will considered it
+	//  * FIXME as a repeatition. We should maybe generate a fake KEYUP event ?*/
 }
 
 /*
@@ -109,7 +117,7 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, int pressed
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
-	SystemListData* data = meh_screen_system_list_get_data(screen);
+	PlatformListData* data = meh_screen_system_list_get_data(screen);
 
 	switch (pressed_button) {
 		/* Return to the front page */
@@ -123,7 +131,6 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, int pressed
 				app->mainloop.running = FALSE;
 			}
 			break;
-
 		case MEH_INPUT_BUTTON_UP:
 			if (data->selected_platform == 0) {
 				data->selected_platform = g_slist_length(meh_screen_system_list_get_data(screen)->platforms)-1;
@@ -139,7 +146,7 @@ void meh_screen_system_list_button_pressed(App* app, Screen* screen, int pressed
 			}
 			break;
 		case MEH_INPUT_BUTTON_START:
-			meh_screen_system_list_start_platform(app);
+			meh_screen_system_list_start_platform(app, screen);
 			break;
 	}
 }
@@ -160,7 +167,7 @@ int meh_screen_system_list_render(App* app, Screen* screen) {
 	SDL_Color white = { 255, 255, 255 };
 	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, 50, 50);
 
-	SystemListData* data = meh_screen_system_list_get_data(screen);
+	PlatformListData* data = meh_screen_system_list_get_data(screen);
 	int i = 0;
 	for (i = 0; i < g_slist_length(data->platforms); i++) {
 		Platform* platform = g_slist_nth_data(data->platforms, i);

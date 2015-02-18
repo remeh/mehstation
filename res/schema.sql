@@ -6,7 +6,7 @@ CREATE TABLE "system" (
 );
 CREATE TABLE `executable` (
 	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-	`name`	TEXT NOT NULL,
+	`display_name`	TEXT NOT NULL,
 	`filepath`	TEXT NOT NULL
 );
 COMMIT;
