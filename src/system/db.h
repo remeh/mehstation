@@ -15,4 +15,5 @@ typedef struct DB {
 DB* meh_db_open_or_create(const char* filename);
 void meh_db_close(DB* db);
 GSList* meh_db_get_platforms(DB* db);
+struct Platform* meh_db_get_platform(DB* db, int platform_id);
 GSList* meh_db_get_platform_executables(DB* db, const struct Platform* platform);

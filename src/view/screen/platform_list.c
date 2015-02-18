@@ -1,4 +1,4 @@
-#include "glib-2.0/glib.h"
+#include <glib-2.0/glib.h>
 
 #include "system/app.h"
 #include "system/consts.h"
@@ -6,12 +6,13 @@
 #include "system/message.h"
 #include "system/db/models.h"
 #include "view/screen.h"
+#include "view/screen/executable_list.h"
 #include "view/screen/platform_list.h"
 
 Screen* meh_screen_platform_list_new(App* app) {
 	Screen* screen = meh_screen_new();
 
-	screen->name = g_strdup("System list screen");
+	screen->name = g_strdup("Platform list screen");
 	screen->messages_handler = &meh_screen_platform_list_messages_handler;
 	screen->destroy_data = &meh_screen_platform_list_destroy_data;
 
@@ -32,7 +33,7 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	if (data != NULL) {
-		g_slist_free(data->platforms);
+		meh_model_platforms_destroy(data->platforms);
 	}
 	g_free(screen->data);
 }
@@ -78,35 +79,14 @@ int meh_screen_platform_list_messages_handler(App* app, Screen* screen, Message*
 }
 
 static void meh_screen_platform_list_start_platform(App* app, Screen* screen) {
-
 	/* get the platform */
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	Platform* platform = g_slist_nth_data(data->platforms, data->selected_platform);
 
-	/* starts the executable list */
-	// TODO
-
-	// const gchar* working_dir = "/usr/bin";
-	// gchar* argv[] = { "xterm",
-	// 				  NULL };
-	// int exit_status = 0;
-	// GError* error = NULL;
-	// g_spawn_sync(working_dir,
-	// 			 argv,
-	// 			 NULL,
-	// 			 G_SPAWN_DEFAULT,
-	// 			 NULL,
-	// 			 NULL,
-	// 			 NULL,
-	// 			 NULL,
-	// 			 &exit_status,
-	// 			 &error);
-	// /* when launching something, we may have missed some
-	//  * input events, reset everything in case of. */
-	// meh_input_manager_reset_buttons_state(app->input_manager);
-	// /* FIXME When returning from the other app, if the user presses the same
-	//  * FIXME key as the one used to start the system, it will considered it
-	//  * FIXME as a repeatition. We should maybe generate a fake KEYUP event ?*/
+	/* create the child screen */
+	Screen* executable_list_screen = meh_screen_executable_list_new(app, platform->id);
+	executable_list_screen->parent_screen = screen;
+	meh_app_set_current_screen(app, executable_list_screen);
 }
 
 /*

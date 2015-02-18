@@ -15,6 +15,7 @@ SET(
         src/system/db/executable.c
         src/view/image.c
         src/view/screen.c
+        src/view/screen/executable_list.c
         src/view/screen/starting.c
         src/view/screen/platform_list.c
         src/view/text.c
