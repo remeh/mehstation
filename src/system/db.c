@@ -43,7 +43,7 @@ GSList* meh_db_get_platforms(DB* db) {
 	g_assert(db != NULL);
 
 	GSList* list = NULL;
-	sqlite3_stmt *statement;
+	sqlite3_stmt *statement = NULL;
 
 	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM system";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
@@ -76,3 +76,40 @@ GSList* meh_db_get_platforms(DB* db) {
 	return list;
 }
 
+/*
+ * meh_db_get_platform_executables gets in  the SQLite3 database all the executables
+ * available for the given platform.
+ */
+GSList* meh_db_get_platform_executables(DB* db, const Platform* platform) {
+	g_assert(db != NULL);
+	g_assert(platform != NULL);
+
+	GSList* executables = NULL;
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\" FROM executable";
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	if (return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		return NULL;
+	}
+
+	/*
+	 * read every row
+	 */
+	while (sqlite3_step(statement) == SQLITE_ROW) {
+		/* read column */
+		int id = sqlite3_column_int(statement, 0);
+		const char* display_name = (const char*)sqlite3_column_text(statement, 1);	
+		const char* filepath = (const char*)sqlite3_column_text(statement, 2);
+		/* build the object */
+		Executable* executable = meh_model_executable_new(id, display_name, filepath);
+		/* append in the list */
+		executables = g_slist_append(executables, executable);
+	}
+
+	/* finalize our work with this statement. */
+	sqlite3_finalize(statement);
+
+	return executables;
+}

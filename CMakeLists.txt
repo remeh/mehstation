@@ -12,6 +12,7 @@ SET(
         src/system/input.c
         src/system/settings.c
         src/system/db/platform.c
+        src/system/db/executable.c
         src/view/image.c
         src/view/screen.c
         src/view/screen/starting.c

@@ -4,9 +4,6 @@
 
 Platform* meh_model_platform_new(int id, const char* name, const char* command) {
 	Platform* platform = g_new(Platform, 1);
-	if (platform == NULL) {
-		return NULL;
-	}
 
 	platform->id = id;
 	platform->name = g_strdup(name);
