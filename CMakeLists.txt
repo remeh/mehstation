@@ -16,7 +16,7 @@ SET(
         src/view/image.c
         src/view/screen.c
         src/view/screen/starting.c
-        src/view/screen/system_list.c
+        src/view/screen/platform_list.c
         src/view/text.c
         src/view/window.c
 )

@@ -6,7 +6,7 @@
 #include "view/image.h"
 #include "view/screen.h"
 #include "view/screen/starting.h"
-#include "view/screen/system_list.h"
+#include "view/screen/platform_list.h"
 #include "view/window.h"
 
 Screen* meh_screen_starting_new() {
@@ -53,10 +53,10 @@ int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* mess
 	return 0;
 }
 
-static void meh_screen_starting_go_to_system_list(App* app, Screen* screen) {
+static void meh_screen_starting_go_to_platform_list(App* app, Screen* screen) {
 	/* create and switch  to the system list screen. */
-	Screen* system_list_screen = meh_screen_system_list_new(app);
-	meh_app_set_current_screen(app, system_list_screen);
+	Screen* platform_list_screen = meh_screen_platform_list_new(app);
+	meh_app_set_current_screen(app, platform_list_screen);
 	/* free the memory of the starting screen */
 	meh_screen_destroy(screen);
 }
@@ -72,7 +72,7 @@ void meh_screen_starting_button_pressed(App* app, Screen* screen, int pressed_bu
 			app->mainloop.running = FALSE;
 			break;
 		case MEH_INPUT_BUTTON_START:
-			meh_screen_starting_go_to_system_list(app, screen);
+			meh_screen_starting_go_to_platform_list(app, screen);
 			break;
 	}
 }
@@ -87,7 +87,7 @@ int meh_screen_starting_update(App* app, Screen* screen, int delta_time) {
 	 * Wait 5s before going to the system list selection.
 	 */
 	if (SDL_GetTicks() > 5000) {
-		meh_screen_starting_go_to_system_list(app, screen);
+		meh_screen_starting_go_to_platform_list(app, screen);
 	}
 
 	return 0;
