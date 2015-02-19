@@ -25,6 +25,7 @@ Screen* meh_screen_executable_list_new(App* app, int platform_id) {
 	g_assert(data->platform != NULL);
 	/* get the executables */
 	data->executables = meh_db_get_platform_executables(app->db, data->platform);
+	data->executables_length = g_slist_length(data->executables);
 	data->selected_executable = 0;
 	screen->data = data;
 
@@ -172,14 +173,14 @@ void meh_screen_executable_list_button_pressed(App* app, Screen* screen, int pre
 		case MEH_INPUT_BUTTON_UP:
 			if (data->selected_executable == 0) {
 				/* FIXME length on a the slist could be a bit slow (iterate over the whole list for the count) */
-				data->selected_executable = g_slist_length(meh_screen_executable_list_get_data(screen)->executables)-1;
+				data->selected_executable = data->executables_length-1;
 			} else {
 				data->selected_executable -= 1;
 			}
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 				/* FIXME length on a the slist could be a bit slow (iterate over the whole list for the count) */
-			if (data->selected_executable == g_slist_length(meh_screen_executable_list_get_data(screen)->executables)-1) {
+			if (data->selected_executable == data->executables_length-1) {
 				data->selected_executable = 0;
 			} else {
 				data->selected_executable += 1;

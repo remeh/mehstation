@@ -11,6 +11,7 @@ struct App;
 typedef struct ExecutableListData {
 	Platform* platform;
 	GSList* executables;
+	int executables_length;
 	int selected_executable;
 } ExecutableListData;
 
