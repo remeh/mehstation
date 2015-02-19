@@ -1,5 +1,5 @@
 BEGIN TRANSACTION;
-CREATE TABLE "system" (
+CREATE TABLE `system`  (
 	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	`name`	TEXT NOT NULL,
 	`command`	TEXT NOT NULL
@@ -7,6 +7,7 @@ CREATE TABLE "system" (
 CREATE TABLE `executable` (
 	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 	`display_name`	TEXT NOT NULL,
-	`filepath`	TEXT NOT NULL
+	`filepath`	TEXT NOT NULL,
+    `platform_id` INTEGER NOT NULL
 );
 COMMIT;
