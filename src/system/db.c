@@ -1,4 +1,4 @@
-#include <glib-2.0/glib.h>
+#include <glib.h>
 #include <sqlite3.h>
 #include <string.h>
 #include <SDL2/SDL.h>
@@ -121,7 +121,7 @@ Platform* meh_db_get_platform(DB* db, int platform_id) {
  * meh_db_get_platform_executables gets in  the SQLite3 database all the executables
  * available for the given platform.
  */
-GSList* meh_db_get_platform_executables(DB* db, const Platform* platform) {
+GSList* meh_db_get_platform_executables(DB* db, const Platform* platform, gboolean get_resources) {
 	g_assert(db != NULL);
 	g_assert(platform != NULL);
 
@@ -147,12 +147,60 @@ GSList* meh_db_get_platform_executables(DB* db, const Platform* platform) {
 		const char* filepath = (const char*)sqlite3_column_text(statement, 2);
 		/* build the object */
 		Executable* executable = meh_model_executable_new(id, display_name, filepath);
-		/* append in the list */
-		executables = g_slist_append(executables, executable);
+
+		if (executable != NULL) {
+			/* do we get the resources of this executable ? */
+			if (get_resources == TRUE) {
+				executable->resources = meh_db_get_executable_resources(db, executable);
+			}
+			/* append in the list */
+			executables = g_slist_append(executables, executable);
+		}
 	}
 
 	/* finalize our work with this statement. */
 	sqlite3_finalize(statement);
 
 	return executables;
+}
+
+/*
+ * meh_db_get_executable_resources gets in  the SQLite3 database all the resources
+ * available for the given executable.
+ */
+GSList* meh_db_get_executable_resources(DB* db, const Executable* executable) {
+	g_assert(db != NULL);
+	g_assert(executable != NULL);
+
+	GSList* exec_resources = NULL;
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "SELECT \"id\", \"executable_id\", \"type\", \"filepath\" FROM executable_resource WHERE executable_id = ?1";
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	if (return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		return NULL;
+	}
+
+	sqlite3_bind_int(statement, 1, executable->id);
+
+	/*
+	 * read every row
+	 */
+	while (sqlite3_step(statement) == SQLITE_ROW) {
+		/* read column */
+		int id = sqlite3_column_int(statement, 0);
+		int executable_id = sqlite3_column_int(statement, 1);
+		const char* type = (const char*)sqlite3_column_text(statement, 2);	
+		const char* filepath = (const char*)sqlite3_column_text(statement, 3);
+		/* build the object */
+		ExecutableResource* exec_res = meh_model_exec_res_new(id, executable_id, type, filepath);
+		/* append in the list */
+		exec_resources = g_slist_append(exec_resources, exec_res);
+	}
+
+	/* finalize our work with this statement. */
+	sqlite3_finalize(statement);
+
+	return exec_resources;
 }

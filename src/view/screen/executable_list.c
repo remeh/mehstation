@@ -24,9 +24,10 @@ Screen* meh_screen_executable_list_new(App* app, int platform_id) {
 	data->platform = meh_db_get_platform(app->db, platform_id);
 	g_assert(data->platform != NULL);
 	/* get the executables */
-	data->executables = meh_db_get_platform_executables(app->db, data->platform);
+	data->executables = meh_db_get_platform_executables(app->db, data->platform, TRUE);
 	data->executables_length = g_slist_length(data->executables);
 	data->selected_executable = 0;
+	/* load the executable resources of every executables */
 	screen->data = data;
 
 	return screen;

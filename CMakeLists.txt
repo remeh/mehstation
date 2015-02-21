@@ -13,6 +13,7 @@ SET(
         src/system/settings.c
         src/system/db/platform.c
         src/system/db/executable.c
+        src/system/db/executable_resource.c
         src/view/image.c
         src/view/screen.c
         src/view/screen/executable_list.c
