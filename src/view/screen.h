@@ -12,8 +12,6 @@ typedef struct Screen {
 	/* extra data of the screen, if any, a destroy_data method must be attached. */
 	void* data;
 	void (*destroy_data) ();
-
-	/* TODO list of texture */
 } Screen;
 
 Screen* meh_screen_new();

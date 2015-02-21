@@ -166,6 +166,14 @@ GHashTable* meh_input_create_default_keyboard_mapping() {
 	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_B;
 	g_hash_table_insert(mapping, sdl, button_mapping);
 	
+	sdl = g_new(int, 1); *sdl = SDLK_i;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_L;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+	
+	sdl = g_new(int, 1); *sdl = SDLK_o;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_R;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+	
 	sdl = g_new(int, 1); *sdl = SDLK_ESCAPE;
 	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_SPECIAL_ESCAPE;
 	g_hash_table_insert(mapping, sdl, button_mapping);

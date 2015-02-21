@@ -6,17 +6,22 @@
 #include "system/input.h"
 #include "system/message.h"
 #include "system/db/models.h"
+#include "view/image.h"
 #include "view/screen.h"
 #include "view/screen/executable_list.h"
 
-Screen* meh_screen_executable_list_new(App* app, int platform_id) {
+static void meh_screen_exec_list_destroy_resources(Screen* screen);
+static void meh_screen_exec_list_load_resources(App* app, Screen* screen);
+static void meh_screen_exec_list_start_executable(App* app, Screen* screen);
+
+Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
 
 	Screen* screen = meh_screen_new();
 
 	screen->name = g_strdup("Executable list screen");
-	screen->messages_handler = &meh_screen_executable_list_messages_handler;
-	screen->destroy_data = &meh_screen_executable_list_destroy_data;
+	screen->messages_handler = &meh_screen_exec_list_messages_handler;
+	screen->destroy_data = &meh_screen_exec_list_destroy_data;
 
 	/* init the custom data. */
 	ExecutableListData* data = g_new(ExecutableListData, 1);	
@@ -27,35 +32,71 @@ Screen* meh_screen_executable_list_new(App* app, int platform_id) {
 	data->executables = meh_db_get_platform_executables(app->db, data->platform, TRUE);
 	data->executables_length = g_slist_length(data->executables);
 	data->selected_executable = 0;
+	data->textures = NULL;
 	/* load the executable resources of every executables */
 	screen->data = data;
+
+	/* Load the first resources */
+	meh_screen_exec_list_load_resources(app, screen);
 
 	return screen;
 }
 
 /*
- * meh_screen_executable_list_destroy_data role is to delete the typed data of the screen
+ * meh_screen_exec_list_destroy_data role is to delete the typed data of the screen
  */
-void meh_screen_executable_list_destroy_data(Screen* screen) {
+void meh_screen_exec_list_destroy_data(Screen* screen) {
 	g_assert(screen != NULL);
 
-	ExecutableListData* data = meh_screen_executable_list_get_data(screen);
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 	if (data != NULL) {
 		meh_model_platform_destroy(data->platform);
 		meh_model_executables_destroy(data->executables);
 	}
+
+	/* We must free the textures cache */
+	meh_screen_exec_list_destroy_resources(screen);
+
 	g_free(screen->data);
 }
 
 /*
- * meh_screen_executable_list_get_data returns the data of the executable_list screen
+ * meh_screen_exec_list_destroy_resources takes care of destroying the
+ * resources.
  */
-ExecutableListData* meh_screen_executable_list_get_data(Screen* screen) {
+static void meh_screen_exec_list_destroy_resources(Screen* screen) {
+	g_assert(screen != NULL);
+
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+
+	if (data == NULL || data->textures == NULL) {
+		return;
+	}
+
+	int i;
+	GList* keys = g_hash_table_get_keys(data->textures);
+	for (i = 0; i < g_list_length(keys); i++) {
+		int* key = g_list_nth_data(keys, i);
+		SDL_Texture* texture = g_hash_table_lookup(data->textures, key);
+		if (texture != NULL) {
+			g_message("Freeing the texture id %d", *key);
+			SDL_DestroyTexture(texture);
+		}
+	}
+
+	g_list_free(keys);
+	g_hash_table_destroy(data->textures);
+}
+
+/*
+ * meh_screen_exec_list_get_data returns the data of the executable_list screen
+ */
+ExecutableListData* meh_screen_exec_list_get_data(Screen* screen) {
 	ExecutableListData* data = (ExecutableListData*) screen->data;
 	return data;
 }
 
-int meh_screen_executable_list_messages_handler(App* app, Screen* screen, Message* message) {
+int meh_screen_exec_list_messages_handler(App* app, Screen* screen, Message* message) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
@@ -68,18 +109,18 @@ int meh_screen_executable_list_messages_handler(App* app, Screen* screen, Messag
 		case MEH_MSG_BUTTON_PRESSED:
 			{
 				int* pressed_button = (int*)message->data;
-				meh_screen_executable_list_button_pressed(app, screen, *pressed_button);
+				meh_screen_exec_list_button_pressed(app, screen, *pressed_button);
 			}
 			break;
 		case MEH_MSG_UPDATE:
 			{
 				int* delta_time = (int*)message->data;
-				meh_screen_executable_list_update(screen, *delta_time);
+				meh_screen_exec_list_update(screen, *delta_time);
 			}
 			break;
 		case MEH_MSG_RENDER:
 			{
-				meh_screen_executable_list_render(app, screen);
+				meh_screen_exec_list_render(app, screen);
 			}
 			break;
 	}
@@ -88,16 +129,50 @@ int meh_screen_executable_list_messages_handler(App* app, Screen* screen, Messag
 }
 
 /*
-static gchar* meh_replace_executable_in_command(const gchar* command, const gchar* executable_filepath) {
-	gchar** splitted = g_strsplit(command, executable_filepath, -1);
-	gchar* result = g_strjoinv("%exec%", splitted);
-	g_strfreev(splitted);
-	return result;
-}
-*/
+ * meh_screen_exec_list_load_resources loads the resources of the currently
+ * selected game.
+ */
+static void meh_screen_exec_list_load_resources(App* app, Screen* screen) {
+	g_assert(app != NULL);	
+	g_assert(screen != NULL);
 
-static void meh_screen_executable_list_start_executable(App* app, Screen* screen) {
-	ExecutableListData* data = meh_screen_executable_list_get_data(screen);
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+
+	if (data->executables == NULL || data->executables_length == 0) {
+		return;
+	}
+	
+	Executable* executable = g_slist_nth_data(data->executables, data->selected_executable);
+	if (executable == NULL || executable->resources == NULL) {
+		return;
+	}
+
+	/* Create the hash table if not existing */
+	if (data->textures == NULL) {
+		data->textures = g_hash_table_new(g_int_hash, g_int_equal);
+	}
+
+	/* Loads the textures described in the executable resources. */
+	int i = 0;
+	for (i = 0; i < g_slist_length(executable->resources); i++) {
+		ExecutableResource* resource = g_slist_nth_data(executable->resources, i);
+		if (resource == NULL) {
+			continue;
+		}
+
+		g_message("Loading the %s ID %d", resource->type, resource->id);
+		SDL_Texture* texture = meh_image_load_file(app->window->sdl_renderer, resource->filepath);
+		if (texture != NULL) {
+			int* id = g_new(int, 1); *id = resource->id;
+			g_hash_table_insert(data->textures, id, texture);
+		}
+	}
+
+	return;
+} 
+
+static void meh_screen_exec_list_start_executable(App* app, Screen* screen) {
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 	/* get the executable selected */
 	Executable* executable = g_slist_nth_data(data->executables, data->selected_executable);
 
@@ -151,14 +226,14 @@ static void meh_screen_executable_list_start_executable(App* app, Screen* screen
 }
 
 /*
- * meh_screen_executable_list_button_pressed is called when we received a button pressed
+ * meh_screen_exec_list_button_pressed is called when we received a button pressed
  * message.
  */
-void meh_screen_executable_list_button_pressed(App* app, Screen* screen, int pressed_button) {
+void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
-	ExecutableListData* data = meh_screen_executable_list_get_data(screen);
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 
 	switch (pressed_button) {
 		case MEH_INPUT_SPECIAL_ESCAPE:
@@ -188,25 +263,25 @@ void meh_screen_executable_list_button_pressed(App* app, Screen* screen, int pre
 			}
 			break;
 		case MEH_INPUT_BUTTON_START:
-			meh_screen_executable_list_start_executable(app, screen);
+			meh_screen_exec_list_start_executable(app, screen);
 			break;
 	}
 }
 
-int meh_screen_executable_list_update(Screen* screen, int delta_time) {
+int meh_screen_exec_list_update(Screen* screen, int delta_time) {
 	g_assert(screen != NULL);
 
 	return 0;
 }
 
-int meh_screen_executable_list_render(App* app, Screen* screen) {
+int meh_screen_exec_list_render(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
 	SDL_Color black = { 0, 0, 0 };
 	meh_window_clear(app->window, black);
 
-	ExecutableListData* data = meh_screen_executable_list_get_data(screen);
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 
 	SDL_Color white = { 255, 255, 255 };
 	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, 50, 50);

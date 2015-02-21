@@ -1,5 +1,7 @@
 #include <glib.h>
+#include "system/app.h"
 #include "system/db/executable_resource.h"
+#include "view/image.h"
 
 ExecutableResource* meh_model_exec_res_new(int id, int executable_id, const gchar* type, const gchar* filepath) {
 	ExecutableResource* exec_res = g_new(ExecutableResource, 1);
@@ -32,3 +34,23 @@ void meh_model_exec_res_list_destroy(GSList* exec_resources) {
 	g_slist_free(exec_resources);
 }
 
+/*
+ * meh_model_exec_res_as_texture loads the given resource as a SDL_Texture*.
+ * Returns NULL if it's not a texture.
+ * The returned texture must be freed by the caller.
+ */
+SDL_Texture* meh_model_exec_res_as_texture(App* app, ExecutableResource* exec_res) {
+	g_assert(app != NULL);
+	g_assert(app->window != NULL);
+	g_assert(app->window->sdl_renderer != NULL);
+	g_assert(exec_res != NULL);
+
+	/* Checks that it's an image */
+	if (g_strcmp0(exec_res->type, MEH_EXEC_RES_COVER) != 0 &&
+		g_strcmp0(exec_res->type, MEH_EXEC_RES_FANART) != 0 &&
+		g_strcmp0(exec_res->type, MEH_EXEC_RES_SCREENSHOT) != 0) {
+		return NULL;
+	}
+
+	return meh_image_load_file(app->window->sdl_renderer, exec_res->filepath);
+}

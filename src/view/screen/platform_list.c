@@ -1,4 +1,4 @@
-#include <glib-2.0/glib.h>
+#include <glib.h>
 
 #include "system/app.h"
 #include "system/consts.h"
@@ -84,9 +84,9 @@ static void meh_screen_platform_list_start_platform(App* app, Screen* screen) {
 	Platform* platform = g_slist_nth_data(data->platforms, data->selected_platform);
 
 	/* create the child screen */
-	Screen* executable_list_screen = meh_screen_executable_list_new(app, platform->id);
-	executable_list_screen->parent_screen = screen;
-	meh_app_set_current_screen(app, executable_list_screen);
+	Screen* exec_list_screen = meh_screen_exec_list_new(app, platform->id);
+	exec_list_screen->parent_screen = screen;
+	meh_app_set_current_screen(app, exec_list_screen);
 }
 
 /*

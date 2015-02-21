@@ -6,6 +6,7 @@
 
 /*
  * meh_image_load_file loads the given file as a texture.
+ * The texture should be freed by the caller.
  */
 SDL_Texture* meh_image_load_file(SDL_Renderer* renderer, const char* filename) {
 	g_assert(renderer != NULL);
