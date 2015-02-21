@@ -13,6 +13,7 @@
 static void meh_screen_exec_list_destroy_resources(Screen* screen);
 static void meh_screen_exec_list_load_resources(App* app, Screen* screen);
 static void meh_screen_exec_list_start_executable(App* app, Screen* screen);
+static void meh_screen_exec_list_select_background(Screen* screen);
 
 Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
@@ -33,11 +34,14 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->executables_length = g_slist_length(data->executables);
 	data->selected_executable = 0;
 	data->textures = NULL;
+	data->background = NULL;
 	/* load the executable resources of every executables */
 	screen->data = data;
 
 	/* Load the first resources */
 	meh_screen_exec_list_load_resources(app, screen);
+	/* Select a background */
+	meh_screen_exec_list_select_background(screen);
 
 	return screen;
 }
@@ -86,6 +90,43 @@ static void meh_screen_exec_list_destroy_resources(Screen* screen) {
 
 	g_list_free(keys);
 	g_hash_table_destroy(data->textures);
+}
+
+/*
+ * meh_screen_exec_list_select_background uses the resources of the currently selected
+ * executable to select a background.
+ */
+static void meh_screen_exec_list_select_background(Screen* screen) {
+	g_assert(screen != NULL);
+
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	if (data == NULL) {
+		return;
+	}
+
+	Executable* executable = g_slist_nth_data(data->executables, data->selected_executable);
+	if (executable == NULL || executable->resources == NULL) {
+		return;
+	}
+
+	/* Select a random resource if any */
+	int length = g_slist_length(executable->resources);
+	if (length == 0) {
+		return;
+	}
+
+	int rand = g_random_int_range(0, length);
+
+	ExecutableResource* resource = g_slist_nth_data(executable->resources, rand);
+	if (resource == NULL) {
+		return;
+	}
+
+	data->background = g_hash_table_lookup(data->textures, &(resource->id));
+	g_message("Selected background : %d (%p)", resource->id, data->background);
+	/* FIXME Temporary */
+	SDL_SetTextureBlendMode(data->background, SDL_BLENDMODE_ADD);
+	SDL_SetTextureAlphaMod(data->background, 50);
 }
 
 /*
@@ -152,11 +193,18 @@ static void meh_screen_exec_list_load_resources(App* app, Screen* screen) {
 		data->textures = g_hash_table_new(g_int_hash, g_int_equal);
 	}
 
-	/* Loads the textures described in the executable resources. */
+	/* Loads the textures described in the executable resources
+	 * if it's not already in the cache */
 	int i = 0;
 	for (i = 0; i < g_slist_length(executable->resources); i++) {
 		ExecutableResource* resource = g_slist_nth_data(executable->resources, i);
 		if (resource == NULL) {
+			continue;
+		}
+
+		/* Look whether or not it's already in the cache. */
+		if (g_hash_table_lookup(data->textures, &(resource->id)) != NULL) {
+			g_message("Not reloading the %s ID %d", resource->type, resource->id);
 			continue;
 		}
 
@@ -253,6 +301,8 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			} else {
 				data->selected_executable -= 1;
 			}
+			meh_screen_exec_list_load_resources(app, screen);
+			meh_screen_exec_list_select_background(screen);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 				/* FIXME length on a the slist could be a bit slow (iterate over the whole list for the count) */
@@ -261,6 +311,8 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			} else {
 				data->selected_executable += 1;
 			}
+			meh_screen_exec_list_load_resources(app, screen);
+			meh_screen_exec_list_select_background(screen);
 			break;
 		case MEH_INPUT_BUTTON_START:
 			meh_screen_exec_list_start_executable(app, screen);
@@ -282,6 +334,10 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	meh_window_clear(app->window, black);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+
+	/* background */
+	SDL_Rect viewport = { 0, 0, 640, 480 };
+	meh_window_render_texture(app->window, data->background, viewport);
 
 	SDL_Color white = { 255, 255, 255 };
 	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, 50, 50);

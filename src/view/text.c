@@ -41,7 +41,7 @@ SDL_Texture* meh_font_render_on_texture(SDL_Renderer* renderer, Font* font, cons
 	g_assert(font != NULL);
 	g_assert(text != NULL);
 
-	SDL_Surface* surface = TTF_RenderText_Solid(font->sdl_font, text, color);
+	SDL_Surface* surface = TTF_RenderText_Blended(font->sdl_font, text, color);
 	SDL_Texture* texture = NULL;
 
 	if (surface == NULL) {
