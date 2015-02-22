@@ -44,7 +44,7 @@ GQueue* meh_db_get_platforms(DB* db) {
 
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM system";
+	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM system ORDER BY name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
@@ -87,7 +87,7 @@ Platform* meh_db_get_platform(DB* db, int platform_id) {
 	Platform* platform = NULL;
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM system WHERE id = ?1";
+	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM system WHERE id = ?1 ORDER BY name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
@@ -129,7 +129,7 @@ GQueue* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
 	GQueue* executables = g_queue_new();
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\" FROM executable WHERE platform_id = ?1";
+	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\" FROM executable WHERE platform_id = ?1 ORDER BY display_name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
