@@ -336,8 +336,10 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 
 	/* background */
-	SDL_Rect viewport = { 0, 0, 640, 480 };
-	meh_window_render_texture(app->window, data->background, viewport);
+	if (data->background != NULL) {
+		SDL_Rect viewport = { 0, 0, app->window->width, app->window->height };
+		meh_window_render_texture(app->window, data->background, viewport);
+	}
 
 	SDL_Color white = { 255, 255, 255 };
 	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, 50, 50);
