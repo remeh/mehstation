@@ -111,7 +111,9 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 		return;
 	}
 
-	/* Select a random resource if any */
+	/*
+	 * Select a random resource if any
+	 */
 	int length = g_queue_get_length(executable->resources);
 	if (length == 0) {
 		return;
@@ -126,9 +128,21 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 
 	data->background = g_hash_table_lookup(data->textures, &(resource->id));
 	g_message("Selected background : %d (%p)", resource->id, data->background);
-	/* FIXME Temporary */
-	SDL_SetTextureBlendMode(data->background, SDL_BLENDMODE_ADD);
-	SDL_SetTextureAlphaMod(data->background, 40);
+
+	/*
+	 * Select a cover
+	 */
+	int i = 0;
+	for (i = 0; i < g_queue_get_length(executable->resources); i++) {
+		ExecutableResource* res = g_queue_peek_nth(executable->resources, i++);
+		if (res != NULL) {
+			if (g_strcmp0(res->type, "cover") == 0) {
+				data->cover = g_hash_table_lookup(data->textures, &(res->id));
+				g_message("Selected cover: %d", res->id);
+				break;
+			}
+		}
+	}
 }
 
 /*
@@ -350,7 +364,16 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	/* background */
 	if (data->background != NULL) {
 		SDL_Rect viewport = { 0, 0, app->window->width, app->window->height };
+		SDL_SetTextureBlendMode(data->background, SDL_BLENDMODE_ADD);
+		SDL_SetTextureAlphaMod(data->background, 40);
 		meh_window_render_texture(app->window, data->background, viewport);
+	}
+
+	/* cover */
+	if (data->cover != NULL) {
+		SDL_Rect viewport = { 600, 200, 300, 400 };
+		SDL_SetTextureBlendMode(data->background, SDL_BLENDMODE_NONE);
+		meh_window_render_texture(app->window, data->cover, viewport);
 	}
 
 	SDL_Color white = { 255, 255, 255 };
