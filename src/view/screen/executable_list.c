@@ -10,7 +10,8 @@
 #include "view/screen.h"
 #include "view/screen/executable_list.h"
 
-#define MEH_EXEC_LIST_MAX_CACHE 10
+#define MEH_EXEC_LIST_MAX_CACHE 3
+#define MEH_EXEC_LIST_DELTA 3 /* Don't delete the cache of the object around the cursor */
 
 static void meh_screen_exec_list_destroy_resources(Screen* screen);
 static void meh_screen_exec_list_load_resources(App* app, Screen* screen);
@@ -43,11 +44,9 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->cover = -1;
 	screen->data = data;
 
-	/* Load the first resources */
+	/* Select and load the first resources */
 	meh_screen_exec_list_select_resources(screen);
 	meh_screen_exec_list_load_resources(app, screen);
-	/* Select a background */
-	meh_screen_exec_list_select_resources(screen);
 
 	return screen;
 }
@@ -106,6 +105,58 @@ static void meh_screen_exec_list_destroy_resources(Screen* screen) {
 }
 
 /*
+ * meh_screen_exec_list_is_in_delta checks whether the given index is in the delta
+ * of the current selection.
+ *
+ * Ex:
+ *
+ * 1            With a delta of 3, the values 9, 1, 2, 4, 5, 6 are included
+ * 2            in the delta.
+ * 3 <--
+ * 4            This method has been created for cache cleaning.
+ * 5
+ * 6
+ * 7
+ * 8
+ * 9
+ */
+static gboolean meh_screen_exec_list_is_in_delta(ExecutableListData* data, int idx) {
+	int top_limit = idx - MEH_EXEC_LIST_DELTA;
+	int bottom_limit = idx + MEH_EXEC_LIST_DELTA;
+
+	/* Special case, if we outbound on low and high, we are included. */
+	if (bottom_limit > data->executables_length && top_limit < 0) {
+		return TRUE;
+	}
+
+	int cursor = data->selected_executable;
+	int j = 0;
+	for (j = 0; j < MEH_EXEC_LIST_DELTA+1; j++) {
+		if (cursor > data->executables_length) {
+			cursor = 0;
+		}
+		if (idx == cursor) {
+			return TRUE;
+		}
+		cursor++;
+	}
+
+	cursor = data->selected_executable;
+	j = 0;
+	for (j = 0; j < MEH_EXEC_LIST_DELTA+1; j++) {
+		if (cursor < 0) {
+			cursor = data->executables_length-1;
+		}
+		if (idx == cursor) {
+			return TRUE;
+		}
+		cursor--;
+	}
+
+	return FALSE;
+}
+
+/*
  * meh_screen_exec_list_delete_some_cache looks for which cache we could
  * free without impacting the user experience.
  */
@@ -123,14 +174,15 @@ static void meh_screen_exec_list_delete_some_cache(Screen* screen) {
 		return;
 	}
 
-	int watchdog = 20; /* avoid an infinite loop */
+	int watchdog = 20; /* Avoid an infinite loop. */
 	while (g_queue_get_length(data->cache_executables_id) > MEH_EXEC_LIST_MAX_CACHE && watchdog > 0) {
 		int* idx = g_queue_pop_head(data->cache_executables_id);
-		if (*idx != current_executable->id) {
+		if (*idx != current_executable->id &&
+			!meh_screen_exec_list_is_in_delta(data, *idx)) { /* do not free the resources of the current selection */
 			/* executable for which we want to free the resources */
 			Executable* exec_to_clear_for = g_queue_peek_nth(data->executables, *idx);
 			if (exec_to_clear_for != NULL && exec_to_clear_for->resources != NULL) {
-				g_debug("Cache cleaning of the resources of %s", exec_to_clear_for->display_name);
+				g_message("Cache cleaning of the resources of %s", exec_to_clear_for->display_name);
 				/* free the resources of this executable */
 				int i = 0;
 				for (i = 0; i < g_queue_get_length(exec_to_clear_for->resources); i++) {
@@ -157,6 +209,8 @@ static void meh_screen_exec_list_delete_some_cache(Screen* screen) {
 		}
 		watchdog--;
 	}
+
+	g_debug("%d", g_queue_get_length(data->cache_executables_id));
 }
 
 /*
@@ -303,9 +357,22 @@ static void meh_screen_exec_list_load_resources(App* app, Screen* screen) {
 		}
 	}
 
-	/* Add to the cache the information that we've load some resources for this executable */
-	int* idx = g_new(int, 1); *idx = data->selected_executable;
-	g_queue_push_tail(data->cache_executables_id, idx);
+	/* Add to the cache the information that we've load some resources for this executable
+	 * only if it's not already present.
+	 * We loosely test all the values because no set in glib
+	 * (we could use the hash table for that, but meh). - remy */
+	gboolean existing = FALSE;
+	for (i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
+		int* val = g_queue_peek_nth(data->cache_executables_id, i);
+		if (*val == data->selected_executable) {
+			existing = TRUE;
+			break;
+		}
+	}
+	if (!existing) {
+		int* idx = g_new(int, 1); *idx = data->selected_executable;
+		g_queue_push_tail(data->cache_executables_id, idx);
+	}
 
 	return;
 } 

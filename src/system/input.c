@@ -17,7 +17,6 @@ InputManager* meh_input_manager_new(Settings settings) {
 	/* default key board mapping */
 	input_manager->keyboard_mapping = meh_input_create_default_keyboard_mapping();
 
-
 	return input_manager;
 }
 
