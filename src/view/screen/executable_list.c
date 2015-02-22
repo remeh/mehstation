@@ -13,7 +13,7 @@
 static void meh_screen_exec_list_destroy_resources(Screen* screen);
 static void meh_screen_exec_list_load_resources(App* app, Screen* screen);
 static void meh_screen_exec_list_start_executable(App* app, Screen* screen);
-static void meh_screen_exec_list_select_background(Screen* screen);
+static void meh_screen_exec_list_select_resources(Screen* screen);
 
 Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
@@ -33,16 +33,17 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	g_assert(data->platform != NULL);
 	/* get the executables */
 	data->executables = meh_db_get_platform_executables(app->db, data->platform, TRUE);
-	data->executables_length = g_slist_length(data->executables);
+	data->executables_length = g_queue_get_length(data->executables);
 	data->selected_executable = 0;
 	data->textures = NULL;
 	data->background = NULL;
+	data->cover = NULL;
 	screen->data = data;
 
 	/* Load the first resources */
 	meh_screen_exec_list_load_resources(app, screen);
 	/* Select a background */
-	meh_screen_exec_list_select_background(screen);
+	meh_screen_exec_list_select_resources(screen);
 
 	return screen;
 }
@@ -97,7 +98,7 @@ static void meh_screen_exec_list_destroy_resources(Screen* screen) {
  * meh_screen_exec_list_select_background uses the resources of the currently selected
  * executable to select a background.
  */
-static void meh_screen_exec_list_select_background(Screen* screen) {
+static void meh_screen_exec_list_select_resources(Screen* screen) {
 	g_assert(screen != NULL);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
@@ -105,20 +106,20 @@ static void meh_screen_exec_list_select_background(Screen* screen) {
 		return;
 	}
 
-	Executable* executable = g_slist_nth_data(data->executables, data->selected_executable);
+	Executable* executable = g_queue_peek_nth(data->executables, data->selected_executable);
 	if (executable == NULL || executable->resources == NULL) {
 		return;
 	}
 
 	/* Select a random resource if any */
-	int length = g_slist_length(executable->resources);
+	int length = g_queue_get_length(executable->resources);
 	if (length == 0) {
 		return;
 	}
 
 	int rand = g_random_int_range(0, length);
 
-	ExecutableResource* resource = g_slist_nth_data(executable->resources, rand);
+	ExecutableResource* resource = g_queue_peek_nth(executable->resources, rand);
 	if (resource == NULL) {
 		return;
 	}
@@ -127,7 +128,7 @@ static void meh_screen_exec_list_select_background(Screen* screen) {
 	g_message("Selected background : %d (%p)", resource->id, data->background);
 	/* FIXME Temporary */
 	SDL_SetTextureBlendMode(data->background, SDL_BLENDMODE_ADD);
-	SDL_SetTextureAlphaMod(data->background, 50);
+	SDL_SetTextureAlphaMod(data->background, 40);
 }
 
 /*
@@ -185,7 +186,7 @@ static void meh_screen_exec_list_load_resources(App* app, Screen* screen) {
 		return;
 	}
 	
-	Executable* executable = g_slist_nth_data(data->executables, data->selected_executable);
+	Executable* executable = g_queue_peek_nth(data->executables, data->selected_executable);
 	if (executable == NULL || executable->resources == NULL) {
 		return;
 	}
@@ -198,8 +199,8 @@ static void meh_screen_exec_list_load_resources(App* app, Screen* screen) {
 	/* Loads the textures described in the executable resources
 	 * if it's not already in the cache */
 	int i = 0;
-	for (i = 0; i < g_slist_length(executable->resources); i++) {
-		ExecutableResource* resource = g_slist_nth_data(executable->resources, i);
+	for (i = 0; i < g_queue_get_length(executable->resources); i++) {
+		ExecutableResource* resource = g_queue_peek_nth(executable->resources, i);
 		if (resource == NULL) {
 			continue;
 		}
@@ -228,7 +229,7 @@ static void meh_screen_exec_list_start_executable(App* app, Screen* screen) {
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 
 	/* get the executable selected */
-	Executable* executable = g_slist_nth_data(data->executables, data->selected_executable);
+	Executable* executable = g_queue_peek_nth(data->executables, data->selected_executable);
 
 	/* no executables to launch. */
 	if (executable == NULL) {
@@ -313,7 +314,7 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 				data->selected_executable -= 1;
 			}
 			meh_screen_exec_list_load_resources(app, screen);
-			meh_screen_exec_list_select_background(screen);
+			meh_screen_exec_list_select_resources(screen);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 				/* FIXME length on a the slist could be a bit slow (iterate over the whole list for the count) */
@@ -323,7 +324,7 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 				data->selected_executable += 1;
 			}
 			meh_screen_exec_list_load_resources(app, screen);
-			meh_screen_exec_list_select_background(screen);
+			meh_screen_exec_list_select_resources(screen);
 			break;
 		case MEH_INPUT_BUTTON_START:
 			meh_screen_exec_list_start_executable(app, screen);
@@ -357,13 +358,13 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	meh_window_render_text(app->window, app->small_font, data->platform->name, white, 250, 100);
 
 	int i = 0;
-	for (i = 0; i < g_slist_length(data->executables); i++) {
-		Executable* executable = g_slist_nth_data(data->executables, i);
-		meh_window_render_text(app->window, app->small_font, executable->display_name, white, 100, 130+(i*30));
+	for (i = 0; i < g_queue_get_length(data->executables); i++) {
+		Executable* executable = g_queue_peek_nth(data->executables, i);
+		meh_window_render_text(app->window, app->small_font, executable->display_name, white, 100, 130+(i*35));
 	}
 
 	/* cursor */
-	meh_window_render_text(app->window, app->small_font, "->", white, 70, 130+(data->selected_executable*30));
+	meh_window_render_text(app->window, app->small_font, "->", white, 70, 130+(data->selected_executable*35));
 	
 	meh_window_render(app->window);
 	SDL_Delay(10); /* TODO delta */

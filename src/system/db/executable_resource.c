@@ -25,13 +25,13 @@ void meh_model_exec_res_destroy(ExecutableResource* exec_res) {
 	g_free(exec_res);
 }
 
-void meh_model_exec_res_list_destroy(GSList* exec_resources) {
+void meh_model_exec_res_list_destroy(GQueue* exec_resources) {
 	int i = 0;
-	for (i = 0; i < g_slist_length(exec_resources); i++) {
-		ExecutableResource* exec_res = g_slist_nth_data(exec_resources, i);
+	for (i = 0; i < g_queue_get_length(exec_resources); i++) {
+		ExecutableResource* exec_res = g_queue_peek_nth(exec_resources, i);
 		meh_model_exec_res_destroy(exec_res);
 	}
-	g_slist_free(exec_resources);
+	g_queue_free(exec_resources);
 }
 
 /*

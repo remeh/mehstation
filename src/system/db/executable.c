@@ -9,7 +9,7 @@ Executable* meh_model_executable_new(int id, const gchar* display_name, const gc
 	executable->id = id;
 	executable->display_name = g_strdup(display_name);
 	executable->filepath = g_strdup(filepath);
-	executable->resources = NULL;
+	executable->resources = g_queue_new();
 
 	return executable;
 }
@@ -27,11 +27,11 @@ void meh_model_executable_destroy(Executable* executable) {
 	g_free(executable);
 }
 
-void meh_model_executables_destroy(GSList* executables) {
+void meh_model_executables_destroy(GQueue* executables) {
 	int i = 0;
-	for (i = 0; i < g_slist_length(executables); i++) {
-		Executable* executable = g_slist_nth_data(executables, i);
+	for (i = 0; i < g_queue_get_length(executables); i++) {
+		Executable* executable = g_queue_peek_nth(executables, i);
 		meh_model_executable_destroy(executable);
 	}
-	g_slist_free(executables);
+	g_queue_free(executables);
 }

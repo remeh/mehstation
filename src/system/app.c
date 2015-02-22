@@ -50,9 +50,9 @@ int meh_app_init(App* app) {
 		return 2;
 	}
 
-	GSList* platforms = meh_db_get_platforms(db);
-	for (int i = 0; i <  g_slist_length(platforms); i++) {
-		Platform* platform = g_slist_nth_data(platforms, i);
+	GQueue* platforms = meh_db_get_platforms(db);
+	for (int i = 0; i <  g_queue_get_length(platforms); i++) {
+		Platform* platform = g_queue_peek_nth(platforms, i);
 		g_message("Platform %s found.", platform->name);
 	}
 	meh_model_platforms_destroy(platforms);

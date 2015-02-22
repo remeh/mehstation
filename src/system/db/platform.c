@@ -20,11 +20,11 @@ void meh_model_platform_destroy(Platform* platform) {
 	g_free(platform);
 }
 
-void meh_model_platforms_destroy(GSList* platforms) {
+void meh_model_platforms_destroy(GQueue* platforms) {
 	int i = 0;
-	for (i = 0; i < g_slist_length(platforms); i++) {
-		Platform* platform = g_slist_nth_data(platforms, i);
+	for (i = 0; i < g_queue_get_length(platforms); i++) {
+		Platform* platform = g_queue_peek_nth(platforms, i);
 		meh_model_platform_destroy(platform);
 	}
-	g_slist_free(platforms);
+	g_queue_free(platforms);
 }

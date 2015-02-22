@@ -7,7 +7,7 @@
 struct App;
 
 typedef struct PlatformListData {
-	GSList* platforms;
+	GQueue* platforms;
 	int selected_platform;
 } PlatformListData;
 

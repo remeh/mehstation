@@ -39,10 +39,9 @@ void meh_db_close(DB* db) {
 /*
  * meh_db_get_platforms gets in the SQLite3 database all the available platforms.
  */
-GSList* meh_db_get_platforms(DB* db) {
+GQueue* meh_db_get_platforms(DB* db) {
 	g_assert(db != NULL);
 
-	GSList* list = NULL;
 	sqlite3_stmt *statement = NULL;
 
 	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM system";
@@ -57,6 +56,8 @@ GSList* meh_db_get_platforms(DB* db) {
 		return NULL;
 	}
 
+	GQueue* list = g_queue_new();
+
 	/*
 	 * read every row
 	 */
@@ -68,7 +69,7 @@ GSList* meh_db_get_platforms(DB* db) {
 		/* build the object */
 		Platform* platform = meh_model_platform_new(id, name, command);
 		/* append in the list */
-		list = g_slist_append(list, platform);
+		g_queue_push_tail(list, platform);
 	}
 
 	sqlite3_finalize(statement);
@@ -121,11 +122,11 @@ Platform* meh_db_get_platform(DB* db, int platform_id) {
  * meh_db_get_platform_executables gets in  the SQLite3 database all the executables
  * available for the given platform.
  */
-GSList* meh_db_get_platform_executables(DB* db, const Platform* platform, gboolean get_resources) {
+GQueue* meh_db_get_platform_executables(DB* db, const Platform* platform, gboolean get_resources) {
 	g_assert(db != NULL);
 	g_assert(platform != NULL);
 
-	GSList* executables = NULL;
+	GQueue* executables = g_queue_new();
 	sqlite3_stmt *statement = NULL;
 
 	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\" FROM executable WHERE platform_id = ?1";
@@ -154,7 +155,7 @@ GSList* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
 				executable->resources = meh_db_get_executable_resources(db, executable);
 			}
 			/* append in the list */
-			executables = g_slist_append(executables, executable);
+			g_queue_push_tail(executables, executable);
 		}
 	}
 
@@ -168,11 +169,10 @@ GSList* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
  * meh_db_get_executable_resources gets in  the SQLite3 database all the resources
  * available for the given executable.
  */
-GSList* meh_db_get_executable_resources(DB* db, const Executable* executable) {
+GQueue* meh_db_get_executable_resources(DB* db, const Executable* executable) {
 	g_assert(db != NULL);
 	g_assert(executable != NULL);
 
-	GSList* exec_resources = NULL;
 	sqlite3_stmt *statement = NULL;
 
 	const char* sql = "SELECT \"id\", \"executable_id\", \"type\", \"filepath\" FROM executable_resource WHERE executable_id = ?1";
@@ -181,6 +181,8 @@ GSList* meh_db_get_executable_resources(DB* db, const Executable* executable) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
 		return NULL;
 	}
+
+	GQueue* exec_resources = g_queue_new();
 
 	sqlite3_bind_int(statement, 1, executable->id);
 
@@ -196,7 +198,9 @@ GSList* meh_db_get_executable_resources(DB* db, const Executable* executable) {
 		/* build the object */
 		ExecutableResource* exec_res = meh_model_exec_res_new(id, executable_id, type, filepath);
 		/* append in the list */
-		exec_resources = g_slist_append(exec_resources, exec_res);
+		if (exec_res != NULL) {
+			g_queue_push_tail(exec_resources, exec_res);
+		}
 	}
 
 	/* finalize our work with this statement. */

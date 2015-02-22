@@ -81,7 +81,7 @@ int meh_screen_platform_list_messages_handler(App* app, Screen* screen, Message*
 static void meh_screen_platform_list_start_platform(App* app, Screen* screen) {
 	/* get the platform */
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
-	Platform* platform = g_slist_nth_data(data->platforms, data->selected_platform);
+	Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
 
 	/* create the child screen */
 	Screen* exec_list_screen = meh_screen_exec_list_new(app, platform->id);
@@ -113,13 +113,13 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			break;
 		case MEH_INPUT_BUTTON_UP:
 			if (data->selected_platform == 0) {
-				data->selected_platform = g_slist_length(meh_screen_platform_list_get_data(screen)->platforms)-1;
+				data->selected_platform = g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1;
 			} else {
 				data->selected_platform -= 1;
 			}
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
-			if (data->selected_platform == g_slist_length(meh_screen_platform_list_get_data(screen)->platforms)-1) {
+			if (data->selected_platform == g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1) {
 				data->selected_platform = 0;
 			} else {
 				data->selected_platform += 1;
@@ -149,8 +149,8 @@ int meh_screen_platform_list_render(App* app, Screen* screen) {
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	int i = 0;
-	for (i = 0; i < g_slist_length(data->platforms); i++) {
-		Platform* platform = g_slist_nth_data(data->platforms, i);
+	for (i = 0; i < g_queue_get_length(data->platforms); i++) {
+		Platform* platform = g_queue_peek_nth(data->platforms, i);
 		meh_window_render_text(app->window, app->small_font, platform->name, white, 100, 100 + i*30);
 	}
 
