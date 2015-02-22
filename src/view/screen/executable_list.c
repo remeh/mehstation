@@ -24,7 +24,9 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	screen->messages_handler = &meh_screen_exec_list_messages_handler;
 	screen->destroy_data = &meh_screen_exec_list_destroy_data;
 
-	/* init the custom data. */
+	/*
+	 * init the custom data.
+	 */
 	ExecutableListData* data = g_new(ExecutableListData, 1);	
 	/* get the platform */
 	data->platform = meh_db_get_platform(app->db, platform_id);
@@ -35,7 +37,6 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->selected_executable = 0;
 	data->textures = NULL;
 	data->background = NULL;
-	/* load the executable resources of every executables */
 	screen->data = data;
 
 	/* Load the first resources */
@@ -134,6 +135,7 @@ static void meh_screen_exec_list_select_background(Screen* screen) {
  */
 ExecutableListData* meh_screen_exec_list_get_data(Screen* screen) {
 	ExecutableListData* data = (ExecutableListData*) screen->data;
+	g_assert(data != NULL);
 	return data;
 }
 
@@ -219,10 +221,19 @@ static void meh_screen_exec_list_load_resources(App* app, Screen* screen) {
 	return;
 } 
 
+/*
+ * meh_screen_exec_list_start_executable launches the currently selected executable.
+ */
 static void meh_screen_exec_list_start_executable(App* app, Screen* screen) {
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+
 	/* get the executable selected */
 	Executable* executable = g_slist_nth_data(data->executables, data->selected_executable);
+
+	/* no executables to launch. */
+	if (executable == NULL) {
+		return;
+	}
 
 	/* prepare the exec call */
 	gchar** command_parts = g_strsplit(data->platform->command, " ", -1);
