@@ -15,8 +15,10 @@ typedef struct ExecutableListData {
 	int selected_executable;
 	GHashTable* textures; /* Hash int->SDL_Texture*, each SDL_Texture* must be freed. */
 
-	SDL_Texture* background; /* Reference to a texture in the map, should NOT be freed ! */
-	SDL_Texture* cover; /* Reference to a texture in the map, shouldn't be freed! */
+	GQueue *cache_executables_id; /* Contains the executables for which we have load the resources
+									 The first loaded is the first in the queue. */
+	int background; /* Reference to a texture in the map, should NOT be freed ! */
+	int cover; /* Reference to a texture in the map, shouldn't be freed! */
 } ExecutableListData;
 
 Screen* meh_screen_exec_list_new(struct App* app, int platform_id);

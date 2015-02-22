@@ -10,6 +10,8 @@
 #include "view/screen.h"
 #include "view/screen/executable_list.h"
 
+#define MEH_EXEC_LIST_MAX_CACHE 10
+
 static void meh_screen_exec_list_destroy_resources(Screen* screen);
 static void meh_screen_exec_list_load_resources(App* app, Screen* screen);
 static void meh_screen_exec_list_start_executable(App* app, Screen* screen);
@@ -34,13 +36,15 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	/* get the executables */
 	data->executables = meh_db_get_platform_executables(app->db, data->platform, TRUE);
 	data->executables_length = g_queue_get_length(data->executables);
+	data->cache_executables_id = g_queue_new();
 	data->selected_executable = 0;
 	data->textures = NULL;
-	data->background = NULL;
-	data->cover = NULL;
+	data->background = -1;
+	data->cover = -1;
 	screen->data = data;
 
 	/* Load the first resources */
+	meh_screen_exec_list_select_resources(screen);
 	meh_screen_exec_list_load_resources(app, screen);
 	/* Select a background */
 	meh_screen_exec_list_select_resources(screen);
@@ -59,6 +63,13 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 		meh_model_platform_destroy(data->platform);
 		meh_model_executables_destroy(data->executables);
 	}
+
+	/* Free the executables id cache. */
+	int i = 0;
+	for (i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
+		g_free(g_queue_peek_nth(data->cache_executables_id, i));
+	}
+	g_queue_free(data->cache_executables_id);
 
 	/* We must free the textures cache */
 	meh_screen_exec_list_destroy_resources(screen);
@@ -85,7 +96,7 @@ static void meh_screen_exec_list_destroy_resources(Screen* screen) {
 		int* key = g_list_nth_data(keys, i);
 		SDL_Texture* texture = g_hash_table_lookup(data->textures, key);
 		if (texture != NULL) {
-			g_message("Freeing the texture id %d", *key);
+			g_debug("Freeing the texture id %d", *key);
 			SDL_DestroyTexture(texture);
 		}
 	}
@@ -95,8 +106,62 @@ static void meh_screen_exec_list_destroy_resources(Screen* screen) {
 }
 
 /*
- * meh_screen_exec_list_select_background uses the resources of the currently selected
- * executable to select a background.
+ * meh_screen_exec_list_delete_some_cache looks for which cache we could
+ * free without impacting the user experience.
+ */
+static void meh_screen_exec_list_delete_some_cache(Screen* screen) {
+	g_assert(screen != NULL);	
+
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	if (data == NULL) {
+		return;
+	}
+
+	/* Get the current executable */
+	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
+	if (current_executable == NULL || current_executable->resources == NULL) {
+		return;
+	}
+
+	int watchdog = 20; /* avoid an infinite loop */
+	while (g_queue_get_length(data->cache_executables_id) > MEH_EXEC_LIST_MAX_CACHE && watchdog > 0) {
+		int* idx = g_queue_pop_head(data->cache_executables_id);
+		if (*idx != current_executable->id) {
+			/* executable for which we want to free the resources */
+			Executable* exec_to_clear_for = g_queue_peek_nth(data->executables, *idx);
+			if (exec_to_clear_for != NULL && exec_to_clear_for->resources != NULL) {
+				g_debug("Cache cleaning of the resources of %s", exec_to_clear_for->display_name);
+				/* free the resources of this executable */
+				int i = 0;
+				for (i = 0; i < g_queue_get_length(exec_to_clear_for->resources); i++) {
+					ExecutableResource* resource = g_queue_peek_nth(exec_to_clear_for->resources, i);
+					if (resource == NULL) {
+						continue;
+					}
+
+					/* free the associated texture */
+					SDL_Texture* texture = g_hash_table_lookup(data->textures, &(resource->id));
+					if (texture != NULL) { /* can be null because we don't load all the resources */
+						SDL_DestroyTexture(texture);
+						g_hash_table_remove(data->textures, &(resource->id));
+						g_debug("Cache clean of %s ID %d", resource->type, resource->id);
+					}
+				}
+			}
+			/* finally free the data of the entry in the cache */
+			g_free(idx);
+		} else {
+			/* we can't delete it, it's the current selection
+			 * re-add it into the cache list. */
+			g_queue_push_tail(data->cache_executables_id, idx);
+		}
+		watchdog--;
+	}
+}
+
+/*
+ * meh_screen_exec_list_select_resources uses the resources of the currently selected
+ * executable to select a background and a cover.
  */
 static void meh_screen_exec_list_select_resources(Screen* screen) {
 	g_assert(screen != NULL);
@@ -126,8 +191,8 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 		return;
 	}
 
-	data->background = g_hash_table_lookup(data->textures, &(resource->id));
-	g_message("Selected background : %d (%p)", resource->id, data->background);
+	data->background = resource->id;
+	g_debug("Selected background : %d.", resource->id);
 
 	/*
 	 * Select a cover
@@ -137,8 +202,8 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 		ExecutableResource* res = g_queue_peek_nth(executable->resources, i++);
 		if (res != NULL) {
 			if (g_strcmp0(res->type, "cover") == 0) {
-				data->cover = g_hash_table_lookup(data->textures, &(res->id));
-				g_message("Selected cover: %d", res->id);
+				data->cover = res->id;
+				g_debug("Selected cover: %d", res->id);
 				break;
 			}
 		}
@@ -219,19 +284,28 @@ static void meh_screen_exec_list_load_resources(App* app, Screen* screen) {
 			continue;
 		}
 
-		/* Look whether or not it's already in the cache. */
-		if (g_hash_table_lookup(data->textures, &(resource->id)) != NULL) {
-			g_message("Not reloading the %s ID %d", resource->type, resource->id);
+		/* Load only the needed resources. */
+		if (resource->id != data->background && resource->id != data->cover) {
 			continue;
 		}
 
-		g_message("Loading the %s ID %d", resource->type, resource->id);
+		/* Look whether or not it's already in the cache. */
+		if (g_hash_table_lookup(data->textures, &(resource->id)) != NULL) {
+			g_debug("Not reloading the %s ID %d", resource->type, resource->id);
+			continue;
+		}
+
+		g_debug("Loading the %s ID %d", resource->type, resource->id);
 		SDL_Texture* texture = meh_image_load_file(app->window->sdl_renderer, resource->filepath);
 		if (texture != NULL) {
 			int* id = g_new(int, 1); *id = resource->id;
 			g_hash_table_insert(data->textures, id, texture);
 		}
 	}
+
+	/* Add to the cache the information that we've load some resources for this executable */
+	int* idx = g_new(int, 1); *idx = data->selected_executable;
+	g_queue_push_tail(data->cache_executables_id, idx);
 
 	return;
 } 
@@ -327,8 +401,9 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			} else {
 				data->selected_executable -= 1;
 			}
-			meh_screen_exec_list_load_resources(app, screen);
 			meh_screen_exec_list_select_resources(screen);
+			meh_screen_exec_list_load_resources(app, screen);
+			meh_screen_exec_list_delete_some_cache(screen);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 				/* FIXME length on a the slist could be a bit slow (iterate over the whole list for the count) */
@@ -337,8 +412,9 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			} else {
 				data->selected_executable += 1;
 			}
-			meh_screen_exec_list_load_resources(app, screen);
 			meh_screen_exec_list_select_resources(screen);
+			meh_screen_exec_list_load_resources(app, screen);
+			meh_screen_exec_list_delete_some_cache(screen);
 			break;
 		case MEH_INPUT_BUTTON_START:
 			meh_screen_exec_list_start_executable(app, screen);
@@ -362,18 +438,24 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 
 	/* background */
-	if (data->background != NULL) {
-		SDL_Rect viewport = { 0, 0, app->window->width, app->window->height };
-		SDL_SetTextureBlendMode(data->background, SDL_BLENDMODE_ADD);
-		SDL_SetTextureAlphaMod(data->background, 40);
-		meh_window_render_texture(app->window, data->background, viewport);
+	if (data->background > -1) {
+		SDL_Texture* background = g_hash_table_lookup(data->textures, &(data->background));
+		if (background != NULL) {
+			SDL_Rect viewport = { 0, 0, app->window->width, app->window->height };
+			SDL_SetTextureBlendMode(background, SDL_BLENDMODE_ADD);
+			SDL_SetTextureAlphaMod(background, 40);
+			meh_window_render_texture(app->window, background, viewport);
+		}
 	}
 
 	/* cover */
-	if (data->cover != NULL) {
-		SDL_Rect viewport = { 600, 200, 300, 400 };
-		SDL_SetTextureBlendMode(data->background, SDL_BLENDMODE_NONE);
-		meh_window_render_texture(app->window, data->cover, viewport);
+	if (data->cover > -1) {
+		SDL_Texture* cover = g_hash_table_lookup(data->textures, &(data->cover));
+		if (cover != NULL) {
+			SDL_Rect viewport = { 600, 200, 300, 400 };
+			SDL_SetTextureBlendMode(cover, SDL_BLENDMODE_NONE);
+			meh_window_render_texture(app->window, cover, viewport);
+		}
 	}
 
 	SDL_Color white = { 255, 255, 255 };
