@@ -105,6 +105,8 @@ int meh_app_destroy(App* app) {
 		meh_screen_destroy(app->current_screen);
 	}
 
+	meh_input_manager_destroy(app->input_manager);
+
 	SDL_Quit();
 	TTF_Quit();
 
@@ -151,7 +153,12 @@ void meh_app_main_loop_event(App* app) {
 		switch (event->type) {
 			case SDL_KEYUP:
 			case SDL_KEYDOWN:
-				meh_input_manager_keyboard_read_event(app->input_manager, event);
+				meh_input_manager_read_event(app->input_manager, event);
+				break;
+			case SDL_JOYBUTTONUP:
+			case SDL_JOYBUTTONDOWN:
+			case SDL_JOYAXISMOTION:
+				meh_input_manager_read_event(app->input_manager, event);
 				break;
 			case SDL_QUIT:
 				/* directly stop the app */

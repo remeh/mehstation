@@ -72,6 +72,10 @@ void meh_screen_starting_button_pressed(App* app, Screen* screen, int pressed_bu
 			app->mainloop.running = FALSE;
 			break;
 		case MEH_INPUT_BUTTON_START:
+		case MEH_INPUT_BUTTON_B:
+		case MEH_INPUT_BUTTON_A:
+		case MEH_INPUT_BUTTON_L:
+		case MEH_INPUT_BUTTON_R:
 			meh_screen_starting_go_to_platform_list(app, screen);
 			break;
 	}

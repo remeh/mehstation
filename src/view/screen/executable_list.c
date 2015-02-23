@@ -470,14 +470,18 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 
 	switch (pressed_button) {
 		case MEH_INPUT_SPECIAL_ESCAPE:
+			/* exit mehstation */
+			app->mainloop.running = FALSE;
+			break;
+		case MEH_INPUT_BUTTON_B:
 			if (screen->parent_screen != NULL) {
 				/* back to the platform screen */
 				meh_app_set_current_screen(app, screen->parent_screen);
 				meh_screen_destroy(screen);
-			} else {
-				/* exit mehstation */
-				app->mainloop.running = FALSE;
 			}
+			break;
+		case MEH_INPUT_BUTTON_A:
+			meh_screen_exec_list_start_executable(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_UP:
 			if (data->selected_executable == 0) {
@@ -500,9 +504,6 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			meh_screen_exec_list_select_resources(screen);
 			meh_screen_exec_list_load_resources(app, screen);
 			meh_screen_exec_list_delete_some_cache(screen);
-			break;
-		case MEH_INPUT_BUTTON_START:
-			meh_screen_exec_list_start_executable(app, screen);
 			break;
 	}
 }

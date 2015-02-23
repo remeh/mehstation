@@ -100,15 +100,18 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 
 	switch (pressed_button) {
-		/* Return to the front page */
 		case MEH_INPUT_SPECIAL_ESCAPE:
+			app->mainloop.running = FALSE;
+			break;
+		case MEH_INPUT_BUTTON_A:
+			meh_screen_platform_list_start_platform(app, screen);
+			break;
+		case MEH_INPUT_BUTTON_B:
 			/* Switch the current_screen to the parent screen if any */
 			if (screen->parent_screen != NULL) {
 				meh_app_set_current_screen(app, screen->parent_screen);
 				/* this one won't be used anymore. */
 				meh_screen_destroy(screen);
-			} else {
-				app->mainloop.running = FALSE;
 			}
 			break;
 		case MEH_INPUT_BUTTON_UP:
@@ -124,9 +127,6 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform += 1;
 			}
-			break;
-		case MEH_INPUT_BUTTON_START:
-			meh_screen_platform_list_start_platform(app, screen);
 			break;
 	}
 }
