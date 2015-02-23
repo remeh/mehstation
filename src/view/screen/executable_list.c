@@ -231,22 +231,40 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 	}
 
 	/*
-	 * Select a random resource if any
+	 * Select a random resource if any and tries to not take a cover if possible.
 	 */
 	int length = g_queue_get_length(executable->resources);
 	if (length == 0) {
 		return;
 	}
 
-	int rand = g_random_int_range(0, length);
+	int watchdog = 5; /* don't do too many tries. */
+	ExecutableResource* resource = NULL;
+	while (watchdog > 0) {
+		int rand = g_random_int_range(0, length);
 
-	ExecutableResource* resource = g_queue_peek_nth(executable->resources, rand);
-	if (resource == NULL) {
-		return;
+		resource = g_queue_peek_nth(executable->resources, rand);
+		if (resource == NULL) {
+			return;
+		}
+
+		if (g_strcmp0(resource->type, "cover") != 0) {
+			/* We found something that's not a cover, perfect. */
+			break;
+		} else {
+			if (g_queue_get_length(executable->resources) == 1) {
+				/* We only found a cover, but we have only one resource, so we can also stop here. */
+				break;
+			}
+		}
+
+		watchdog--;
 	}
 
-	data->background = resource->id;
-	g_debug("Selected background : %d.", resource->id);
+	if (resource != NULL) {
+		data->background = resource->id;
+		g_debug("Selected background : %d.", resource->id);
+	}
 
 	/*
 	 * Select a cover
