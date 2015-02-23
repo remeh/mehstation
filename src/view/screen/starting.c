@@ -104,7 +104,7 @@ void meh_screen_starting_render(App* app, Screen* screen) {
 	meh_window_clear(app->window, black);
 
 	SDL_Texture* texture = meh_image_load_file(app->window->sdl_renderer, "./image.png");
-	SDL_Rect rect = { 0, 0, 500, 500 };
+	SDL_Rect rect = { 0, 0, 300, 300 };
 	meh_window_render_texture(app->window, texture, rect);
 	SDL_DestroyTexture(texture);
 

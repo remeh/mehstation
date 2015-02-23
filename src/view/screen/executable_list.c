@@ -182,7 +182,7 @@ static void meh_screen_exec_list_delete_some_cache(Screen* screen) {
 			/* executable for which we want to free the resources */
 			Executable* exec_to_clear_for = g_queue_peek_nth(data->executables, *idx);
 			if (exec_to_clear_for != NULL && exec_to_clear_for->resources != NULL) {
-				g_message("Cache cleaning of the resources of %s", exec_to_clear_for->display_name);
+				g_debug("Cache cleaning of the resources of %s", exec_to_clear_for->display_name);
 				/* free the resources of this executable */
 				int i = 0;
 				for (i = 0; i < g_queue_get_length(exec_to_clear_for->resources); i++) {

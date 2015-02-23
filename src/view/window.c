@@ -32,16 +32,16 @@ Window* meh_window_create(guint width, guint height, gboolean fullscreen) {
 		return NULL;
 	}
 
-	/* Retrieve the width and height after creation, because the flag fullscreen
-	 * desktop means to automatically take the size of the desktop */
-	SDL_GetWindowSize(w->sdl_window, (int*)&(w->width), (int*)&(w->height));
-
 	/* Attach a renderer to the window. */
 	w->sdl_renderer = SDL_CreateRenderer(w->sdl_window, -1, 0);
 	if (w->sdl_renderer == NULL) {
 		g_critical("Can't attach the renderer: %s", SDL_GetError());
 		return NULL;
 	}
+
+	/* Uses SDL2 auto-scaling system. */
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");  // make the scaled rendering look smoother.
+	SDL_RenderSetLogicalSize(w->sdl_renderer, w->width, w->height);
 
 	g_message("Window %d:%d %s created.", w->width, w->height, (w->fullscreen == TRUE ? "fullscreen" : "windowed"));
 	return w;
