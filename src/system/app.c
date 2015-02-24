@@ -70,7 +70,7 @@ int meh_app_init(App* app) {
 	app->input_manager = input_manager;
 
 	/* Sets the starting screen as the current screen */
-	Screen* starting_screen = meh_screen_starting_new();
+	Screen* starting_screen = meh_screen_starting_new(app);
 	if (starting_screen == NULL) {
 		g_critical("Can't init the starting screen.");
 		return 1;
@@ -124,6 +124,7 @@ void meh_app_set_current_screen(App* app, Screen* screen) {
 /*
  * meh_app_main_loop is the main loop running for the whole time 
  * of the process.
+ * Simple main loop with constant update speed and max rendering.
  */
 int meh_app_main_loop(App* app) {
 	g_assert(app != NULL);
@@ -132,10 +133,43 @@ int meh_app_main_loop(App* app) {
 	app->mainloop.running = TRUE;
 
 	/* application lifecycle */
+	int loop_count = 0;
+	int next_tick = SDL_GetTicks();
+	int start_tick = SDL_GetTicks();
 	while (app->mainloop.running) {
-		meh_app_main_loop_event(app);
-		meh_app_main_loop_update(app);
+		loop_count = 0;
+		start_tick = SDL_GetTicks();
+
+		while(SDL_GetTicks() > next_tick && loop_count < MEH_FPS_MAX_FRAMESKIP) {
+			meh_app_main_loop_event(app);
+			meh_app_main_loop_update(app);
+			next_tick += MEH_FPS_DELTA_TO_SKIP;
+			loop_count++;
+		}
+
 		meh_app_main_loop_render(app);
+
+		/* fps count */
+		guint32 now = SDL_GetTicks();
+		app->mainloop.framecount++;
+		if (now > app->mainloop.frame_next_s) {
+			app->mainloop.fps = app->mainloop.framecount;
+			g_message("%d fps", app->mainloop.fps);
+			app->mainloop.frame_next_s = now + 1000;
+			app->mainloop.framecount = 0;
+		}
+
+		/* well, don't want to use 100% of CPU and mehstation
+		 * won't need so much resources to render...
+		 * Look how long we can sleep.
+		 * We can sleep 16 - delta if the delta < 16ms (60fps)
+		 * we even remove some seconds for the OS */
+		int delta = SDL_GetTicks() - start_tick;
+		if (delta < 16) {
+			delta -= 3;
+			if (delta < 0) { delta = 0; }
+			SDL_Delay(16-delta);
+		}
 	}
 
 	return 0;
