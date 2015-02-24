@@ -9,11 +9,19 @@
 #include "view/screen/platform_list.h"
 #include "view/window.h"
 
-Screen* meh_screen_starting_new() {
+Screen* meh_screen_starting_new(App* app) {
+	g_assert(app != NULL);
+
 	Screen* screen = meh_screen_new();
 
 	screen->name = g_strdup("Starting screen");
 	screen->messages_handler = &meh_screen_starting_messages_handler;
+	screen->destroy_data = &meh_screen_starting_destroy_data;
+
+	/* custom data */
+	StartingData* data = g_new(StartingData, 1);
+	data->splashscreen = meh_image_load_file(app->window->sdl_renderer, "res/splashscreen.png");
+	screen->data = data;
 
 	return screen;
 }
@@ -51,6 +59,25 @@ int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* mess
 	}
 
 	return 0;
+}
+
+void meh_screen_starting_destroy_data(Screen* screen) {
+	g_assert(screen != NULL);
+
+	StartingData* data = meh_screen_starting_get_data(screen);
+	if (data != NULL && data->splashscreen != NULL) {
+		SDL_DestroyTexture(data->splashscreen);
+	}
+	screen->data = NULL;
+}
+
+StartingData* meh_screen_starting_get_data(Screen* screen) {
+	g_assert(screen != NULL);
+	if (screen->data == NULL) {
+		return NULL;
+	}
+
+	return (StartingData*) screen->data;
 }
 
 static void meh_screen_starting_go_to_platform_list(App* app, Screen* screen) {
@@ -104,16 +131,16 @@ void meh_screen_starting_render(App* app, Screen* screen) {
 	g_assert(screen != NULL);
 	g_assert(app != NULL);
 
+	StartingData* data = meh_screen_starting_get_data(screen);
+	g_assert(data != NULL);
+
 	SDL_Color black = { 0, 0, 0 };
 	meh_window_clear(app->window, black);
 
-	SDL_Texture* texture = meh_image_load_file(app->window->sdl_renderer, "./image.png");
 	SDL_Rect rect = { 0, 0, 300, 300 };
-	meh_window_render_texture(app->window, texture, rect);
-	SDL_DestroyTexture(texture);
+	meh_window_render_texture(app->window, data->splashscreen, rect);
 
 	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", black, 50, 50);
 
 	meh_window_render(app->window);
-	SDL_Delay(10); /* TODO delta */
 }

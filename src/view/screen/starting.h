@@ -6,7 +6,14 @@
 /* cross-reference */
 struct App;
 
-Screen* meh_screen_starting_new();
+typedef struct {
+	SDL_Texture* splashscreen;
+} StartingData;
+
+Screen* meh_screen_starting_new(struct App* app);
+void meh_screen_starting_destroy(Screen* screen);
+StartingData* meh_screen_starting_get_data(Screen* screen);
+void meh_screen_starting_destroy_data(Screen* screen);
 int meh_screen_starting_messages_handler(struct App* app, Screen* screen, Message* message);
 void meh_screen_starting_button_pressed(struct App* app, Screen* screen, int pressed_button);
 int meh_screen_starting_update(struct App* app, Screen* screen, int delta_time);

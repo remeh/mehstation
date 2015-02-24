@@ -157,6 +157,5 @@ int meh_screen_platform_list_render(App* app, Screen* screen) {
 	meh_window_render_text(app->window, app->small_font, "->", white, 80, 100 + (30*data->selected_platform));
 	
 	meh_window_render(app->window);
-	SDL_Delay(10); /* TODO delta */
 	return 0;
 }

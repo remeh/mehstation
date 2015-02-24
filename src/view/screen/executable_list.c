@@ -548,6 +548,7 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	meh_window_clear(app->window, black);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	g_assert(data != NULL);
 
 	/* background */
 	if (data->background > -1) {
@@ -584,7 +585,6 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	meh_window_render_text(app->window, app->small_font, "->", white, 70, 130+(data->selected_executable*35));
 	
 	meh_window_render(app->window);
-	SDL_Delay(10); /* TODO delta */
 	return 0;
 }
 
