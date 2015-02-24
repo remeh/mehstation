@@ -459,6 +459,16 @@ static void meh_screen_exec_list_start_executable(App* app, Screen* screen) {
 }
 
 /*
+ * meh_screen_exec_list_refresh_after_cursor_move refreshes the screen information
+ * after a jump in the executable list.
+ */
+static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* screen) {
+	meh_screen_exec_list_select_resources(screen);
+	meh_screen_exec_list_load_resources(app, screen);
+	meh_screen_exec_list_delete_some_cache(screen);
+}
+
+/*
  * meh_screen_exec_list_button_pressed is called when we received a button pressed
  * message.
  */
@@ -485,25 +495,33 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			break;
 		case MEH_INPUT_BUTTON_UP:
 			if (data->selected_executable == 0) {
-				/* FIXME length on a the slist could be a bit slow (iterate over the whole list for the count) */
 				data->selected_executable = data->executables_length-1;
 			} else {
 				data->selected_executable -= 1;
 			}
-			meh_screen_exec_list_select_resources(screen);
-			meh_screen_exec_list_load_resources(app, screen);
-			meh_screen_exec_list_delete_some_cache(screen);
+			meh_screen_exec_list_refresh_after_cursor_move(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
-				/* FIXME length on a the slist could be a bit slow (iterate over the whole list for the count) */
 			if (data->selected_executable == data->executables_length-1) {
 				data->selected_executable = 0;
 			} else {
 				data->selected_executable += 1;
 			}
-			meh_screen_exec_list_select_resources(screen);
-			meh_screen_exec_list_load_resources(app, screen);
-			meh_screen_exec_list_delete_some_cache(screen);
+			meh_screen_exec_list_refresh_after_cursor_move(app, screen);
+			break;
+		case MEH_INPUT_BUTTON_L:
+			data->selected_executable -= 10;
+			if (data->selected_executable < 0) {
+				data->selected_executable = data->executables_length-1;
+			}
+			meh_screen_exec_list_refresh_after_cursor_move(app, screen);
+			break;
+		case MEH_INPUT_BUTTON_R:
+			data->selected_executable += 10;
+			if (data->selected_executable > data->executables_length) {
+				data->selected_executable = 0;
+			}
+			meh_screen_exec_list_refresh_after_cursor_move(app, screen);
 			break;
 	}
 }
