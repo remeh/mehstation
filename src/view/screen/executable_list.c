@@ -1,4 +1,12 @@
-#include <glib-2.0/glib.h>
+/*
+ * mehstation - Screen of executables.
+ *
+ * Copyright © 2015 Rémy Mathieu
+ *
+ * TODO We could free the cache when an executable is launched.
+ */
+
+#include <glib.h>
 
 #include "system/app.h"
 #include "system/consts.h"
@@ -10,7 +18,7 @@
 #include "view/screen.h"
 #include "view/screen/executable_list.h"
 
-#define MEH_EXEC_LIST_MAX_CACHE 3
+#define MEH_EXEC_LIST_MAX_CACHE 7
 #define MEH_EXEC_LIST_DELTA 3 /* Don't delete the cache of the object around the cursor */
 
 static void meh_screen_exec_list_destroy_resources(Screen* screen);
