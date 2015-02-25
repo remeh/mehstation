@@ -4,6 +4,7 @@
 #include "system/consts.h"
 #include "system/input.h"
 #include "system/message.h"
+#include "system/transition.h"
 #include "system/db/models.h"
 #include "view/screen.h"
 #include "view/screen/executable_list.h"
@@ -20,6 +21,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	PlatformListData* data = g_new(PlatformListData, 1);	
 	data->platforms = meh_db_get_platforms(app->db);
 	data->selected_platform = 0;
+	data->title_x = meh_transition_new(MEH_TRANSITION_QUADRATIC, 50, 300, 800);
 	screen->data = data;
 
 	return screen;
@@ -134,6 +136,11 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 int meh_screen_platform_list_update(Screen* screen, int delta_time) {
 	g_assert(screen != NULL);
 
+	PlatformListData* data = meh_screen_platform_list_get_data(screen);
+	g_assert(data != NULL);
+
+	meh_transition_compute(&(data->title_x));
+
 	return 0;
 }
 
@@ -141,13 +148,15 @@ int meh_screen_platform_list_render(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
+	PlatformListData* data = meh_screen_platform_list_get_data(screen);
+	g_assert(data != NULL);
+
 	SDL_Color black = { 0, 0, 0 };
 	meh_window_clear(app->window, black);
 
 	SDL_Color white = { 255, 255, 255 };
-	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, 50, 50);
+	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, data->title_x.value, 50);
 
-	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	int i = 0;
 	for (i = 0; i < g_queue_get_length(data->platforms); i++) {
 		Platform* platform = g_queue_peek_nth(data->platforms, i);

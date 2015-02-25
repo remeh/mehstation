@@ -8,9 +8,10 @@ SET(
         src/main.c
         src/system/app.c
         src/system/db.c
-        src/system/message.c
         src/system/input.c
+        src/system/message.c
         src/system/settings.c
+        src/system/transition.c
         src/system/db/platform.c
         src/system/db/executable.c
         src/system/db/executable_resource.c

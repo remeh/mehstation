@@ -1,6 +1,7 @@
 #pragma once
 
 #include "system/message.h"
+#include "system/transition.h"
 #include "view/screen.h"
 
 /* cross-reference */
@@ -9,6 +10,7 @@ struct App;
 typedef struct PlatformListData {
 	GQueue* platforms;
 	int selected_platform;
+	Transition title_x;
 } PlatformListData;
 
 Screen* meh_screen_platform_list_new(struct App* app);
