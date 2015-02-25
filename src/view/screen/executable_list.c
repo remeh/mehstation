@@ -574,10 +574,19 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 		}
 	}
 
+	SDL_Color white = { 255, 255, 255 };
+
+
 	/* selection */
 	SDL_Rect selection = { 20, data->cursor_y.value, 550, 35 };
 	SDL_SetRenderDrawColor(app->window->sdl_renderer, 15, 15, 15, 255);
 	SDL_RenderFillRect(app->window->sdl_renderer, &selection);
+
+	/* header */
+	SDL_Rect header = { 0, 0, 1920, 70 };
+	SDL_SetRenderDrawColor(app->window->sdl_renderer, 15, 15, 15, 200);
+	SDL_RenderFillRect(app->window->sdl_renderer, &header);
+	meh_window_render_text(app->window, app->big_font, data->platform->name, white, 20, 10);
 
 	/* cover */
 	if (data->cover > -1) {
@@ -589,9 +598,6 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 		}
 	}
 
-	SDL_Color white = { 255, 255, 255 };
-	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, 550, 50);
-	meh_window_render_text(app->window, app->small_font, data->platform->name, white, 250, 100);
 
 	int i = 0;
 	for (i = 0; i < g_queue_get_length(data->executables); i++) {
