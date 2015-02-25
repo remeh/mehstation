@@ -1,5 +1,10 @@
+/*
+ * mehstation - App.
+ *
+ * Copyright © 2015 Rémy Mathieu
+ */
 #include <SDL2/SDL_image.h>
-#include <glib-2.0/glib.h>
+#include <glib.h>
 
 #include "view/image.h"
 #include "view/screen.h"

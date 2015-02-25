@@ -13,6 +13,9 @@ Screen* meh_screen_new() {
 	return screen;
 }
 
+/*
+ * meh_screen_destroy releases all the memory of the given screen.
+ */
 void meh_screen_destroy(Screen* screen) {
 	g_assert(screen != NULL);
 

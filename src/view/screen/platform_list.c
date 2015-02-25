@@ -1,3 +1,8 @@
+/*
+ * mehstation - Platform list screen.
+ *
+ * Copyright © 2015 Rémy Mathieu
+ */
 #include <glib.h>
 
 #include "system/app.h"
