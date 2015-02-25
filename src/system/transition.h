@@ -1,10 +1,9 @@
-#pragma once 
-
 /*
- * mehstation - Easing helpers.
+ * mehstation - Transition on values.
  *
  * Copyright © 2015 Rémy Mathieu
  */
+#pragma once 
 
 #include <glib.h>
 
@@ -15,13 +14,14 @@
 
 typedef struct {
 	guint transition_type;
-	gfloat duration; /* duration of the transition */
-	gfloat start_tick;
-	gfloat start_value; /* the starting value */
-	gfloat final_value; /* the final value */
-	gfloat value;
+	float duration; /* duration of the transition */
+	float start_tick;
+	float start_value; /* the starting value */
+	float final_value; /* the final value */
+	float value;
 	gboolean ended;
 } Transition;
 
-Transition meh_transition_new(int transition_type, guint start_value, guint change, guint duration);
-void meh_transition_compute(Transition* transition);
+Transition meh_transition_start(int transition_type, int start_value, int final_value, int duration);
+void meh_transition_update(Transition* transition);
+void meh_transitions_update(GQueue* transitions);

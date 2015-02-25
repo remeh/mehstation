@@ -1,9 +1,19 @@
+/*
+ * mehstation - Transition on values.
+ *
+ * Copyright © 2015 Rémy Mathieu
+ */
 #include <glib.h>
 #include <SDL2/SDL.h>
 
 #include "system/transition.h"
 
-Transition meh_transition_new(int transition_type, guint start_value, guint final_value, guint duration) {
+#define MEH_EPSILON 2.0f
+
+/*
+ * meh_transition_start prepares and starts a new transition.
+ */
+Transition meh_transition_start(int transition_type, int start_value, int final_value, int duration) {
 	Transition ti;
 	ti.transition_type = transition_type;
 	ti.start_tick = -1;
@@ -15,7 +25,22 @@ Transition meh_transition_new(int transition_type, guint start_value, guint fina
 	return ti;
 }
 
-void meh_transition_compute(Transition* tvar) {
+/*
+ * meh_transitions_update updates a queue of transitions.
+ */
+void meh_transitions_update(GQueue* transitions) {
+	g_assert(transitions != NULL);
+
+	for (int i = 0; i < g_queue_get_length(transitions); i++) {
+		Transition* transition = g_queue_peek_nth(transitions, i);
+		meh_transition_update(transition);
+	}
+}
+
+/*
+ * meh_transition_update compute the next value for the given transition.
+ */
+void meh_transition_update(Transition* tvar) {
 	if (tvar == NULL) {
 		return;
 	}
@@ -58,9 +83,9 @@ void meh_transition_compute(Transition* tvar) {
 			break;
 	}
 
-	if (tvar->final_value > tvar->start_value && tvar->final_value - tvar->value < 0.9f) {
+	if (tvar->final_value > tvar->start_value && tvar->final_value - tvar->value < MEH_EPSILON) {
 		tvar->ended = TRUE;
-	} else if (tvar->final_value <= tvar->start_value && tvar->value - tvar->final_value < 0.9f) {
+	} else if (tvar->final_value <= tvar->start_value && tvar->value - tvar->final_value < MEH_EPSILON) {
 		tvar->ended = TRUE;
 	}
 }

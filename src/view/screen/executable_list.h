@@ -19,6 +19,8 @@ typedef struct ExecutableListData {
 									 The first loaded is the first in the queue. */
 	int background; /* Reference to a texture in the map, should NOT be freed ! */
 	int cover; /* Reference to a texture in the map, shouldn't be freed! */
+
+	Transition cursor_y;
 } ExecutableListData;
 
 Screen* meh_screen_exec_list_new(struct App* app, int platform_id);

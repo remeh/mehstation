@@ -13,6 +13,7 @@
 #include "system/db.h"
 #include "system/input.h"
 #include "system/message.h"
+#include "system/transition.h"
 #include "system/db/models.h"
 #include "view/image.h"
 #include "view/screen.h"
@@ -50,6 +51,8 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->textures = NULL;
 	data->background = -1;
 	data->cover = -1;
+	data->cursor_y = meh_transition_start(MEH_TRANSITION_CUBIC, 0, 130, 500);
+	g_queue_push_tail(screen->transitions, &data->cursor_y);
 	screen->data = data;
 
 	/* Select and load the first resources */
@@ -470,10 +473,13 @@ static void meh_screen_exec_list_start_executable(App* app, Screen* screen) {
  * meh_screen_exec_list_refresh_after_cursor_move refreshes the screen information
  * after a jump in the executable list.
  */
-static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* screen) {
+static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* screen, int prev_selected_exec) {
 	meh_screen_exec_list_select_resources(screen);
 	meh_screen_exec_list_load_resources(app, screen);
 	meh_screen_exec_list_delete_some_cache(screen);
+
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	data->cursor_y = meh_transition_start(MEH_TRANSITION_CUBIC, 130 + prev_selected_exec*35, 130 + (data->selected_executable*35), 100);
 }
 
 /*
@@ -485,6 +491,9 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 	g_assert(screen != NULL);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	g_assert(data != NULL);
+
+	int prev_selected_exec = data->selected_executable;
 
 	switch (pressed_button) {
 		case MEH_INPUT_SPECIAL_ESCAPE:
@@ -507,7 +516,7 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			} else {
 				data->selected_executable -= 1;
 			}
-			meh_screen_exec_list_refresh_after_cursor_move(app, screen);
+			meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 			if (data->selected_executable == data->executables_length-1) {
@@ -515,27 +524,31 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			} else {
 				data->selected_executable += 1;
 			}
-			meh_screen_exec_list_refresh_after_cursor_move(app, screen);
+			meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 		case MEH_INPUT_BUTTON_L:
 			data->selected_executable -= 10;
 			if (data->selected_executable < 0) {
 				data->selected_executable = data->executables_length-1;
 			}
-			meh_screen_exec_list_refresh_after_cursor_move(app, screen);
+			meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 		case MEH_INPUT_BUTTON_R:
 			data->selected_executable += 10;
 			if (data->selected_executable > data->executables_length) {
 				data->selected_executable = 0;
 			}
-			meh_screen_exec_list_refresh_after_cursor_move(app, screen);
+			meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 	}
 }
 
 int meh_screen_exec_list_update(Screen* screen, int delta_time) {
 	g_assert(screen != NULL);
+
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	g_assert(data != NULL);
+	meh_transitions_update(screen->transitions);
 
 	return 0;
 }
@@ -556,10 +569,15 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 		if (background != NULL) {
 			SDL_Rect viewport = { 0, 0, app->window->width, app->window->height };
 			SDL_SetTextureBlendMode(background, SDL_BLENDMODE_ADD);
-			SDL_SetTextureAlphaMod(background, 40);
+			SDL_SetTextureAlphaMod(background, 75);
 			meh_window_render_texture(app->window, background, viewport);
 		}
 	}
+
+	/* selection */
+	SDL_Rect selection = { 20, data->cursor_y.value, 550, 35 };
+	SDL_SetRenderDrawColor(app->window->sdl_renderer, 15, 15, 15, 255);
+	SDL_RenderFillRect(app->window->sdl_renderer, &selection);
 
 	/* cover */
 	if (data->cover > -1) {
@@ -581,9 +599,6 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 		meh_window_render_text(app->window, app->small_font, executable->display_name, white, 100, 130+(i*35));
 	}
 
-	/* cursor */
-	meh_window_render_text(app->window, app->small_font, "->", white, 70, 130+(data->selected_executable*35));
-	
 	meh_window_render(app->window);
 	return 0;
 }

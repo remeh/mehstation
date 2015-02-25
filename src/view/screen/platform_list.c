@@ -21,7 +21,8 @@ Screen* meh_screen_platform_list_new(App* app) {
 	PlatformListData* data = g_new(PlatformListData, 1);	
 	data->platforms = meh_db_get_platforms(app->db);
 	data->selected_platform = 0;
-	data->title_x = meh_transition_new(MEH_TRANSITION_QUADRATIC, 50, 300, 800);
+	data->title_x = meh_transition_start(MEH_TRANSITION_QUADRATIC, -300, 300, 800);
+	g_queue_push_tail(screen->transitions, &data->title_x);
 	screen->data = data;
 
 	return screen;
@@ -138,8 +139,7 @@ int meh_screen_platform_list_update(Screen* screen, int delta_time) {
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	g_assert(data != NULL);
-
-	meh_transition_compute(&(data->title_x));
+	meh_transitions_update(screen->transitions);
 
 	return 0;
 }
