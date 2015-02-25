@@ -26,6 +26,27 @@ Transition meh_transition_start(int transition_type, int start_value, int final_
 }
 
 /*
+ * meh_transitions_end ends all the given transitions.
+ */
+void meh_transitions_end(GQueue* transitions) {
+	g_assert(transitions != NULL);
+
+	for (int i = 0; i < g_queue_get_length(transitions); i++) {
+		Transition* transition = g_queue_peek_nth(transitions, i);
+		meh_transition_end(transition);
+	}
+}
+
+/*
+ * meh_transition_end ends the given position.
+ */
+void meh_transition_end(Transition* transition) {
+	g_assert(transition != NULL);
+	transition->value = transition->final_value;
+	transition->ended = TRUE;
+}
+
+/*
  * meh_transitions_update updates a queue of transitions.
  */
 void meh_transitions_update(GQueue* transitions) {

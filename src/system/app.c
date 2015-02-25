@@ -5,9 +5,10 @@
 #include "view/screen.h"
 #include "view/screen/starting.h"
 #include "system/app.h"
-#include "system/message.h"
 #include "system/input.h"
+#include "system/message.h"
 #include "system/settings.h"
+#include "system/transition.h"
 #include "system/db/models.h"
 
 App* meh_app_create() {
@@ -118,6 +119,9 @@ void meh_app_set_current_screen(App* app, Screen* screen) {
 	g_assert(screen != NULL);
 
 	g_message("Setting the current screen to : %s", screen->name);
+	if (app->current_screen != NULL) {
+		meh_transitions_end(app->current_screen->transitions); /* before leaving this screen, we must end all its transitions. */
+	}
 	app->current_screen = screen;
 }
 

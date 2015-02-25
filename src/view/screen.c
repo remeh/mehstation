@@ -1,6 +1,7 @@
 #include <stdlib.h>
-#include "glib-2.0/glib.h"
+#include <glib.h>
 
+#include "system/transition.h"
 #include "view/screen.h"
 
 Screen* meh_screen_new() {
@@ -24,7 +25,6 @@ void meh_screen_destroy(Screen* screen) {
 	}
 
 	g_queue_free(screen->transitions);
-
 	g_free(screen->name);
 	g_free(screen);
 }
