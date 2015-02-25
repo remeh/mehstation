@@ -26,7 +26,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	PlatformListData* data = g_new(PlatformListData, 1);	
 	data->platforms = meh_db_get_platforms(app->db);
 	data->selected_platform = 0;
-	data->title_x = meh_transition_start(MEH_TRANSITION_QUADRATIC, -300, 300, 800);
+	data->title_x = meh_transition_start(MEH_TRANSITION_QUADRATIC, -300, 550, 800);
 	g_queue_push_tail(screen->transitions, &data->title_x);
 	screen->data = data;
 

@@ -590,7 +590,7 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	}
 
 	SDL_Color white = { 255, 255, 255 };
-	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, 50, 50);
+	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, 550, 50);
 	meh_window_render_text(app->window, app->small_font, data->platform->name, white, 250, 100);
 
 	int i = 0;

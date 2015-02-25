@@ -61,53 +61,54 @@ void meh_transitions_update(GQueue* transitions) {
 /*
  * meh_transition_update compute the next value for the given transition.
  */
-void meh_transition_update(Transition* tvar) {
-	if (tvar == NULL) {
+void meh_transition_update(Transition* transition) {
+	if (transition == NULL) {
 		return;
 	}
 
-	if (tvar->ended == TRUE) {
+	if (transition->ended == TRUE) {
 		return;
 	}
 
 	float time = 0;
-	if (tvar->start_tick == -1) {
-		tvar->start_tick = (float)SDL_GetTicks();
+	if (transition->start_tick == -1) {
+		transition->start_tick = (float)SDL_GetTicks();
 	} else {
-		time = (float)SDL_GetTicks() - tvar->start_tick;
+		time = (float)SDL_GetTicks() - transition->start_tick;
 	}
 
-	float change = tvar->final_value - tvar->start_value;
+	float change = transition->final_value - transition->start_value;
 
-	switch (tvar->transition_type) {
+	switch (transition->transition_type) {
 		case MEH_TRANSITION_LINEAR:
-			tvar->value = (change*(time / tvar->duration)) + tvar->start_value;
+			transition->value = (change*(time / transition->duration)) + transition->start_value;
 			break;
 		case MEH_TRANSITION_CUBIC:
-			time /= tvar->duration/2.0f;
+			time /= transition->duration/2.0f;
 			if (time < 1.0f) {
-				tvar->value = change/2*time*time*time + tvar->start_value;
+				transition->value = change/2*time*time*time + transition->start_value;
 			} else {
 				time -= 2.0f;
-				tvar->value = change/2.0f*(time*time*time + 2.0f) + tvar->start_value;
+				transition->value = change/2.0f*(time*time*time + 2.0f) + transition->start_value;
 			}
 			break;
 		case MEH_TRANSITION_QUADRATIC:
-			time /= tvar->duration/2.0f;
+			time /= transition->duration/2.0f;
 			if (time < 1.0f) {
-				tvar->value = change/2.0f*time*time + tvar->start_value;
+				transition->value = change/2.0f*time*time + transition->start_value;
 			} else {
 				time -= 1.0f;
-				tvar->value = -change/2.0f * (time*(time-2.0f) - 1.0f) + tvar->start_value;
+				transition->value = -change/2.0f * (time*(time-2.0f) - 1.0f) + transition->start_value;
 			}
 
 			break;
 	}
 
-	if (tvar->final_value > tvar->start_value && tvar->final_value - tvar->value < MEH_EPSILON) {
-		tvar->ended = TRUE;
-	} else if (tvar->final_value <= tvar->start_value && tvar->value - tvar->final_value < MEH_EPSILON) {
-		tvar->ended = TRUE;
+	/* Perfect value for the end */
+	if (transition->final_value > transition->start_value && transition->final_value - transition->value < MEH_EPSILON) {
+		meh_transition_end(transition);
+	} else if (transition->final_value <= transition->start_value && transition->value - transition->final_value < MEH_EPSILON) {
+		meh_transition_end(transition);
 	}
 }
 
