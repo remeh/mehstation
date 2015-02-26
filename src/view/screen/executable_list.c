@@ -51,7 +51,7 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->textures = NULL;
 	data->background = -1;
 	data->cover = -1;
-	data->cursor_y = meh_transition_start(MEH_TRANSITION_CUBIC, 0, 130, 500);
+	data->cursor_y = meh_transition_start(MEH_TRANSITION_LINEAR, 0, 130, 500);
 	g_queue_push_tail(screen->transitions, &data->cursor_y);
 	screen->data = data;
 
