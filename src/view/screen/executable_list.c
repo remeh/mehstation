@@ -479,7 +479,7 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	meh_screen_exec_list_delete_some_cache(screen);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
-	data->cursor_y = meh_transition_start(MEH_TRANSITION_CUBIC, 130 + prev_selected_exec*35, 130 + (data->selected_executable*35), 100);
+	data->cursor_y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected_exec*35, 130 + (data->selected_executable*35), 100);
 }
 
 /*
@@ -508,6 +508,7 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			}
 			break;
 		case MEH_INPUT_BUTTON_A:
+			/* launch the game */
 			meh_screen_exec_list_start_executable(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_UP:

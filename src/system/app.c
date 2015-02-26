@@ -16,6 +16,8 @@
 #include "system/transition.h"
 #include "system/db/models.h"
 
+static void meh_settings_print_system_infos();
+
 App* meh_app_create() {
 	return g_new(App, 1);
 }
@@ -147,14 +149,18 @@ int meh_app_main_loop(App* app) {
 	int loop_count = 0;
 	int next_tick = SDL_GetTicks();
 	int start_tick = SDL_GetTicks();
+
+	const int MAX_FRAMESKIP = app->settings.max_frameskip;
+	const int DELTA_TO_SKIP = 1000 / app->settings.max_update_per_second;
+
 	while (app->mainloop.running) {
 		loop_count = 0;
 		start_tick = SDL_GetTicks();
 
-		while(SDL_GetTicks() > next_tick && loop_count < MEH_FPS_MAX_FRAMESKIP) {
+		while(SDL_GetTicks() > next_tick && loop_count < MAX_FRAMESKIP) {
 			meh_app_main_loop_event(app);
 			meh_app_main_loop_update(app);
-			next_tick += MEH_FPS_DELTA_TO_SKIP;
+			next_tick += DELTA_TO_SKIP;
 			loop_count++;
 		}
 
@@ -266,4 +272,22 @@ void meh_app_send_message(App* app, Message* message) {
 	if (app->current_screen != NULL) {
 		app->current_screen->messages_handler(app, app->current_screen, message);
 	}
+}
+
+/*
+ * Display some system information on the standart output.
+ * Unused.
+ */
+static void meh_settings_print_system_infos() {
+	SDL_DisplayMode display_mode;
+	int i;
+
+	g_message("Available displays: %d", SDL_GetNumVideoDisplays());
+	for (i = 0; i < SDL_GetNumVideoDisplays(); i++) {
+		if (SDL_GetCurrentDisplayMode(i, &display_mode) == 0) {
+			g_message("Display #%d: display mode is %dx%d@%dhz.", i, display_mode.w, display_mode.h, display_mode.refresh_rate);
+		}
+	}
+
+	g_message("Video driver: %s", SDL_GetCurrentVideoDriver());
 }

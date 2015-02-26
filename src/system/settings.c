@@ -37,8 +37,13 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 	settings->height = meh_settings_read_int(keyfile, "mehstation", "height", 480);
 	settings->fullscreen = meh_settings_read_bool(keyfile, "mehstation", "fullscreen", FALSE);
 
-	settings->input_repeat_delay = meh_settings_read_int(keyfile, "mehstation", "input_repeat_delay", 300);
-	settings->input_repeat_frequency = meh_settings_read_int(keyfile, "mehstation", "input_repeat_frequency", 50);
+	settings->input_repeat_delay = meh_settings_read_int(keyfile, "input", "input_repeat_delay", 300);
+	settings->input_repeat_frequency = meh_settings_read_int(keyfile, "input", "input_repeat_frequency", 50);
+
+	settings->max_update_per_second = meh_settings_read_int(keyfile, "render", "max_update_per_second", 50);
+	settings->max_frameskip = meh_settings_read_int(keyfile, "render", "max_frameskip", 5);
+
+	printf("%d %d\n", settings->max_update_per_second, settings->max_frameskip);
 
 	return TRUE;
 }
@@ -63,21 +68,4 @@ gboolean meh_settings_read_bool(GKeyFile* keyfile, const gchar* group_name, cons
 		return default_value;
 	}
 	return value;
-}
-
-/*
- * Display some system information on the standart output.
- */
-void meh_settings_print_system_infos() {
-	SDL_DisplayMode display_mode;
-	int i;
-
-	g_message("Available displays: %d", SDL_GetNumVideoDisplays());
-	for (i = 0; i < SDL_GetNumVideoDisplays(); i++) {
-		if (SDL_GetCurrentDisplayMode(i, &display_mode) == 0) {
-			g_message("Display #%d: display mode is %dx%d@%dhz.", i, display_mode.w, display_mode.h, display_mode.refresh_rate);
-		}
-	}
-
-	g_message("Video driver: %s", SDL_GetCurrentVideoDriver());
 }

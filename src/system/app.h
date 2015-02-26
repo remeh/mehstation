@@ -8,11 +8,6 @@
 #include "view/screen.h"
 #include "view/window.h"
 
-/* TODO configuration */
-#define MEH_FPS_MAX_TICKS_SECOND (50) /* max ticks per second */
-#define MEH_FPS_DELTA_TO_SKIP (1000 / MEH_FPS_MAX_TICKS_SECOND)
-#define MEH_FPS_MAX_FRAMESKIP (5)
-
 typedef struct {
 	SDL_Event event;
 	gboolean running;
