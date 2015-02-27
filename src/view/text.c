@@ -45,7 +45,7 @@ SDL_Texture* meh_font_render_on_texture(SDL_Renderer* renderer, const Font* font
 	SDL_Texture* texture = NULL;
 
 	if (surface == NULL) {
-		g_warning("Unable to render the text '%s' on a SDL_Surface: %s\n", SDL_GetError());
+		g_warning("Unable to render the text '%s' on a SDL_Surface: %s\n", text, SDL_GetError());
 		return NULL;
 	}
 

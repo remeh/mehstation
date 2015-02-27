@@ -2,6 +2,7 @@
 #include <glib.h>
 
 #include "system/transition.h"
+#include "view/widget_text.h"
 #include "view/screen.h"
 
 Screen* meh_screen_new() {
@@ -54,7 +55,26 @@ void meh_screen_update_transitions(Screen* screen) {
 		gboolean ended = meh_transition_update(transition);
 		/* if the transition is ended, remove it from the queue */
 		if (ended == TRUE) {
+			/*
+			 * TODO FIXME Bug here! By popping while iterating, we
+			 * TODO FIXME have an unknown behavior in the loop !!!
+			 */
 			g_queue_pop_nth(screen->transitions, i);
 		}
 	}
+}
+
+/*
+ * meh_screen_add_text_transitions adds all the transition contained into the given text widget.
+ */
+void meh_screen_add_text_transitions(Screen* screen, Text* text) {
+	g_assert(screen != NULL);
+	g_assert(text != NULL);
+
+	meh_screen_add_transition(screen, &text->x);
+	meh_screen_add_transition(screen, &text->y);
+
+	meh_screen_add_transition(screen, &text->r);
+	meh_screen_add_transition(screen, &text->g);
+	meh_screen_add_transition(screen, &text->b);
 }

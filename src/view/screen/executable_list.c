@@ -39,6 +39,7 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	/*
 	 * init the custom data.
 	 */
+
 	ExecutableListData* data = g_new(ExecutableListData, 1);	
 
 	/* get the platform */
@@ -62,7 +63,10 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 
 	screen->data = data;
 
-	/* Select and load the first resources */
+	/*
+	 * Select and load the first resources
+	 */
+
 	meh_screen_exec_list_select_resources(screen);
 	meh_screen_exec_list_load_resources(app, screen);
 
@@ -551,6 +555,9 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 	}
 }
 
+/*
+ * meh_screen_exec_list_update updates the executable list.
+ */
 int meh_screen_exec_list_update(Screen* screen, int delta_time) {
 	g_assert(screen != NULL);
 
@@ -561,6 +568,9 @@ int meh_screen_exec_list_update(Screen* screen, int delta_time) {
 	return 0;
 }
 
+/*
+ * meh_screen_exec_list_render renders the executable list view.
+ */
 int meh_screen_exec_list_render(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);

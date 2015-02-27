@@ -32,8 +32,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	SDL_Color white = { 255, 255, 255 };
 	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 30, 30, white);
 	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 460,500);
-	/* TODO helper to add widget transitions into the screen. */
-	g_queue_push_tail(screen->transitions, &(data->title->x));
+	meh_screen_add_text_transitions(screen, data->title);
 
 	screen->data = data;
 
@@ -152,6 +151,7 @@ int meh_screen_platform_list_update(Screen* screen, int delta_time) {
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	g_assert(data != NULL);
 
+	/* updates all the transition in the screen */
 	meh_screen_update_transitions(screen);
 
 	return 0;

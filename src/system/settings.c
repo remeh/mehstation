@@ -43,8 +43,6 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 	settings->max_update_per_second = meh_settings_read_int(keyfile, "render", "max_update_per_second", 50);
 	settings->max_frameskip = meh_settings_read_int(keyfile, "render", "max_frameskip", 5);
 
-	printf("%d %d\n", settings->max_update_per_second, settings->max_frameskip);
-
 	return TRUE;
 }
 
