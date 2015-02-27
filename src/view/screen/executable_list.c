@@ -58,7 +58,7 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 
 	/* widgets */
 	data->cursor_y = meh_transition_start(MEH_TRANSITION_LINEAR, 0, 130, 500);
-	g_queue_push_tail(screen->transitions, &data->cursor_y);
+	meh_screen_add_transition(screen, &data->cursor_y);
 
 	screen->data = data;
 
@@ -556,7 +556,7 @@ int meh_screen_exec_list_update(Screen* screen, int delta_time) {
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 	g_assert(data != NULL);
-	meh_transitions_update(screen->transitions);
+	meh_screen_update_transitions(screen);
 
 	return 0;
 }

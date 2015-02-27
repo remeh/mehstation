@@ -26,4 +26,4 @@ typedef struct {
 
 Text* meh_widget_text_new(const Font* font, const char* text, int x, int y, SDL_Color color);
 void meh_widget_text_destroy(Text* text);
-void meh_widget_text_render(const Text* text, const Window* window);
+void meh_widget_text_render(const Text* text, Window* window);

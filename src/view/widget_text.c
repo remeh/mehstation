@@ -37,7 +37,7 @@ void meh_widget_text_destroy(Text* text) {
 	g_free(text);
 }
 
-void meh_widget_text_render(const Text* text, const Window* window) {
+void meh_widget_text_render(const Text* text, Window* window) {
 	g_assert(text != NULL);
 	g_assert(window != NULL);
 

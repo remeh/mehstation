@@ -151,7 +151,8 @@ int meh_screen_platform_list_update(Screen* screen, int delta_time) {
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	g_assert(data != NULL);
-	meh_transitions_update(screen->transitions);
+
+	meh_screen_update_transitions(screen);
 
 	return 0;
 }

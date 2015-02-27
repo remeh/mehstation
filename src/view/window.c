@@ -100,7 +100,7 @@ void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect vi
  *  0 if everything succeed
  *  1 if an error occurred
  */
-int meh_window_render_text(const Window* window, const Font* font, const char* text, SDL_Color color, int x, int y) {
+int meh_window_render_text(Window* window, const Font* font, const char* text, SDL_Color color, int x, int y) {
 	g_assert(window != NULL);
 	g_assert(font != NULL);
 	g_assert(text != NULL);

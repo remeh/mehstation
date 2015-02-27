@@ -22,4 +22,4 @@ void meh_window_clear(Window* window, SDL_Color color);
 
 void meh_window_render(Window* window);
 void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect viewport);
-int meh_window_render_text(const Window* window, const Font* font, const char* text, SDL_Color color, int x, int y);
+int meh_window_render_text(Window* window, const Font* font, const char* text, SDL_Color color, int x, int y);
