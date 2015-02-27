@@ -38,7 +38,7 @@ void meh_transitions_end(GQueue* transitions) {
 }
 
 /*
- * meh_transition_end ends the given position.
+ * meh_transition_end ends the given transition.
  */
 void meh_transition_end(Transition* transition) {
 	g_assert(transition != NULL);
@@ -61,13 +61,13 @@ void meh_transitions_update(GQueue* transitions) {
 /*
  * meh_transition_update compute the next value for the given transition.
  */
-void meh_transition_update(Transition* transition) {
+gboolean meh_transition_update(Transition* transition) {
 	if (transition == NULL) {
-		return;
+		return TRUE;
 	}
 
 	if (transition->ended == TRUE) {
-		return;
+		return TRUE;
 	}
 
 	float time = 0;
@@ -107,9 +107,14 @@ void meh_transition_update(Transition* transition) {
 	/* Perfect value for the end */
 	if (transition->final_value > transition->start_value && transition->final_value - transition->value < MEH_EPSILON) {
 		meh_transition_end(transition);
+		return TRUE;
 	} else if (transition->final_value <= transition->start_value && transition->value - transition->final_value < MEH_EPSILON) {
 		meh_transition_end(transition);
+		return TRUE;
 	}
+
+	return FALSE;
 }
+
 
 

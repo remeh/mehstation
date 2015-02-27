@@ -23,7 +23,7 @@ typedef struct {
 } Transition;
 
 Transition meh_transition_start(int transition_type, int start_value, int final_value, int duration);
-void meh_transition_update(Transition* transition);
+gboolean meh_transition_update(Transition* transition);
 void meh_transitions_update(GQueue* transitions);
 void meh_transition_end(Transition* transition);
 void meh_transitions_end(GQueue* transition);
