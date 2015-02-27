@@ -12,6 +12,7 @@
 #include "system/transition.h"
 #include "system/db/models.h"
 #include "view/screen.h"
+#include "view/widget_text.h"
 #include "view/screen/executable_list.h"
 #include "view/screen/platform_list.h"
 
@@ -26,8 +27,14 @@ Screen* meh_screen_platform_list_new(App* app) {
 	PlatformListData* data = g_new(PlatformListData, 1);	
 	data->platforms = meh_db_get_platforms(app->db);
 	data->selected_platform = 0;
-	data->title_x = meh_transition_start(MEH_TRANSITION_QUADRATIC, -300, 550, 800);
-	g_queue_push_tail(screen->transitions, &data->title_x);
+
+	/* Widget title */
+	SDL_Color white = { 255, 255, 255 };
+	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 30, 30, white);
+	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 460,500);
+	/* TODO helper to add widget transitions into the screen. */
+	g_queue_push_tail(screen->transitions, &(data->title->x));
+
 	screen->data = data;
 
 	return screen;
@@ -157,10 +164,11 @@ int meh_screen_platform_list_render(App* app, Screen* screen) {
 	g_assert(data != NULL);
 
 	SDL_Color black = { 0, 0, 0 };
+	SDL_Color white = { 255, 255, 255 };
 	meh_window_clear(app->window, black);
 
-	SDL_Color white = { 255, 255, 255 };
-	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", white, data->title_x.value, 50);
+
+	meh_widget_text_render(data->title, app->window);
 
 	int i = 0;
 	for (i = 0; i < g_queue_get_length(data->platforms); i++) {

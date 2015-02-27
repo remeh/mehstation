@@ -3,6 +3,7 @@
 #include "system/message.h"
 #include "system/transition.h"
 #include "view/screen.h"
+#include "view/widget_text.h"
 
 /* cross-reference */
 struct App;
@@ -10,7 +11,8 @@ struct App;
 typedef struct PlatformListData {
 	GQueue* platforms;
 	int selected_platform;
-	Transition title_x;
+
+	Text* title;
 } PlatformListData;
 
 Screen* meh_screen_platform_list_new(struct App* app);

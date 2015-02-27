@@ -37,7 +37,7 @@ void meh_font_destroy(Font* font) {
  *
  * The returned surface should be freed by the caller.
  */
-SDL_Texture* meh_font_render_on_texture(SDL_Renderer* renderer, Font* font, const char* text, SDL_Color color) {
+SDL_Texture* meh_font_render_on_texture(SDL_Renderer* renderer, const Font* font, const char* text, SDL_Color color) {
 	g_assert(font != NULL);
 	g_assert(text != NULL);
 

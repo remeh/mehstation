@@ -40,19 +40,26 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	 * init the custom data.
 	 */
 	ExecutableListData* data = g_new(ExecutableListData, 1);	
+
 	/* get the platform */
 	data->platform = meh_db_get_platform(app->db, platform_id);
 	g_assert(data->platform != NULL);
+
 	/* get the executables */
 	data->executables = meh_db_get_platform_executables(app->db, data->platform, TRUE);
 	data->executables_length = g_queue_get_length(data->executables);
 	data->cache_executables_id = g_queue_new();
 	data->selected_executable = 0;
+
+	/* display resources */
 	data->textures = NULL;
 	data->background = -1;
 	data->cover = -1;
+
+	/* widgets */
 	data->cursor_y = meh_transition_start(MEH_TRANSITION_LINEAR, 0, 130, 500);
 	g_queue_push_tail(screen->transitions, &data->cursor_y);
+
 	screen->data = data;
 
 	/* Select and load the first resources */
