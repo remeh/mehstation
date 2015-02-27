@@ -7,6 +7,7 @@
 
 #include <glib.h>
 #include "system/message.h"
+#include "system/transition.h"
 
 /* cross-reference. */
 struct App;
@@ -29,3 +30,5 @@ typedef struct Screen {
 Screen* meh_screen_new();
 void meh_screen_destroy(Screen* screen);
 void meh_screen_destroy_data_stub(Screen* screen);
+void meh_screen_add_transition(Screen* screen, Transition* transition);
+void meh_screen_update_transitions(Screen* screen);
