@@ -18,9 +18,15 @@ Screen* meh_screen_starting_new(App* app) {
 	screen->messages_handler = &meh_screen_starting_messages_handler;
 	screen->destroy_data = &meh_screen_starting_destroy_data;
 
-	/* custom data */
+	/*
+	 * Custom data
+	 */
 	StartingData* data = g_new(StartingData, 1);
-	data->splashscreen = meh_image_load_file(app->window->sdl_renderer, "res/splashscreen.png");
+
+	/* Splashscreen */
+	data->splash_texture = meh_image_load_file(app->window->sdl_renderer, "res/splashscreen.png");
+	data->splash = meh_widget_image_new(data->splash_texture, 0, 0, app->window->width, app->window->height);
+
 	screen->data = data;
 
 	return screen;
@@ -65,8 +71,8 @@ void meh_screen_starting_destroy_data(Screen* screen) {
 	g_assert(screen != NULL);
 
 	StartingData* data = meh_screen_starting_get_data(screen);
-	if (data != NULL && data->splashscreen != NULL) {
-		SDL_DestroyTexture(data->splashscreen);
+	if (data != NULL && data->splash_texture != NULL) {
+		SDL_DestroyTexture(data->splash_texture);
 	}
 	screen->data = NULL;
 }
@@ -134,13 +140,12 @@ void meh_screen_starting_render(App* app, Screen* screen) {
 	StartingData* data = meh_screen_starting_get_data(screen);
 	g_assert(data != NULL);
 
+	/* clear the screen */
 	SDL_Color black = { 0, 0, 0 };
 	meh_window_clear(app->window, black);
 
-	SDL_Rect rect = { 0, 0, 300, 300 };
-	meh_window_render_texture(app->window, data->splashscreen, rect);
-
-	meh_window_render_text(app->window, app->small_font, "mehstation 1.0", black, 50, 50);
+	/* draw the splashscreen */
+	meh_widget_image_render(app->window, data->splash);
 
 	meh_window_render(app->window);
 }

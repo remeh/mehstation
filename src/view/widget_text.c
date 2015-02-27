@@ -10,8 +10,8 @@
 #include "view/widget_text.h"
 #include "view/window.h"
 
-Text* meh_widget_text_new(const Font* font, const char* text, int x, int y, SDL_Color color) {
-	Text* t = g_new(Text, 1);
+WidgetText* meh_widget_text_new(const Font* font, const char* text, int x, int y, SDL_Color color) {
+	WidgetText* t = g_new(WidgetText, 1);
 
 	t->font = font;
 	t->text = g_strdup(text);
@@ -31,13 +31,13 @@ Text* meh_widget_text_new(const Font* font, const char* text, int x, int y, SDL_
 	return t;
 }
 
-void meh_widget_text_destroy(Text* text) {
+void meh_widget_text_destroy(WidgetText* text) {
 	g_assert(text != NULL);
 
 	g_free(text);
 }
 
-void meh_widget_text_render(const Text* text, Window* window) {
+void meh_widget_text_render(Window* window, const WidgetText* text) {
 	g_assert(text != NULL);
 	g_assert(window != NULL);
 

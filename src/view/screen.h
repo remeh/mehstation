@@ -33,5 +33,5 @@ Screen* meh_screen_new();
 void meh_screen_destroy(Screen* screen);
 void meh_screen_destroy_data_stub(Screen* screen);
 void meh_screen_add_transition(Screen* screen, Transition* transition);
-void meh_screen_add_text_transitions(Screen* screen, Text* text);
+void meh_screen_add_text_transitions(Screen* screen, WidgetText* text);
 void meh_screen_update_transitions(Screen* screen);

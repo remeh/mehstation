@@ -22,8 +22,8 @@ typedef struct {
 	Transition r;
 	Transition g;
 	Transition b;
-} Text;
+} WidgetText;
 
-Text* meh_widget_text_new(const Font* font, const char* text, int x, int y, SDL_Color color);
-void meh_widget_text_destroy(Text* text);
-void meh_widget_text_render(const Text* text, Window* window);
+WidgetText* meh_widget_text_new(const Font* font, const char* text, int x, int y, SDL_Color color);
+void meh_widget_text_destroy(WidgetText* text);
+void meh_widget_text_render(Window* window, const WidgetText* text);

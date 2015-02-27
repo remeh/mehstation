@@ -19,6 +19,7 @@ SET(
         src/view/screen.c
         src/view/text.c
         src/view/window.c
+        src/view/widget_image.c
         src/view/widget_text.c
         src/view/screen/executable_list.c
         src/view/screen/starting.c

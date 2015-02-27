@@ -169,7 +169,7 @@ int meh_screen_platform_list_render(App* app, Screen* screen) {
 	meh_window_clear(app->window, black);
 
 
-	meh_widget_text_render(data->title, app->window);
+	meh_widget_text_render(app->window, data->title);
 
 	int i = 0;
 	for (i = 0; i < g_queue_get_length(data->platforms); i++) {

@@ -2,12 +2,15 @@
 
 #include "system/message.h"
 #include "view/screen.h"
+#include "view/widget_image.h"
 
 /* cross-reference */
 struct App;
 
 typedef struct {
-	SDL_Texture* splashscreen;
+	SDL_Texture* splash_texture;
+
+	WidgetImage* splash;
 } StartingData;
 
 Screen* meh_screen_starting_new(struct App* app);

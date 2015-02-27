@@ -67,7 +67,7 @@ void meh_screen_update_transitions(Screen* screen) {
 /*
  * meh_screen_add_text_transitions adds all the transition contained into the given text widget.
  */
-void meh_screen_add_text_transitions(Screen* screen, Text* text) {
+void meh_screen_add_text_transitions(Screen* screen, WidgetText* text) {
 	g_assert(screen != NULL);
 	g_assert(text != NULL);
 

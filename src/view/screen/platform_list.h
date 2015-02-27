@@ -12,7 +12,7 @@ typedef struct PlatformListData {
 	GQueue* platforms;
 	int selected_platform;
 
-	Text* title;
+	WidgetText* title;
 } PlatformListData;
 
 Screen* meh_screen_platform_list_new(struct App* app);
