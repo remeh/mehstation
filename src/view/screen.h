@@ -7,6 +7,7 @@
 
 #include <glib.h>
 #include "view/text.h"
+#include "view/widget_image.h"
 #include "view/widget_text.h"
 #include "system/message.h"
 #include "system/transition.h"
@@ -33,5 +34,6 @@ Screen* meh_screen_new();
 void meh_screen_destroy(Screen* screen);
 void meh_screen_destroy_data_stub(Screen* screen);
 void meh_screen_add_transition(Screen* screen, Transition* transition);
+void meh_screen_add_image_transitions(Screen* screen, WidgetImage* image);
 void meh_screen_add_text_transitions(Screen* screen, WidgetText* text);
 void meh_screen_update_transitions(Screen* screen);

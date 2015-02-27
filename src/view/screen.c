@@ -65,6 +65,19 @@ void meh_screen_update_transitions(Screen* screen) {
 }
 
 /*
+ * meh_screen_add_image_transitions adds all the transition contained into the given image widget.
+ */
+void meh_screen_add_image_transitions(Screen* screen, WidgetImage* image) {
+	g_assert(screen != NULL);
+	g_assert(image != NULL);
+
+	meh_screen_add_transition(screen, &image->x);
+	meh_screen_add_transition(screen, &image->y);
+	meh_screen_add_transition(screen, &image->w);
+	meh_screen_add_transition(screen, &image->h);
+}
+
+/*
  * meh_screen_add_text_transitions adds all the transition contained into the given text widget.
  */
 void meh_screen_add_text_transitions(Screen* screen, WidgetText* text) {

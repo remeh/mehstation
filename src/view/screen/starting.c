@@ -26,6 +26,10 @@ Screen* meh_screen_starting_new(App* app) {
 	/* Splashscreen */
 	data->splash_texture = meh_image_load_file(app->window->sdl_renderer, "res/splashscreen.png");
 	data->splash = meh_widget_image_new(data->splash_texture, 0, 0, app->window->width, app->window->height);
+	data->splash->w = meh_transition_start(MEH_TRANSITION_QUADRATIC, app->window->width, app->window->width+2600, 5000);
+	data->splash->h = meh_transition_start(MEH_TRANSITION_QUADRATIC, app->window->height, app->window->height+700, 5000);
+	meh_screen_add_image_transitions(screen, data->splash);
+
 
 	screen->data = data;
 
@@ -119,6 +123,8 @@ void meh_screen_starting_button_pressed(App* app, Screen* screen, int pressed_bu
  * can update this screen.
  */
 int meh_screen_starting_update(App* app, Screen* screen, int delta_time) {
+	/* Animate the splashscreen */
+	meh_screen_update_transitions(screen);
 
 	/*
 	 * Wait 5s before going to the system list selection.
