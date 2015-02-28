@@ -30,7 +30,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 
 	/* Widget title */
 	SDL_Color white = { 255, 255, 255 };
-	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 30, 30, white);
+	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 30, 30, white, FALSE);
 	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 460,500);
 	meh_screen_add_text_transitions(screen, data->title);
 

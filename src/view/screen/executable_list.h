@@ -21,9 +21,13 @@ typedef struct ExecutableListData {
 	int background; /* Reference to a texture in the map, should NOT be freed ! */
 	int cover; /* Reference to a texture in the map, shouldn't be freed! */
 
-
-	WidgetRect* selection;
-	Transition cursor_y;
+	/*
+	 * Widgets
+	 */
+	WidgetRect* selection_widget;
+	WidgetRect* header_widget;
+	WidgetText* header_text_widget;
+	WidgetImage* background_widget;
 } ExecutableListData;
 
 Screen* meh_screen_exec_list_new(struct App* app, int platform_id);

@@ -22,6 +22,7 @@
 #define MEH_EXEC_LIST_MAX_CACHE 7
 #define MEH_EXEC_LIST_DELTA 3 /* Don't delete the cache of the object around the cursor */
 
+static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data);
 static void meh_screen_exec_list_destroy_resources(Screen* screen);
 static void meh_screen_exec_list_load_resources(App* app, Screen* screen);
 static void meh_screen_exec_list_start_executable(App* app, Screen* screen);
@@ -37,7 +38,7 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	screen->destroy_data = &meh_screen_exec_list_destroy_data;
 
 	/*
-	 * init the custom data.
+	 * Init the custom data.
 	 */
 
 	ExecutableListData* data = g_new(ExecutableListData, 1);	
@@ -57,11 +58,8 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->background = -1;
 	data->cover = -1;
 
-	/* widgets */
-	SDL_Color gray = { 10, 10, 10, 170 };
-	data->selection = meh_widget_rect_new(20, -100, 550, 35, gray, TRUE);
-	data->selection->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 130, 500);
-	meh_screen_add_rect_transitions(screen, data->selection);
+	/* create widgets */
+	meh_screen_exec_create_widgets(app, screen, data);
 
 	screen->data = data;
 
@@ -75,6 +73,27 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	return screen;
 }
 
+static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
+	g_assert(data != NULL);
+
+	SDL_Color white = { 255, 255, 255, 255 };
+	SDL_Color gray = { 10, 10, 10, 170 };
+
+	/* Selection. */
+	data->selection_widget = meh_widget_rect_new(20, -100, 550, 35, gray, TRUE);
+	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 130, 500);
+	meh_screen_add_rect_transitions(screen, data->selection_widget);
+
+	/* Background */
+	data->background_widget = meh_widget_image_new(NULL, 0, 0, app->window->width, app->window->height);
+
+	/* Header */
+	data->header_text_widget = meh_widget_text_new(app->big_font, data->platform->name, 20, 10, white, TRUE);
+	data->header_widget = meh_widget_rect_new(0, 0, app->window->width, 70, gray, TRUE);
+}
+
 /*
  * meh_screen_exec_list_destroy_data role is to delete the typed data of the screen
  */
@@ -86,6 +105,12 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 		meh_model_platform_destroy(data->platform);
 		meh_model_executables_destroy(data->executables);
 	}
+
+	/* Destroy the widgets */
+	meh_widget_image_destroy(data->background_widget);
+	meh_widget_rect_destroy(data->header_widget);
+	meh_widget_rect_destroy(data->selection_widget);
+	meh_widget_text_destroy(data->header_text_widget);
 
 	/* Free the executables id cache. */
 	int i = 0;
@@ -492,8 +517,8 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	meh_screen_exec_list_delete_some_cache(screen);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
-	data->selection->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected_exec*35, 130 + (data->selected_executable*35), 100);
-	meh_screen_add_rect_transitions(screen, data->selection);
+	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected_exec*35, 130 + (data->selected_executable*35), 100);
+	meh_screen_add_rect_transitions(screen, data->selection_widget);
 }
 
 /*
@@ -580,6 +605,7 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
+	SDL_Color white = { 255, 255, 255 };
 	SDL_Color black = { 0, 0, 0 };
 	meh_window_clear(app->window, black);
 
@@ -588,26 +614,17 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 
 	/* background */
 	if (data->background > -1) {
-		SDL_Texture* background = g_hash_table_lookup(data->textures, &(data->background));
-		if (background != NULL) {
-			SDL_Rect viewport = { 0, 0, app->window->width, app->window->height };
-			SDL_SetTextureBlendMode(background, SDL_BLENDMODE_ADD);
-			SDL_SetTextureAlphaMod(background, 75);
-			meh_window_render_texture(app->window, background, viewport);
-		}
+		data->background_widget->texture = g_hash_table_lookup(data->textures, &(data->background));
 	}
-
-	SDL_Color white = { 255, 255, 255 };
+	meh_widget_image_render(app->window, data->background_widget);
 
 
 	/* selection */
-	meh_widget_rect_render(app->window, data->selection);
+	meh_widget_rect_render(app->window, data->selection_widget);
 
 	/* header */
-	SDL_Rect header = { 0, 0, 1920, 70 };
-	SDL_SetRenderDrawColor(app->window->sdl_renderer, 15, 15, 15, 200);
-	SDL_RenderFillRect(app->window->sdl_renderer, &header);
-	meh_window_render_text(app->window, app->big_font, data->platform->name, white, 20, 10);
+	meh_widget_rect_render(app->window, data->header_widget);
+	meh_widget_text_render(app->window, data->header_text_widget);
 
 	/* cover */
 	if (data->cover > -1) {
