@@ -50,16 +50,22 @@ void meh_screen_add_transition(Screen* screen, Transition* transition) {
 void meh_screen_update_transitions(Screen* screen) {
 	g_assert(screen != NULL);
 
-	for (int i = 0; i < g_queue_get_length(screen->transitions); i++) {
+	int length = g_queue_get_length(screen->transitions);
+	Transition* to_delete[length];
+
+	for (int i = 0; i < length; i++) {
+		to_delete[i] = NULL;
 		Transition* transition = g_queue_peek_nth(screen->transitions, i);
-		gboolean ended = meh_transition_update(transition);
-		/* if the transition is ended, remove it from the queue */
-		if (ended == TRUE) {
-			/*
-			 * TODO FIXME Bug here! By popping while iterating, we
-			 * TODO FIXME have an unknown behavior in the loop !!!
-			 */
-			g_queue_pop_nth(screen->transitions, i);
+		/* update the transition and if the transition is ended,
+		 * remove it from the queue */
+		if (meh_transition_update(transition)) {
+			to_delete[i] = transition;
+		}
+	}
+	
+	for (int i = 0; i < length; i++) {
+		if (to_delete[i] != NULL) {
+			g_queue_remove(screen->transitions, to_delete[i]);
 		}
 	}
 }
