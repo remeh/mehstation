@@ -95,6 +95,7 @@ int meh_app_init(App* app) {
  * meh_app_exit is called just before freeing all the resources.
  */
 void meh_app_exit(App* app) {
+	g_assert(app != NULL);
 	g_message("mehstation is closing.");
 }
 
@@ -104,6 +105,8 @@ void meh_app_exit(App* app) {
  */
 int meh_app_destroy(App* app) {
 	g_assert(app != NULL);
+
+	meh_db_close(app->db);
 
 	/* Free the resource */
 	meh_font_destroy(app->small_font);

@@ -1,5 +1,4 @@
-BEGIN TRANSACTION;
-CREATE TABLE `system`  (
+CREATE TABLE `platform`  (
 	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	`name`	TEXT NOT NULL,
 	`command`	TEXT NOT NULL
@@ -10,4 +9,8 @@ CREATE TABLE `executable` (
 	`filepath`	TEXT NOT NULL,
     `platform_id` INTEGER NOT NULL
 );
-COMMIT;
+CREATE TABLE `mehstation` (
+    `name` TEXT NOT NULL PRIMARY KEY UNIQUE,
+    `value` TEXT
+);
+INSERT INTO mehstation VALUES ('schema', '1');

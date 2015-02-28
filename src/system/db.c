@@ -6,6 +6,11 @@
 #include "system/db.h"
 #include "system/db/models.h"
 
+#define MEH_SCHEMA_FILE "res/schema.sql"
+
+static gboolean meh_db_check_schema(DB* db);
+static gboolean meh_db_initialize(DB* db);
+
 /*
  * meh_db_open_or_create uses the given filename to open
  * or create (if needed) an SQLite3 DB.
@@ -22,19 +27,111 @@ DB* meh_db_open_or_create(const char* filename) {
 		return NULL;
 	}
 
+	/* Initialize the database if needed. */
+	if (!meh_db_check_schema(db)) {
+		g_message("Creating the initial schema in database.");
+
+		gboolean creation_success = meh_db_initialize(db);
+		if (creation_success == FALSE) {
+			g_critical("Can't initialize the mehstation database.");
+			return NULL;
+		}
+	}
+
 	return db;
 }
 
+/*
+ * meh_db_close closes the given db.
+ */
 void meh_db_close(DB* db) {
-	if (db == NULL) {
-		return;
-	}
+	g_assert(db != NULL);
 
 	if (db->sqlite != NULL) {
 		sqlite3_close_v2(db->sqlite);
 	}
 }
 
+/*
+ * meh_db_initialize initialize the mehstation database.
+ */
+static gboolean meh_db_initialize(DB* db) {
+	g_assert(db != NULL);
+	sqlite3_stmt *statement = NULL;
+
+	/* Test for the existence of the file. */
+	gboolean exists = g_file_test(MEH_SCHEMA_FILE, G_FILE_TEST_EXISTS);
+	if (!exists) {
+		g_critical("The schema file doesn't exist.");
+		return FALSE;
+	}
+
+	gchar* content;
+	gchar** queries;
+	gsize length;
+	GError* error = NULL;
+
+	/* read the queries file */
+	g_file_get_contents(MEH_SCHEMA_FILE, &content, &length, &error);
+
+	if (error != NULL) {
+		g_critical("Error while reading the schema file : %s\n", error->message);
+		g_error_free(error);
+		return FALSE;
+	}
+	
+	queries = g_strsplit(content, ";", -1);
+	int idx = 0;
+	const char* query = NULL;
+	while ((query = queries[idx]) != NULL) {
+		/* This test because after the last query there is a ; */
+		if (strlen(query) != 1) {
+			/* Execute the query */
+			int return_code = sqlite3_prepare_v2(db->sqlite, query, strlen(query), &statement, NULL);
+
+			if (return_code != SQLITE_OK) {
+				g_critical("Can't execute the initialization query: %s", sqlite3_errmsg(db->sqlite));
+				sqlite3_finalize(statement);
+				return FALSE;
+			}
+
+			return_code = sqlite3_step(statement);
+			if (return_code != SQLITE_DONE) {
+				g_critical("Can't execute the initialization query: %s", sqlite3_errmsg(db->sqlite));
+				return FALSE;
+			}
+		}
+		idx++;
+		sqlite3_finalize(statement);
+		statement = NULL;
+	}
+
+	g_strfreev(queries);
+	g_free(content);
+	sqlite3_finalize(statement);
+	g_message("Database initialized.");
+	return TRUE;
+}
+
+/*
+ * meh_db_check_schema checks that the schema is created in the DB.
+ */
+static gboolean meh_db_check_schema(DB* db) {
+	g_assert(db != NULL);
+
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "SELECT \"value\" FROM mehstation WHERE \"name\" = \"schema\"";
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+
+	if (return_code != SQLITE_OK) {
+		sqlite3_finalize(statement);
+		return FALSE;
+	}
+
+	sqlite3_finalize(statement);
+	return TRUE;
+}
 
 /*
  * meh_db_get_platforms gets in the SQLite3 database all the available platforms.
@@ -44,7 +141,7 @@ GQueue* meh_db_get_platforms(DB* db) {
 
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM system ORDER BY name";
+	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM platform ORDER BY name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
@@ -73,7 +170,6 @@ GQueue* meh_db_get_platforms(DB* db) {
 	}
 
 	sqlite3_finalize(statement);
-
 	return list;
 }
 
@@ -87,7 +183,7 @@ Platform* meh_db_get_platform(DB* db, int platform_id) {
 	Platform* platform = NULL;
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM system WHERE id = ?1 ORDER BY name";
+	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM platform WHERE id = ?1 ORDER BY name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
