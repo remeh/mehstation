@@ -84,6 +84,24 @@ void meh_screen_add_image_transitions(Screen* screen, WidgetImage* image) {
 }
 
 /*
+ * meh_screen_add_rect_transitions adds all the transition contained into the given rect widget.
+ */
+void meh_screen_add_rect_transitions(Screen* screen, WidgetRect* rect) {
+	g_assert(screen != NULL);
+	g_assert(rect != NULL);
+
+	meh_screen_add_transition(screen, &rect->x);
+	meh_screen_add_transition(screen, &rect->y);
+	meh_screen_add_transition(screen, &rect->w);
+	meh_screen_add_transition(screen, &rect->h);
+
+	meh_screen_add_transition(screen, &rect->r);
+	meh_screen_add_transition(screen, &rect->g);
+	meh_screen_add_transition(screen, &rect->b);
+	meh_screen_add_transition(screen, &rect->a);
+}
+
+/*
  * meh_screen_add_text_transitions adds all the transition contained into the given text widget.
  */
 void meh_screen_add_text_transitions(Screen* screen, WidgetText* text) {

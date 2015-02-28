@@ -4,6 +4,7 @@
 
 #include "system/message.h"
 #include "view/screen.h"
+#include "view/widget_rect.h"
 
 /* cross-reference */
 struct App;
@@ -20,6 +21,8 @@ typedef struct ExecutableListData {
 	int background; /* Reference to a texture in the map, should NOT be freed ! */
 	int cover; /* Reference to a texture in the map, shouldn't be freed! */
 
+
+	WidgetRect* selection;
 	Transition cursor_y;
 } ExecutableListData;
 

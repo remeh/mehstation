@@ -58,8 +58,10 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->cover = -1;
 
 	/* widgets */
-	data->cursor_y = meh_transition_start(MEH_TRANSITION_LINEAR, 0, 130, 500);
-	meh_screen_add_transition(screen, &data->cursor_y);
+	SDL_Color gray = { 10, 10, 10, 170 };
+	data->selection = meh_widget_rect_new(20, -100, 550, 35, gray, TRUE);
+	data->selection->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 130, 500);
+	meh_screen_add_rect_transitions(screen, data->selection);
 
 	screen->data = data;
 
@@ -490,7 +492,8 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	meh_screen_exec_list_delete_some_cache(screen);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
-	data->cursor_y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected_exec*35, 130 + (data->selected_executable*35), 100);
+	data->selection->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected_exec*35, 130 + (data->selected_executable*35), 100);
+	meh_screen_add_rect_transitions(screen, data->selection);
 }
 
 /*
@@ -563,6 +566,8 @@ int meh_screen_exec_list_update(Screen* screen, int delta_time) {
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 	g_assert(data != NULL);
+
+	/* updates all the transition in the screen */
 	meh_screen_update_transitions(screen);
 
 	return 0;
@@ -596,9 +601,7 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 
 
 	/* selection */
-	SDL_Rect selection = { 20, data->cursor_y.value, 550, 35 };
-	SDL_SetRenderDrawColor(app->window->sdl_renderer, 15, 15, 15, 255);
-	SDL_RenderFillRect(app->window->sdl_renderer, &selection);
+	meh_widget_rect_render(app->window, data->selection);
 
 	/* header */
 	SDL_Rect header = { 0, 0, 1920, 70 };
