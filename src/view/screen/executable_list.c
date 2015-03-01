@@ -19,8 +19,10 @@
 #include "view/screen.h"
 #include "view/screen/executable_list.h"
 
-#define MEH_EXEC_LIST_MAX_CACHE 7
-#define MEH_EXEC_LIST_DELTA 3 /* Don't delete the cache of the object around the cursor */
+#define MEH_EXEC_LIST_MAX_CACHE (7)
+#define MEH_EXEC_LIST_DELTA (3) /* Don't delete the cache of the object around the cursor */
+
+#define MEH_EXEC_LIST_SIZE (14) /* Maximum amount of executables displayed */
 
 static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data);
 static void meh_screen_exec_list_destroy_resources(Screen* screen);
@@ -78,6 +80,7 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 	g_assert(data != NULL);
 
 	SDL_Color white = { 255, 255, 255, 255 };
+	SDL_Color white_transparent = { 255, 255, 255, 50 };
 	SDL_Color transparent_gray = { 10, 10, 10, 80 };
 	SDL_Color gray = { 10, 10, 10, 170 };
 
@@ -94,6 +97,9 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 	data->background_widget->x = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 15000);
 	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 15000);
 	meh_screen_add_image_transitions(screen, data->background_widget);
+
+	/* Background hover */
+	data->background_hover_widget = meh_widget_rect_new(0, 0, app->window->width, app->window->height, white_transparent, TRUE); 
 
 	/* Header */
 	data->header_text_widget = meh_widget_text_new(app->big_font, data->platform->name, 20, 10, white, TRUE);
@@ -118,6 +124,7 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 		meh_widget_image_destroy(data->background_widget);
 		meh_widget_rect_destroy(data->header_widget);
 		meh_widget_rect_destroy(data->selection_widget);
+		meh_widget_rect_destroy(data->background_hover_widget);
 		meh_widget_rect_destroy(data->list_background_widget);
 		meh_widget_image_destroy(data->cover_widget);
 		meh_widget_text_destroy(data->header_text_widget);
@@ -528,7 +535,9 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	meh_screen_exec_list_delete_some_cache(screen);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
-	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected_exec*35, 130 + (data->selected_executable*35), 100);
+	int selected = data->selected_executable % (MEH_EXEC_LIST_SIZE+1);
+	int prev_selected = prev_selected_exec % (MEH_EXEC_LIST_SIZE+1);
+	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected*35, 130 + (selected*35), 100);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 }
 
@@ -629,15 +638,18 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	}
 	meh_widget_image_render(app->window, data->background_widget);
 
+	/* background hover */
+	meh_widget_rect_render(app->window, data->background_hover_widget);
+
 	/* header */
 	meh_widget_rect_render(app->window, data->header_widget);
 	meh_widget_text_render(app->window, data->header_text_widget);
 
-	/* selection */
-	meh_widget_rect_render(app->window, data->selection_widget);
-
 	/* list background */
 	meh_widget_rect_render(app->window, data->list_background_widget);
+
+	/* selection */
+	meh_widget_rect_render(app->window, data->selection_widget);
 
 	/* cover */
 	if (data->cover > -1) {
@@ -645,11 +657,17 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	}
 	meh_widget_image_render(app->window, data->cover_widget);
 
-
-	int i = 0;
-	for (i = 0; i < g_queue_get_length(data->executables); i++) {
+	/* executable list */
+	int j = 0;
+	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE+1));
+	for (int i = page*(MEH_EXEC_LIST_SIZE+1); i < g_queue_get_length(data->executables); i++) {
 		Executable* executable = g_queue_peek_nth(data->executables, i);
-		meh_window_render_text(app->window, app->small_font, executable->display_name, white, 100, 130+(i*35));
+		meh_window_render_text(app->window, app->small_font, executable->display_name, black, 62, 132+(j*35));
+		meh_window_render_text(app->window, app->small_font, executable->display_name, white, 60, 130+(j*35));
+		j++;
+		if (j > MEH_EXEC_LIST_SIZE) {
+			break;
+		}
 	}
 
 	meh_window_render(app->window);
