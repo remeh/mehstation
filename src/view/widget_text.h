@@ -22,6 +22,7 @@ typedef struct {
 	Transition r;
 	Transition g;
 	Transition b;
+	Transition a;
 
 	gboolean shadow;
 } WidgetText;

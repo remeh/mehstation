@@ -104,23 +104,23 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 	if (data != NULL) {
 		meh_model_platform_destroy(data->platform);
 		meh_model_executables_destroy(data->executables);
+
+		/* Destroy the widgets */
+		meh_widget_image_destroy(data->background_widget);
+		meh_widget_rect_destroy(data->header_widget);
+		meh_widget_rect_destroy(data->selection_widget);
+		meh_widget_text_destroy(data->header_text_widget);
+
+		/* Free the executables id cache. */
+		int i = 0;
+		for (i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
+			g_free(g_queue_peek_nth(data->cache_executables_id, i));
+		}
+		g_queue_free(data->cache_executables_id);
+
+		/* We must free the textures cache */
+		meh_screen_exec_list_destroy_resources(screen);
 	}
-
-	/* Destroy the widgets */
-	meh_widget_image_destroy(data->background_widget);
-	meh_widget_rect_destroy(data->header_widget);
-	meh_widget_rect_destroy(data->selection_widget);
-	meh_widget_text_destroy(data->header_text_widget);
-
-	/* Free the executables id cache. */
-	int i = 0;
-	for (i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
-		g_free(g_queue_peek_nth(data->cache_executables_id, i));
-	}
-	g_queue_free(data->cache_executables_id);
-
-	/* We must free the textures cache */
-	meh_screen_exec_list_destroy_resources(screen);
 
 	g_free(screen->data);
 }

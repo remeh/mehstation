@@ -12,6 +12,10 @@ typedef struct PlatformListData {
 	GQueue* platforms;
 	int selected_platform;
 
+	/*
+	 * Widgets
+	 */
+	WidgetText* no_platforms_widget;
 	WidgetText* title;
 } PlatformListData;
 

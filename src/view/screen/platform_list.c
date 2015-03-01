@@ -34,6 +34,9 @@ Screen* meh_screen_platform_list_new(App* app) {
 	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 460,500);
 	meh_screen_add_text_transitions(screen, data->title);
 
+	/* No platforms text */
+	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured", 70, 90, white, FALSE);
+
 	screen->data = data;
 
 	return screen;
@@ -48,6 +51,9 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	if (data != NULL) {
 		meh_model_platforms_destroy(data->platforms);
+
+		meh_widget_text_destroy(data->title);
+		meh_widget_text_destroy(data->no_platforms_widget);
 	}
 	g_free(screen->data);
 }
@@ -93,14 +99,17 @@ int meh_screen_platform_list_messages_handler(App* app, Screen* screen, Message*
 }
 
 static void meh_screen_platform_list_start_platform(App* app, Screen* screen) {
+
 	/* get the platform */
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
 
-	/* create the child screen */
-	Screen* exec_list_screen = meh_screen_exec_list_new(app, platform->id);
-	exec_list_screen->parent_screen = screen;
-	meh_app_set_current_screen(app, exec_list_screen);
+	if (platform != NULL) {
+		/* create the child screen */
+		Screen* exec_list_screen = meh_screen_exec_list_new(app, platform->id);
+		exec_list_screen->parent_screen = screen;
+		meh_app_set_current_screen(app, exec_list_screen);
+	}
 }
 
 /*
@@ -168,8 +177,9 @@ int meh_screen_platform_list_render(App* app, Screen* screen) {
 	SDL_Color white = { 255, 255, 255 };
 	meh_window_clear(app->window, black);
 
-
 	meh_widget_text_render(app->window, data->title);
+
+	meh_widget_text_render(app->window, data->no_platforms_widget);
 
 	int i = 0;
 	for (i = 0; i < g_queue_get_length(data->platforms); i++) {
@@ -177,7 +187,9 @@ int meh_screen_platform_list_render(App* app, Screen* screen) {
 		meh_window_render_text(app->window, app->small_font, platform->name, white, 100, 100 + i*30);
 	}
 
-	meh_window_render_text(app->window, app->small_font, "->", white, 80, 100 + (30*data->selected_platform));
+	if (g_queue_get_length(data->platforms) > 0) {
+		meh_window_render_text(app->window, app->small_font, "->", white, 80, 100 + (30*data->selected_platform));
+	}
 	
 	meh_window_render(app->window);
 	return 0;

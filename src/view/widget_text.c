@@ -27,6 +27,8 @@ WidgetText* meh_widget_text_new(const Font* font, const char* text, int x, int y
 	meh_transition_end(&t->g);
 	t->b = meh_transition_start(MEH_TRANSITION_NONE, color.b, color.b, 0);
 	meh_transition_end(&t->b);
+	t->a = meh_transition_start(MEH_TRANSITION_NONE, color.a, color.a, 0);
+	meh_transition_end(&t->a);
 
 	t->shadow = shadow;
 
@@ -43,9 +45,9 @@ void meh_widget_text_render(Window* window, const WidgetText* text) {
 	g_assert(text != NULL);
 	g_assert(window != NULL);
 
-	SDL_Color black = { 0, 0, 0 };
-	SDL_Color color = { text->r.value, text->g.value, text->b.value };
+	SDL_Color color = { text->r.value, text->g.value, text->b.value , text->a.value };
 	if (text->shadow) {
+		SDL_Color black = { 0, 0, 0 };
 		meh_window_render_text(window, text->font, text->text, black, text->x.value+4, text->y.value+4); /* shadow */
 	}
 	meh_window_render_text(window, text->font, text->text, color, text->x.value, text->y.value); /* text */
