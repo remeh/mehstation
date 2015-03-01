@@ -26,7 +26,9 @@ typedef struct ExecutableListData {
 	 */
 	WidgetRect* selection_widget;
 	WidgetRect* header_widget;
+	WidgetRect* list_background_widget;
 	WidgetText* header_text_widget;
+	WidgetImage* cover_widget;
 	WidgetImage* background_widget;
 } ExecutableListData;
 

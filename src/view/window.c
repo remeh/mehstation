@@ -91,6 +91,7 @@ void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect vi
 
 	SDL_RenderSetViewport(window->sdl_renderer, &viewport);
 	SDL_RenderCopy(window->sdl_renderer, texture, NULL, NULL);
+	SDL_RenderSetViewport(window->sdl_renderer, NULL);
 }
 
 /*

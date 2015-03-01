@@ -175,19 +175,24 @@ int meh_screen_platform_list_render(App* app, Screen* screen) {
 
 	SDL_Color black = { 0, 0, 0 };
 	SDL_Color white = { 255, 255, 255 };
+	int platform_count = g_queue_get_length(data->platforms);
+
+	/* clear the screen */
 	meh_window_clear(app->window, black);
 
 	meh_widget_text_render(app->window, data->title);
-
-	meh_widget_text_render(app->window, data->no_platforms_widget);
+	
+	if (platform_count == 0) {
+		meh_widget_text_render(app->window, data->no_platforms_widget);
+	}
 
 	int i = 0;
-	for (i = 0; i < g_queue_get_length(data->platforms); i++) {
+	for (i = 0; i < platform_count; i++) {
 		Platform* platform = g_queue_peek_nth(data->platforms, i);
 		meh_window_render_text(app->window, app->small_font, platform->name, white, 100, 100 + i*30);
 	}
 
-	if (g_queue_get_length(data->platforms) > 0) {
+	if (platform_count > 0) {
 		meh_window_render_text(app->window, app->small_font, "->", white, 80, 100 + (30*data->selected_platform));
 	}
 	
