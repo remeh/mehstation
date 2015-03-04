@@ -21,6 +21,7 @@ typedef struct App {
 	Window* window;
 	Screen* current_screen;
 	Font* small_font;
+	Font* small_bold_font;
 	Font* big_font;
 	DB* db;
 	InputManager* input_manager;

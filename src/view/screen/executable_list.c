@@ -62,7 +62,6 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->cover = -1;
 	data->header_text = g_utf8_strup(data->platform->name, -1);
 
-
 	/* create widgets */
 	meh_screen_exec_create_widgets(app, screen, data);
 
@@ -105,6 +104,34 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 	data->header_text_widget = meh_widget_text_new(app->big_font, data->header_text, 20, 10, white, TRUE);
 	data->header_widget = meh_widget_rect_new(0, 0, app->window->width, 70, gray, TRUE);
 
+	/*
+	 * Extra information
+	 */
+
+	/* Genres */
+	data->genres_l_widget = meh_widget_text_new(app->small_bold_font, "Genres", 580, 558, white, TRUE);
+	data->genres_widget = meh_widget_text_new(app->small_font, NULL, 710, 560, white, TRUE);
+
+	/* Players */
+	data->players_l_widget = meh_widget_text_new(app->small_bold_font, "Players", 870, 558, white, TRUE);
+	data->players_widget = meh_widget_text_new(app->small_font, NULL, 1030, 560, white, TRUE);
+
+	/* Publisher */
+	data->publisher_l_widget = meh_widget_text_new(app->small_bold_font, "Publisher", 580, 588, white, TRUE);
+	data->publisher_widget = meh_widget_text_new(app->small_font, NULL, 710, 590, white, TRUE);
+
+	/* Developer */
+	data->developer_l_widget = meh_widget_text_new(app->small_bold_font, "Developer", 870, 588, white, TRUE);
+	data->developer_widget = meh_widget_text_new(app->small_font, NULL, 1030, 590, white, TRUE);
+
+	/* Rating */
+	data->rating_l_widget = meh_widget_text_new(app->small_bold_font, "Rating", 580, 618, white, TRUE);
+	data->rating_widget = meh_widget_text_new(app->small_font, NULL, 710, 620, white, TRUE);
+
+	/* Release date */
+	data->release_date_l_widget = meh_widget_text_new(app->small_bold_font, "Release date", 870, 618, white, TRUE);
+	data->release_date_widget = meh_widget_text_new(app->small_font, NULL, 1030, 620, white, TRUE);
+
 	/* Cover */
 	data->cover_widget = meh_widget_image_new(NULL, 1030, 140, 200, 300);
 }
@@ -139,6 +166,20 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 		meh_widget_rect_destroy(data->list_background_widget);
 		meh_widget_image_destroy(data->cover_widget);
 		meh_widget_text_destroy(data->header_text_widget);
+
+		meh_widget_text_destroy(data->genres_l_widget);
+		meh_widget_text_destroy(data->genres_widget);
+		meh_widget_text_destroy(data->players_l_widget);
+		meh_widget_text_destroy(data->players_widget);
+		meh_widget_text_destroy(data->publisher_l_widget);
+		meh_widget_text_destroy(data->publisher_widget);
+		meh_widget_text_destroy(data->developer_l_widget);
+		meh_widget_text_destroy(data->developer_widget);
+		meh_widget_text_destroy(data->rating_l_widget);
+		meh_widget_text_destroy(data->rating_widget);
+		meh_widget_text_destroy(data->release_date_l_widget);
+		meh_widget_text_destroy(data->release_date_widget);
+
 
 		/* Free the executables id cache. */
 		int i = 0;
@@ -644,9 +685,11 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	SDL_Color white = { 255, 255, 255 };
 	SDL_Color black = { 0, 0, 0 };
 	meh_window_clear(app->window, black);
-
+	
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 	g_assert(data != NULL);
+
+	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
 
 	/* background */
 	if (data->background > -1) {
@@ -672,6 +715,36 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 		data->cover_widget->texture = g_hash_table_lookup(data->textures, &(data->cover));
 	}
 	meh_widget_image_render(app->window, data->cover_widget);
+
+	/*
+	 * Extra info
+	 */
+	if (current_executable != NULL) {
+		/* Genres */
+		data->genres_widget->text = current_executable->genres;
+		meh_widget_text_render(app->window, data->genres_l_widget);
+		meh_widget_text_render(app->window, data->genres_widget);
+		/* Players */
+		data->players_widget->text = current_executable->players;
+		meh_widget_text_render(app->window, data->players_l_widget);
+		meh_widget_text_render(app->window, data->players_widget);
+		/* Publisher */
+		data->publisher_widget->text = current_executable->publisher;
+		meh_widget_text_render(app->window, data->publisher_l_widget);
+		meh_widget_text_render(app->window, data->publisher_widget);
+		/* Developer */
+		data->developer_widget->text = current_executable->developer;
+		meh_widget_text_render(app->window, data->developer_l_widget);
+		meh_widget_text_render(app->window, data->developer_widget);
+		/* Release date */
+		data->rating_widget->text = current_executable->rating;
+		meh_widget_text_render(app->window, data->rating_l_widget);
+		meh_widget_text_render(app->window, data->rating_widget);
+		/* Release date */
+		data->release_date_widget->text = current_executable->release_date;
+		meh_widget_text_render(app->window, data->release_date_l_widget);
+		meh_widget_text_render(app->window, data->release_date_widget);
+	}
 
 	/* executable list */
 	int j = 0;

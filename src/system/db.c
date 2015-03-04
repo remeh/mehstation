@@ -225,7 +225,7 @@ GQueue* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
 	GQueue* executables = g_queue_new();
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\" FROM executable WHERE platform_id = ?1 ORDER BY display_name";
+	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\"  FROM executable WHERE platform_id = ?1 ORDER BY display_name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
@@ -242,8 +242,17 @@ GQueue* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
 		int id = sqlite3_column_int(statement, 0);
 		const char* display_name = (const char*)sqlite3_column_text(statement, 1);	
 		const char* filepath = (const char*)sqlite3_column_text(statement, 2);
+		const char* description = (const char*)sqlite3_column_text(statement, 3);
+		const char* genres = (const char*)sqlite3_column_text(statement, 4);
+		const char* publisher = (const char*)sqlite3_column_text(statement, 5);
+		const char* developer = (const char*)sqlite3_column_text(statement, 6);
+		const char* release_date = (const char*)sqlite3_column_text(statement, 7);
+		const char* rating = (const char*)sqlite3_column_text(statement, 8);
+		const char* players = (const char*)sqlite3_column_text(statement, 9);
+
 		/* build the object */
-		Executable* executable = meh_model_executable_new(id, display_name, filepath);
+		Executable* executable = meh_model_executable_new(id, display_name, filepath, description,
+				genres, publisher, developer, release_date, rating, players);
 
 		if (executable != NULL) {
 			/* do we get the resources of this executable ? */

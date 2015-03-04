@@ -45,6 +45,10 @@ void meh_widget_text_render(Window* window, const WidgetText* text) {
 	g_assert(text != NULL);
 	g_assert(window != NULL);
 
+	if (text->text == NULL) {
+		return;
+	}
+
 	SDL_Color color = { text->r.value, text->g.value, text->b.value , text->a.value };
 	if (text->shadow) {
 		SDL_Color black = { 0, 0, 0 };

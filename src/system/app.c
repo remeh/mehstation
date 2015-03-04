@@ -72,6 +72,8 @@ int meh_app_init(App* app) {
 	/* Opens some font. */
 	Font* font = meh_font_open("res/fonts/OpenSans-Regular.ttf", 20);
 	app->small_font = font;
+	font = meh_font_open("res/fonts/OpenSans-Bold.ttf", 22);
+	app->small_bold_font = font;
 	font = meh_font_open("res/fonts/OpenSans-Bold.ttf", 36);
 	app->big_font = font;
 
@@ -111,6 +113,11 @@ int meh_app_destroy(App* app) {
 	/* Free the resource */
 	meh_font_destroy(app->small_font);
 	app->small_font = NULL;
+	meh_font_destroy(app->small_bold_font);
+	app->small_bold_font = NULL;
+	meh_font_destroy(app->big_font);
+	app->big_font = NULL;
+
 	meh_window_destroy(app->window);
 	app->window = NULL;
 

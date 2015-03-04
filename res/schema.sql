@@ -20,10 +20,10 @@ CREATE TABLE "executable" (
 	`filepath`	TEXT NOT NULL,
 	`platform_id`	INTEGER NOT NULL,
 	`description`	TEXT,
-	`genre`	TEXT,
+	`genres`	TEXT,
+	`publisher`	TEXT,
 	`developer`	TEXT,
 	`release_date`	TEXT,
-	`publisher`	TEXT,
 	`players`	TEXT,
 	`rating`	TEXT
 );

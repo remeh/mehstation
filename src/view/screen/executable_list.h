@@ -33,6 +33,24 @@ typedef struct ExecutableListData {
 	WidgetText* header_text_widget;
 	WidgetImage* cover_widget;
 	WidgetImage* background_widget;
+
+	WidgetText* genres_widget;
+	WidgetText* genres_l_widget;
+
+	WidgetText* players_widget;
+	WidgetText* players_l_widget;
+
+	WidgetText* publisher_widget;
+	WidgetText* publisher_l_widget;
+
+	WidgetText* developer_widget;
+	WidgetText* developer_l_widget;
+
+	WidgetText* rating_widget;
+	WidgetText* rating_l_widget;
+
+	WidgetText* release_date_widget;
+	WidgetText* release_date_l_widget;
 } ExecutableListData;
 
 Screen* meh_screen_exec_list_new(struct App* app, int platform_id);
