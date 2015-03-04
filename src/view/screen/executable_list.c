@@ -29,6 +29,7 @@ static void meh_screen_exec_list_destroy_resources(Screen* screen);
 static void meh_screen_exec_list_load_resources(App* app, Screen* screen);
 static void meh_screen_exec_list_start_executable(App* app, Screen* screen);
 static void meh_screen_exec_list_select_resources(Screen* screen);
+static void meh_screen_exec_list_start_bg_anim(Screen* screen);
 
 Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
@@ -59,6 +60,8 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->textures = NULL;
 	data->background = -1;
 	data->cover = -1;
+	data->header_text = g_utf8_strup(data->platform->name, -1);
+
 
 	/* create widgets */
 	meh_screen_exec_create_widgets(app, screen, data);
@@ -70,6 +73,7 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	 */
 	meh_screen_exec_list_select_resources(screen);
 	meh_screen_exec_list_load_resources(app, screen);
+	meh_screen_exec_list_start_bg_anim(screen);
 
 	return screen;
 }
@@ -81,31 +85,39 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 
 	SDL_Color white = { 255, 255, 255, 255 };
 	SDL_Color white_transparent = { 255, 255, 255, 50 };
-	SDL_Color gray = { 10, 10, 10, 230 };
+	SDL_Color gray = { 10, 10, 10, 245 };
 
 	/* Selection. */
-	data->selection_widget = meh_widget_rect_new(40, -100, 550, 28, gray, TRUE);
+	data->selection_widget = meh_widget_rect_new(40, -100, 550, 28, white_transparent, TRUE);
 	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 130, 500);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 
 	/* List background */
-	data->list_background_widget = meh_widget_rect_new(35, 125, 1100, 535, gray, TRUE);
+	data->list_background_widget = meh_widget_rect_new(35, 125, 1210, 550, gray, TRUE);
 
 	/* Background */
 	data->background_widget = meh_widget_image_new(NULL, -50, -50, app->window->width+50, app->window->height+50);
-	data->background_widget->x = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 15000);
-	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 15000);
-	meh_screen_add_image_transitions(screen, data->background_widget);
 
 	/* Background hover */
 	data->background_hover_widget = meh_widget_rect_new(0, 0, app->window->width, app->window->height, white_transparent, TRUE); 
 
 	/* Header */
-	data->header_text_widget = meh_widget_text_new(app->big_font, data->platform->name, 20, 10, white, TRUE);
+	data->header_text_widget = meh_widget_text_new(app->big_font, data->header_text, 20, 10, white, TRUE);
 	data->header_widget = meh_widget_rect_new(0, 0, app->window->width, 70, gray, TRUE);
 
 	/* Cover */
-	data->cover_widget = meh_widget_image_new(NULL, 600, 200, 200, 300);
+	data->cover_widget = meh_widget_image_new(NULL, 1030, 140, 200, 300);
+}
+
+static void meh_screen_exec_list_start_bg_anim(Screen* screen) {
+	g_assert(screen != NULL);
+
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	g_assert(data != NULL);
+
+	data->background_widget->x = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 10000);
+	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 10000);
+	meh_screen_add_image_transitions(screen, data->background_widget);
 }
 
 /*
@@ -134,6 +146,9 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 			g_free(g_queue_peek_nth(data->cache_executables_id, i));
 		}
 		g_queue_free(data->cache_executables_id);
+
+		/* Misc */
+		g_free(data->header_text);
 
 		/* We must free the textures cache */
 		meh_screen_exec_list_destroy_resources(screen);
@@ -536,8 +551,10 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
 	int selected = data->selected_executable % (MEH_EXEC_LIST_SIZE);
 	int prev_selected = prev_selected_exec % (MEH_EXEC_LIST_SIZE);
-	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected*30, 130 + (selected*30), 100);
+	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected*32, 130 + (selected*32), 100);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
+
+	meh_screen_exec_list_start_bg_anim(screen);
 }
 
 /*
@@ -661,8 +678,12 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));
 	for (int i = page*(MEH_EXEC_LIST_SIZE); i < g_queue_get_length(data->executables); i++) {
 		Executable* executable = g_queue_peek_nth(data->executables, i);
-		meh_window_render_text(app->window, app->small_font, executable->display_name, black, 62, 132+(j*30));
-		meh_window_render_text(app->window, app->small_font, executable->display_name, white, 60, 130+(j*30));
+
+		gchar* text = g_utf8_strup(executable->display_name, -1);
+		meh_window_render_text(app->window, app->small_font, text, black, 62, 132+(j*32));
+		meh_window_render_text(app->window, app->small_font, text, white, 60, 130+(j*32));
+		g_free(text);
+
 		j++;
 		if (j >= MEH_EXEC_LIST_SIZE) {
 			break;

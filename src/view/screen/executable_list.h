@@ -21,6 +21,8 @@ typedef struct ExecutableListData {
 	int background; /* Reference to a texture in the map, should NOT be freed ! */
 	int cover; /* Reference to a texture in the map, shouldn't be freed! */
 
+	gchar* header_text;
+
 	/*
 	 * Widgets
 	 */
