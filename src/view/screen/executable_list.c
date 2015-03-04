@@ -180,7 +180,6 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 		meh_widget_text_destroy(data->release_date_l_widget);
 		meh_widget_text_destroy(data->release_date_widget);
 
-
 		/* Free the executables id cache. */
 		int i = 0;
 		for (i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {

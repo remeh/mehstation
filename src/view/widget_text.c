@@ -45,7 +45,8 @@ void meh_widget_text_render(Window* window, const WidgetText* text) {
 	g_assert(text != NULL);
 	g_assert(window != NULL);
 
-	if (text->text == NULL) {
+	/* Don't render empty text. */
+	if (text->text == NULL || strlen(text->text) == 0) {
 		return;
 	}
 
