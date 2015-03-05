@@ -3,6 +3,9 @@
 #include "system/db/executable.h"
 #include "system/db/executable_resource.h"
 
+static gchar* meh_copy_string(const gchar* str, const gchar* fallback);
+static gchar* meh_copy_string(const gchar* str, const gchar* fallback);
+
 Executable* meh_model_executable_new(int id, const gchar* display_name, const gchar* filepath,
 		const gchar* description, const gchar* genres, const gchar* publisher,
 		const gchar* developer, const gchar* release_date, const gchar* rating, const gchar* players) {
@@ -12,17 +15,37 @@ Executable* meh_model_executable_new(int id, const gchar* display_name, const gc
 	executable->display_name = g_strdup(display_name);
 	executable->filepath = g_strdup(filepath);
 
-	executable->description = g_strdup(description);
-	executable->genres = g_strdup(genres);
-	executable->publisher = g_strdup(publisher);
-	executable->developer = g_strdup(developer);
-	executable->release_date = g_strdup(release_date);
-	executable->rating = g_strdup(rating);
-	executable->players = g_strdup(players);
+	executable->description = meh_copy_string(description, "No description.");
+	executable->genres = meh_copy_string(genres, "Unknown");
+	executable->publisher = meh_copy_string(publisher, "Unknown");
+	executable->developer = meh_copy_string(developer, "Unknown");
+	executable->release_date = meh_copy_string(release_date, "Unknown");
+
+	if (g_strcmp0(rating, "0.0") == 0) {
+		executable->rating = g_strdup("No rating");
+	} else {
+		executable->rating = meh_copy_string(rating, "No rating");
+	}
+
+	if (g_strcmp0(players, "0")  == 0) {
+		executable->players = g_strdup("Unknown");
+	} else {
+		executable->players = meh_copy_string(players, "Unknown");
+	}
 
 	executable->resources = g_queue_new();
 
 	return executable;
+}
+
+/*
+ * meh_copy_string copies the string or fallback to the given value.
+ */
+static gchar* meh_copy_string(const gchar* str, const gchar* fallback) {
+	if (str == NULL || strlen(str) == 0) {
+		return g_strdup(fallback);
+	}
+	return g_strdup(str);
 }
 
 void meh_model_executable_destroy(Executable* executable) {
