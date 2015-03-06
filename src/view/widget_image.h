@@ -25,6 +25,6 @@ typedef struct {
 	SDL_Texture* texture;
 } WidgetImage;
 
-WidgetImage* meh_widget_image_new(SDL_Texture* texture, int x, int y, int w, int h);
+WidgetImage* meh_widget_image_new(SDL_Texture* texture, float x, float y, float w, float h);
 void meh_widget_image_destroy(WidgetImage* image);
 void meh_widget_image_render(Window* window, const WidgetImage* image);

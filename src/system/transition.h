@@ -22,7 +22,7 @@ typedef struct {
 	gboolean ended;
 } Transition;
 
-Transition meh_transition_start(int transition_type, int start_value, int final_value, int duration);
+Transition meh_transition_start(int transition_type, float start_value, float final_value, int duration);
 gboolean meh_transition_update(Transition* transition);
 void meh_transitions_update(GQueue* transitions);
 void meh_transition_end(Transition* transition);

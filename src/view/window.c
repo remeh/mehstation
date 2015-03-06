@@ -33,7 +33,7 @@ Window* meh_window_create(guint width, guint height, gboolean fullscreen) {
 	}
 
 	/* Attach a renderer to the window. */
-	w->sdl_renderer = SDL_CreateRenderer(w->sdl_window, -1, 0);
+	w->sdl_renderer = SDL_CreateRenderer(w->sdl_window, -1, SDL_RENDERER_ACCELERATED);
 	if (w->sdl_renderer == NULL) {
 		g_critical("Can't attach the renderer: %s", SDL_GetError());
 		return NULL;
@@ -89,9 +89,14 @@ void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect vi
 	g_assert(window != NULL);
 	g_assert(texture != NULL);
 
-	SDL_RenderSetViewport(window->sdl_renderer, &viewport);
+	// NOTE If the texture aren't at the good position,
+	// NOTE I should try to Get the original viewport,
+	// NOTE Set the viewport then render the texture and
+	// NOTE finally to restore the viewstore.
+	// FIXME Actually SDL_RenderCopyEx sounds the best solution.
+	//SDL_RenderSetViewport(window->sdl_renderer, &viewport);
 	SDL_RenderCopy(window->sdl_renderer, texture, NULL, NULL);
-	SDL_RenderSetViewport(window->sdl_renderer, NULL);
+	//SDL_RenderSetViewport(window->sdl_renderer, NULL);
 }
 
 /*
@@ -126,4 +131,12 @@ int meh_window_render_text(Window* window, const Font* font, const char* text, S
 	SDL_DestroyTexture(texture);
 
 	return 0;
+}
+
+float meh_window_convert_width(Window* window, float normalized_x) {
+	return normalized_x * (float)window->width;
+}
+
+float meh_window_convert_height(Window* window, float normalized_y) {
+	return normalized_y * (float)window->height;
 }

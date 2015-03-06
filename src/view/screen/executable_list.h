@@ -1,3 +1,9 @@
+/*
+ * mehstation - Screen of executables.
+ *
+ * Copyright © 2015 Rémy Mathieu
+ */
+
 #pragma once
 
 #include <glib.h>

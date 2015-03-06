@@ -1,3 +1,11 @@
+/*
+ * mehstation - Starting screen.
+ *
+ * Copyright © 2015 Rémy Mathieu
+ * 
+ * TODO Rename to Splashscreen ?
+ */
+
 #pragma once
 
 #include "system/message.h"

@@ -12,7 +12,7 @@
 /*
  * meh_widget_rect_destroy allocates a new widget rect.
  */
-WidgetRect* meh_widget_rect_new(int x, int y, int w, int h, SDL_Color color, gboolean filled) {
+WidgetRect* meh_widget_rect_new(float x, float y, float w, float h, SDL_Color color, gboolean filled) {
 	WidgetRect* r = g_new(WidgetRect, 1);
 
 	r->x = meh_transition_start(MEH_TRANSITION_NONE, x, x, 0);
@@ -58,7 +58,12 @@ void meh_widget_rect_render(Window* window, const WidgetRect* rect) {
 
 	}
 
-	SDL_Rect sdl_rect = { rect->x.value, rect->y.value, rect->w.value, rect->h.value };
+	SDL_Rect sdl_rect = {
+		meh_window_convert_width(window, rect->x.value),
+		meh_window_convert_height(window, rect->y.value),
+		meh_window_convert_width(window, rect->w.value),
+		meh_window_convert_height(window, rect->h.value)
+	};
 
 	if (rect->filled) {
 		SDL_RenderFillRect(window->sdl_renderer, &sdl_rect);

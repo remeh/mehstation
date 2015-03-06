@@ -29,6 +29,6 @@ typedef struct {
 	gboolean filled;
 } WidgetRect;
 
-WidgetRect* meh_widget_rect_new(int x, int y, int w, int h, SDL_Color color, gboolean filled);
+WidgetRect* meh_widget_rect_new(float x, float y, float w, float h, SDL_Color color, gboolean filled);
 void meh_widget_rect_destroy(WidgetRect* rect);
 void meh_widget_rect_render(Window* window, const WidgetRect* rect);

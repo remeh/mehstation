@@ -13,14 +13,14 @@
 /*
  * meh_transition_start prepares and starts a new transition.
  */
-Transition meh_transition_start(int transition_type, int start_value, int final_value, int duration) {
+Transition meh_transition_start(int transition_type, float start_value, float final_value, int duration) {
 	Transition ti;
 	ti.transition_type = transition_type;
 	ti.start_tick = -1;
-	ti.start_value = (float)start_value;
-	ti.final_value = (float)final_value;
-	ti.duration = (float)duration;
-	ti.value = (float)start_value;
+	ti.start_value = start_value;
+	ti.final_value = final_value;
+	ti.duration = duration;
+	ti.value = start_value;
 	ti.ended = FALSE;
 	return ti;
 }
@@ -86,7 +86,7 @@ gboolean meh_transition_update(Transition* transition) {
 		case MEH_TRANSITION_CUBIC:
 			time /= transition->duration/2.0f;
 			if (time < 1.0f) {
-				transition->value = change/2*time*time*time + transition->start_value;
+				transition->value = change/2.0f*time*time*time + transition->start_value;
 			} else {
 				time -= 2.0f;
 				transition->value = change/2.0f*(time*time*time + 2.0f) + transition->start_value;

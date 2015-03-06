@@ -11,7 +11,7 @@
 /*
  * meh_widget_image_destroy allocates a new widget image.
  */
-WidgetImage* meh_widget_image_new(SDL_Texture* texture, int x, int y, int w, int h) {
+WidgetImage* meh_widget_image_new(SDL_Texture* texture, float x, float y, float w, float h) {
 	WidgetImage* i = g_new(WidgetImage, 1);
 
 	i->x = meh_transition_start(MEH_TRANSITION_NONE, x, x, 0);
@@ -44,6 +44,13 @@ void meh_widget_image_render(Window* window, const WidgetImage* image) {
 		return;
 	}
 
-	SDL_Rect rect = { image->x.value, image->y.value, image->w.value, image->h.value };
+	// Convert the normalized position to the window position.
+	SDL_Rect rect = {
+		meh_window_convert_width(window, image->x.value),
+		meh_window_convert_height(window, image->y.value),
+		meh_window_convert_width(window, image->w.value),
+		meh_window_convert_height(window, image->h.value)
+	};
+
 	meh_window_render_texture(window, image->texture, rect);
 }

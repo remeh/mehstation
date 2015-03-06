@@ -5,6 +5,7 @@
 #include "system/message.h"
 #include "view/image.h"
 #include "view/screen.h"
+#include "view/widget_rect.h"
 #include "view/screen/starting.h"
 #include "view/screen/platform_list.h"
 #include "view/window.h"
@@ -25,7 +26,7 @@ Screen* meh_screen_starting_new(App* app) {
 
 	/* Splashscreen */
 	data->splash_texture = meh_image_load_file(app->window->sdl_renderer, "res/splashscreen.png");
-	data->splash = meh_widget_image_new(data->splash_texture, 0, 0, app->window->width, app->window->height);
+	data->splash = meh_widget_image_new(data->splash_texture, 0.0f, 0.0f, 1.0f, 1.0f);
 
 	screen->data = data;
 
