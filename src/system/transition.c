@@ -8,6 +8,7 @@
 
 #include "system/transition.h"
 
+#define MEH_COEFF 10000.0f /* We apply a coefficient because we're on small numbers. */
 #define MEH_EPSILON 2.0f
 
 /*
@@ -17,8 +18,8 @@ Transition meh_transition_start(int transition_type, float start_value, float fi
 	Transition ti;
 	ti.transition_type = transition_type;
 	ti.start_tick = -1;
-	ti.start_value = start_value;
-	ti.final_value = final_value;
+	ti.start_value = start_value*MEH_COEFF;
+	ti.final_value = final_value*MEH_COEFF;
 	ti.duration = duration;
 	ti.value = start_value;
 	ti.ended = FALSE;
@@ -42,7 +43,7 @@ void meh_transitions_end(GQueue* transitions) {
  */
 void meh_transition_end(Transition* transition) {
 	g_assert(transition != NULL);
-	transition->value = transition->final_value;
+	transition->value = transition->final_value/MEH_COEFF;
 	transition->ended = TRUE;
 }
 
@@ -81,34 +82,34 @@ gboolean meh_transition_update(Transition* transition) {
 
 	switch (transition->transition_type) {
 		case MEH_TRANSITION_LINEAR:
-			transition->value = (change*(time / transition->duration)) + transition->start_value;
+			transition->value = ( (change*(time / transition->duration)) + transition->start_value ) / MEH_COEFF;
 			break;
 		case MEH_TRANSITION_CUBIC:
 			time /= transition->duration/2.0f;
 			if (time < 1.0f) {
-				transition->value = change/2.0f*time*time*time + transition->start_value;
+				transition->value = ( change/2.0f*time*time*time + transition->start_value ) / MEH_COEFF;
 			} else {
 				time -= 2.0f;
-				transition->value = change/2.0f*(time*time*time + 2.0f) + transition->start_value;
+				transition->value = ( change/2.0f*(time*time*time + 2.0f) + transition->start_value ) / MEH_COEFF;
 			}
 			break;
 		case MEH_TRANSITION_QUADRATIC:
 			time /= transition->duration/2.0f;
 			if (time < 1.0f) {
-				transition->value = change/2.0f*time*time + transition->start_value;
+				transition->value = ( change/2.0f*time*time + transition->start_value ) / MEH_COEFF;
 			} else {
 				time -= 1.0f;
-				transition->value = -change/2.0f * (time*(time-2.0f) - 1.0f) + transition->start_value;
+				transition->value = ( -change/2.0f * (time*(time-2.0f) - 1.0f) + transition->start_value ) / MEH_COEFF;
 			}
 
 			break;
 	}
 
 	/* Perfect value for the end */
-	if (transition->final_value > transition->start_value && transition->final_value - transition->value < MEH_EPSILON) {
+	if (transition->final_value > transition->start_value && transition->final_value - (transition->value*MEH_COEFF)< MEH_EPSILON) {
 		meh_transition_end(transition);
 		return TRUE;
-	} else if (transition->final_value <= transition->start_value && transition->value - transition->final_value < MEH_EPSILON) {
+	} else if (transition->final_value <= transition->start_value && (transition->value*MEH_COEFF) - transition->final_value < MEH_EPSILON) {
 		meh_transition_end(transition);
 		return TRUE;
 	}
