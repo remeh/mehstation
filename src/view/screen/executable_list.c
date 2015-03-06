@@ -715,18 +715,24 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 		case MEH_INPUT_BUTTON_L:
-			data->selected_executable -= 10;
-			if (data->selected_executable < 0) {
-				data->selected_executable = data->executables_length-1;
+			{
+				int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE)) - 1;
+				data->selected_executable = page * MEH_EXEC_LIST_SIZE;
+				if (data->selected_executable < 0) {
+					data->selected_executable = data->executables_length-1;
+				}
+				meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
 			}
-			meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 		case MEH_INPUT_BUTTON_R:
-			data->selected_executable += 10;
-			if (data->selected_executable > data->executables_length) {
-				data->selected_executable = 0;
+			{
+				int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE)) + 1;
+				data->selected_executable = page * MEH_EXEC_LIST_SIZE;
+				if (data->selected_executable > data->executables_length) {
+					data->selected_executable = 0;
+				}
+				meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
 			}
-			meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 	}
 }
