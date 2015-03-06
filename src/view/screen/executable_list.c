@@ -593,6 +593,7 @@ static void meh_screen_exec_list_start_executable(App* app, Screen* screen) {
 	/* FIXME When returning from the other app, if the user presses the same
 	 * FIXME key as the one used to start the system, SDL will considered it
 	 * FIXME as a repeatition. We should maybe generate a fake KEYUP event ?*/
+	SDL_RaiseWindow(app->window->sdl_window);
 }
 
 /*
