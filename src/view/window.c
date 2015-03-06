@@ -1,6 +1,7 @@
-#include "glib-2.0/glib.h"
+#include <glib.h>
 #include "view/window.h"
 #include "view/text.h"
+#include "system/consts.h"
 
 /*
  * meh_create_window deals with the creation of the opengl window.
@@ -104,15 +105,8 @@ int meh_window_render_text(Window* window, const Font* font, const char* text, S
 	g_assert(font != NULL);
 	g_assert(text != NULL);
 
-	if (text == '\0') {
-		return 1;
-	}
-
-	SDL_Texture* texture = meh_font_render_on_texture(window->sdl_renderer, font, text, color);
-	if (texture == NULL) {
-		g_critical("Can't render text on the window.\n");
-		return 1;
-	}
+	/* Write the text on a texture. */
+	SDL_Texture* texture = meh_window_render_text_texture(window, font, text, color);
 
 	/* Renders at the good position */
 	int w, h;
@@ -126,10 +120,38 @@ int meh_window_render_text(Window* window, const Font* font, const char* text, S
 	return 0;
 }
 
-float meh_window_convert_width(Window* window, float normalized_x) {
-	return normalized_x * (float)window->width;
+/*
+ * meh_window_render_text_texture renders the given text with the given font on a SDL_Texture
+ * and returns it.
+ */
+SDL_Texture* meh_window_render_text_texture(Window* window, const Font* font, const char* text, SDL_Color color) {
+	if (text == NULL) {
+		return NULL;
+	}
+
+	/*
+	 * If the text is empty, render a space 
+	 * NOTE bit of a trick to avoid error while using render_text_texture
+	 */
+	const char* rendered_text = text;
+	if (rendered_text == '\0') {
+		rendered_text = " ";
+	}
+
+	SDL_Texture* texture = meh_font_render_on_texture(window->sdl_renderer, font, rendered_text, color);
+
+	if (texture == NULL) {
+		g_critical("Can't render text on a texture.\n");
+		return NULL;
+	}
+
+	return texture;
 }
 
-float meh_window_convert_height(Window* window, float normalized_y) {
-	return normalized_y * (float)window->height;
+float meh_window_convert_width(Window* window, float fake_x) {
+	return (fake_x/MEH_FAKE_WIDTH) * (float)window->width;
+}
+
+float meh_window_convert_height(Window* window, float fake_y) {
+	return (fake_y/MEH_FAKE_HEIGHT) * (float)window->height;
 }

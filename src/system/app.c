@@ -10,6 +10,7 @@
 #include "view/screen.h"
 #include "view/screen/starting.h"
 #include "system/app.h"
+#include "system/consts.h"
 #include "system/input.h"
 #include "system/message.h"
 #include "system/settings.h"
@@ -70,11 +71,11 @@ int meh_app_init(App* app) {
 	app->window = window;
 
 	/* Opens some font. */
-	Font* font = meh_font_open("res/fonts/OpenSans-Regular.ttf", 20);
+	Font* font = meh_font_open("res/fonts/OpenSans-Regular.ttf", meh_window_convert_width(window, 20));
 	app->small_font = font;
-	font = meh_font_open("res/fonts/OpenSans-Bold.ttf", 22);
+	font = meh_font_open("res/fonts/OpenSans-Bold.ttf", meh_window_convert_width(window, 22));
 	app->small_bold_font = font;
-	font = meh_font_open("res/fonts/OpenSans-Bold.ttf", 36);
+	font = meh_font_open("res/fonts/OpenSans-Bold.ttf", meh_window_convert_width(window, 36));
 	app->big_font = font;
 
 	/* Input manager */

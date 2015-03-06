@@ -31,6 +31,7 @@ WidgetText* meh_widget_text_new(const Font* font, const char* text, float x, flo
 	meh_transition_end(&t->a);
 
 	t->shadow = shadow;
+	t->texture = NULL;
 
 	return t;
 }
@@ -38,10 +39,35 @@ WidgetText* meh_widget_text_new(const Font* font, const char* text, float x, flo
 void meh_widget_text_destroy(WidgetText* text) {
 	g_assert(text != NULL);
 
+	if (text->texture != NULL) {
+		SDL_DestroyTexture(text->texture);
+	}
+
 	g_free(text);
 }
 
-void meh_widget_text_render(Window* window, const WidgetText* text) {
+/*
+ * meh_widget_text_reload writes the text on a texture and store it in the WidgetText.
+ */
+void meh_widget_text_reload(Window* window, WidgetText* text) {
+	if (text->texture != NULL) {
+		SDL_DestroyTexture(text->texture);
+	}
+
+	SDL_Color color = {
+		text->r.value,
+		text->g.value,
+		text->b.value,
+		text->a.value,
+	};
+
+	text->texture = meh_window_render_text_texture(window, text->font, text->text, color);
+
+	SDL_QueryTexture(text->texture, NULL, NULL, &text->tex_w, &text->tex_h);
+	g_debug("Texture for text %s loaded.", text->text);
+}
+
+void meh_widget_text_render(Window* window, WidgetText* text) {
 	g_assert(text != NULL);
 	g_assert(window != NULL);
 
@@ -50,15 +76,17 @@ void meh_widget_text_render(Window* window, const WidgetText* text) {
 		return;
 	}
 
-	float x = meh_window_convert_width(window, text->x.value);
-	float y = meh_window_convert_height(window, text->y.value);
-
-	SDL_Color color = { text->r.value, text->g.value, text->b.value , text->a.value };
-	if (text->shadow) {
-		SDL_Color black = { 0, 0, 0 };
-		// FIXME +4.0f not normalized
-		meh_window_render_text(window, text->font, text->text, black, x+4.0f, y+4.0f); /* shadow */
+	if (text->texture == NULL) {
+		meh_widget_text_reload(window, text);
 	}
 
-	meh_window_render_text(window, text->font, text->text, color, x, y); /* text */
+
+	SDL_Rect position = { 
+		meh_window_convert_width(window, text->x.value),
+		meh_window_convert_height(window, text->y.value),
+		text->tex_w,
+		text->tex_h
+	};
+	
+	meh_window_render_texture(window, text->texture, position);
 }

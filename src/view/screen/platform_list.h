@@ -17,6 +17,8 @@ typedef struct PlatformListData {
 	 */
 	WidgetText* no_platforms_widget;
 	WidgetText* title;
+	WidgetText* selection_widget;
+	GQueue* platform_widgets;
 } PlatformListData;
 
 Screen* meh_screen_platform_list_new(struct App* app);

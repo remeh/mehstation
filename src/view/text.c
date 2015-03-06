@@ -16,6 +16,7 @@ Font* meh_font_open(const char* filename, guint size) {
 
 	font = g_new(Font, 1);
 	font->sdl_font = sdl_font;
+	font->size = size;
 
 	return font;
 }

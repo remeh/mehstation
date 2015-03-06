@@ -16,6 +16,7 @@
 #include "system/transition.h"
 #include "system/db/models.h"
 #include "view/image.h"
+#include "view/widget_text.h"
 #include "view/screen.h"
 #include "view/screen/executable_list.h"
 
@@ -589,10 +590,28 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	meh_screen_exec_list_delete_some_cache(screen);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+
 	int selected = data->selected_executable % (MEH_EXEC_LIST_SIZE);
 	int prev_selected = prev_selected_exec % (MEH_EXEC_LIST_SIZE);
 	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected*32, 130 + (selected*32), 100);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
+
+	/* Refreshes the text widget. */
+	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
+	if (current_executable != NULL) {
+		data->genres_widget->text = current_executable->genres;
+		meh_widget_text_reload(app->window, data->genres_widget);
+		data->players_widget->text = current_executable->players;
+		meh_widget_text_reload(app->window, data->players_widget);
+		data->publisher_widget->text = current_executable->publisher;
+		meh_widget_text_reload(app->window, data->publisher_widget);
+		data->developer_widget->text = current_executable->developer;
+		meh_widget_text_reload(app->window, data->developer_widget);
+		data->rating_widget->text = current_executable->rating;
+		meh_widget_text_reload(app->window, data->rating_widget);
+		data->release_date_widget->text = current_executable->release_date;
+		meh_widget_text_reload(app->window, data->release_date_widget);
+	}	
 
 	meh_screen_exec_list_start_bg_anim(screen);
 }
@@ -720,27 +739,21 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	 */
 	if (current_executable != NULL) {
 		/* Genres */
-		data->genres_widget->text = current_executable->genres;
 		meh_widget_text_render(app->window, data->genres_l_widget);
 		meh_widget_text_render(app->window, data->genres_widget);
 		/* Players */
-		data->players_widget->text = current_executable->players;
 		meh_widget_text_render(app->window, data->players_l_widget);
 		meh_widget_text_render(app->window, data->players_widget);
 		/* Publisher */
-		data->publisher_widget->text = current_executable->publisher;
 		meh_widget_text_render(app->window, data->publisher_l_widget);
 		meh_widget_text_render(app->window, data->publisher_widget);
 		/* Developer */
-		data->developer_widget->text = current_executable->developer;
 		meh_widget_text_render(app->window, data->developer_l_widget);
 		meh_widget_text_render(app->window, data->developer_widget);
 		/* Release date */
-		data->rating_widget->text = current_executable->rating;
 		meh_widget_text_render(app->window, data->rating_l_widget);
 		meh_widget_text_render(app->window, data->rating_widget);
 		/* Release date */
-		data->release_date_widget->text = current_executable->release_date;
 		meh_widget_text_render(app->window, data->release_date_l_widget);
 		meh_widget_text_render(app->window, data->release_date_widget);
 	}

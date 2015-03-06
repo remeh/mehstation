@@ -2,6 +2,8 @@
  * internal mehstation button codes.
  */
 
+#pragma once
+
 /* Input */
 
 #define MEH_INPUT_BUTTON_UP 0
@@ -25,3 +27,12 @@
 #define MEH_MSG_UPDATE 1
 #define MEH_MSG_RENDER 2
 #define MEH_MSG_END 3
+
+/*
+ * We fake a resolution while drawing into a Screen
+ * for simple representation.
+ */
+
+#define MEH_FAKE_WIDTH 1280.0f
+#define MEH_FAKE_HEIGHT 720.0f
+

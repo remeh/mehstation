@@ -25,8 +25,15 @@ typedef struct {
 	Transition a;
 
 	gboolean shadow;
+
+	/* At first rendering, the texture is cached for performance purpose.
+	 * Use meh_widget_text_reload to refresh the texture. */
+	SDL_Texture* texture;
+	int tex_w;
+	int tex_h;
 } WidgetText;
 
 WidgetText* meh_widget_text_new(const Font* font, const char* text, float x, float y, SDL_Color color, gboolean shadow);
 void meh_widget_text_destroy(WidgetText* text);
-void meh_widget_text_render(Window* window, const WidgetText* text);
+void meh_widget_text_render(Window* window, WidgetText* text);
+void meh_widget_text_reload(Window* window, WidgetText* text);

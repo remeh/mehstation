@@ -5,6 +5,7 @@
 
 typedef struct {
 	TTF_Font* sdl_font;
+	guint size;
 } Font;
 
 Font* meh_font_open(const char* filename, guint size);

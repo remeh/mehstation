@@ -26,7 +26,7 @@ Screen* meh_screen_starting_new(App* app) {
 
 	/* Splashscreen */
 	data->splash_texture = meh_image_load_file(app->window->sdl_renderer, "res/splashscreen.png");
-	data->splash = meh_widget_image_new(data->splash_texture, 0.0f, 0.0f, 1.0f, 1.0f);
+	data->splash = meh_widget_image_new(data->splash_texture, 0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT);
 
 	screen->data = data;
 
