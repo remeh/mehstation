@@ -85,18 +85,11 @@ void meh_window_render(Window* window) {
 /*
  * meh_window_render_texture renders the given texture at the given position.
  */
-void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect viewport) {
+void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect position) {
 	g_assert(window != NULL);
 	g_assert(texture != NULL);
 
-	// NOTE If the texture aren't at the good position,
-	// NOTE I should try to Get the original viewport,
-	// NOTE Set the viewport then render the texture and
-	// NOTE finally to restore the viewstore.
-	// FIXME Actually SDL_RenderCopyEx sounds the best solution.
-	//SDL_RenderSetViewport(window->sdl_renderer, &viewport);
-	SDL_RenderCopy(window->sdl_renderer, texture, NULL, NULL);
-	//SDL_RenderSetViewport(window->sdl_renderer, NULL);
+	SDL_RenderCopyEx(window->sdl_renderer, texture, NULL, &position, 0.0, NULL, SDL_FLIP_NONE);
 }
 
 /*
