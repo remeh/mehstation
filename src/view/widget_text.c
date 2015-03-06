@@ -10,7 +10,7 @@
 #include "view/widget_text.h"
 #include "view/window.h"
 
-WidgetText* meh_widget_text_new(const Font* font, const char* text, int x, int y, SDL_Color color, gboolean shadow) {
+WidgetText* meh_widget_text_new(const Font* font, const char* text, float x, float y, SDL_Color color, gboolean shadow) {
 	WidgetText* t = g_new(WidgetText, 1);
 
 	t->font = font;
@@ -50,10 +50,15 @@ void meh_widget_text_render(Window* window, const WidgetText* text) {
 		return;
 	}
 
+	float x = meh_window_convert_width(window, text->x.value);
+	float y = meh_window_convert_height(window, text->y.value);
+
 	SDL_Color color = { text->r.value, text->g.value, text->b.value , text->a.value };
 	if (text->shadow) {
 		SDL_Color black = { 0, 0, 0 };
-		meh_window_render_text(window, text->font, text->text, black, text->x.value+4, text->y.value+4); /* shadow */
+		// FIXME +4.0f not normalized
+		meh_window_render_text(window, text->font, text->text, black, x+4.0f, y+4.0f); /* shadow */
 	}
-	meh_window_render_text(window, text->font, text->text, color, text->x.value, text->y.value); /* text */
+
+	meh_window_render_text(window, text->font, text->text, color, x, y); /* text */
 }

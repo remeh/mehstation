@@ -30,12 +30,12 @@ Screen* meh_screen_platform_list_new(App* app) {
 
 	/* Widget title */
 	SDL_Color white = { 255, 255, 255 };
-	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 30, 30, white, FALSE);
-	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 460,500);
+	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 0.05f, 0.05f, white, FALSE);
+	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -0.2f, 0.4f, 1000);
 	meh_screen_add_text_transitions(screen, data->title);
 
 	/* No platforms text */
-	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured", 70, 90, white, FALSE);
+	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured", 0.2f, 0.2f, white, FALSE);
 
 	screen->data = data;
 
