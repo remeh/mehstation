@@ -71,15 +71,9 @@ void meh_widget_text_render(Window* window, WidgetText* text) {
 	g_assert(text != NULL);
 	g_assert(window != NULL);
 
-	/* Don't render empty text. */
-	if (text->text == NULL || strlen(text->text) == 0) {
-		return;
-	}
-
 	if (text->texture == NULL) {
 		meh_widget_text_reload(window, text);
 	}
-
 
 	SDL_Rect position = { 
 		meh_window_convert_width(window, text->x.value),

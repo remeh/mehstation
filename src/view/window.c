@@ -103,7 +103,6 @@ void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect po
 int meh_window_render_text(Window* window, const Font* font, const char* text, SDL_Color color, int x, int y) {
 	g_assert(window != NULL);
 	g_assert(font != NULL);
-	g_assert(text != NULL);
 
 	/* Write the text on a texture. */
 	SDL_Texture* texture = meh_window_render_text_texture(window, font, text, color);
@@ -125,17 +124,16 @@ int meh_window_render_text(Window* window, const Font* font, const char* text, S
  * and returns it.
  */
 SDL_Texture* meh_window_render_text_texture(Window* window, const Font* font, const char* text, SDL_Color color) {
-	if (text == NULL) {
-		return NULL;
-	}
+	g_assert(window != NULL);
+	g_assert(font != NULL);
 
 	/*
-	 * If the text is empty, render a space 
+	 * If the text is empty, render a space.
 	 * NOTE bit of a trick to avoid error while using render_text_texture
 	 */
-	const char* rendered_text = text;
-	if (rendered_text == '\0') {
-		rendered_text = " ";
+	const char* rendered_text = " ";
+	if (text != NULL && strlen(text) > 0) {
+		rendered_text = text;
 	}
 
 	SDL_Texture* texture = meh_font_render_on_texture(window->sdl_renderer, font, rendered_text, color);

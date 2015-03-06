@@ -57,6 +57,8 @@ typedef struct ExecutableListData {
 
 	WidgetText* release_date_widget;
 	WidgetText* release_date_l_widget;
+
+	GQueue* executable_widgets;
 } ExecutableListData;
 
 Screen* meh_screen_exec_list_new(struct App* app, int platform_id);

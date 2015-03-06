@@ -31,6 +31,7 @@ static void meh_screen_exec_list_load_resources(App* app, Screen* screen);
 static void meh_screen_exec_list_start_executable(App* app, Screen* screen);
 static void meh_screen_exec_list_select_resources(Screen* screen);
 static void meh_screen_exec_list_start_bg_anim(Screen* screen);
+static void meh_screen_exec_list_refresh_executables_widget(App* app, Screen* screen);
 
 Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
@@ -63,6 +64,8 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->cover = -1;
 	data->header_text = g_utf8_strup(data->platform->name, -1);
 
+	data->executable_widgets = g_queue_new();
+
 	/* create widgets */
 	meh_screen_exec_create_widgets(app, screen, data);
 
@@ -74,6 +77,7 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	meh_screen_exec_list_select_resources(screen);
 	meh_screen_exec_list_load_resources(app, screen);
 	meh_screen_exec_list_start_bg_anim(screen);
+	meh_screen_exec_list_refresh_executables_widget(app, screen);
 
 	return screen;
 }
@@ -104,6 +108,12 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 	/* Header */
 	data->header_text_widget = meh_widget_text_new(app->big_font, data->header_text, 20, 10, white, TRUE);
 	data->header_widget = meh_widget_rect_new(0, 0, app->window->width, 70, gray, TRUE);
+
+	/* Executables */
+	for (int i = 0; i < MEH_EXEC_LIST_SIZE; i++) {
+		WidgetText* text = meh_widget_text_new(app->small_font, "", 60, 130+(i*32), white, FALSE);
+		g_queue_push_tail(data->executable_widgets, text);
+	}
 
 	/*
 	 * Extra information
@@ -180,6 +190,11 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 		meh_widget_text_destroy(data->rating_widget);
 		meh_widget_text_destroy(data->release_date_l_widget);
 		meh_widget_text_destroy(data->release_date_widget);
+
+		for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
+			meh_widget_text_destroy( g_queue_peek_nth( data->executable_widgets, i) );
+		}
+		g_queue_free(data->executable_widgets);
 
 		/* Free the executables id cache. */
 		int i = 0;
@@ -596,7 +611,7 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected*32, 130 + (selected*32), 100);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 
-	/* Refreshes the text widget. */
+	/* Refreshes the text widgets about game info. */
 	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
 	if (current_executable != NULL) {
 		data->genres_widget->text = current_executable->genres;
@@ -611,9 +626,47 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 		meh_widget_text_reload(app->window, data->rating_widget);
 		data->release_date_widget->text = current_executable->release_date;
 		meh_widget_text_reload(app->window, data->release_date_widget);
-	}	
+	}
+
+	/* do we need to refresh the executable widgets ?
+	 * Only on page changes */
+	int relative_new = data->selected_executable%MEH_EXEC_LIST_SIZE;
+	int relative_old = prev_selected_exec%MEH_EXEC_LIST_SIZE;
+	if ((relative_new == 0 && relative_old != 1) || /* Last -> First */
+			(relative_new == MEH_EXEC_LIST_SIZE-1 && relative_old != MEH_EXEC_LIST_SIZE-2))	{						          
+		meh_screen_exec_list_refresh_executables_widget(app, screen);
+	}
 
 	meh_screen_exec_list_start_bg_anim(screen);
+}
+
+/*
+ * meh_screen_exec_list_refresh_executables_widget re-creates all the texture
+ * in the text widgets for the executables.
+ */
+static void meh_screen_exec_list_refresh_executables_widget(App* app, Screen* screen) {
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	g_assert(data != NULL);
+
+	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));
+
+	/* For every executable text widget */
+	for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
+		WidgetText* text = g_queue_peek_nth(data->executable_widgets, i);
+		text->text = "";
+		
+		/* look for the executable text if any */
+		int executable_idx = page*(MEH_EXEC_LIST_SIZE) + i;
+		if (executable_idx <= data->executables_length) {
+			Executable* executable = g_queue_peek_nth(data->executables, executable_idx);
+			if (executable != NULL) {
+				text->text = executable->display_name;
+			}
+		}
+
+		// reload the text texture.
+		meh_widget_text_reload(app->window, text);
+	}
 }
 
 /*
@@ -700,7 +753,6 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
-	SDL_Color white = { 255, 255, 255 };
 	SDL_Color black = { 0, 0, 0 };
 	meh_window_clear(app->window, black);
 	
@@ -758,21 +810,9 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 		meh_widget_text_render(app->window, data->release_date_widget);
 	}
 
-	/* executable list */
-	int j = 0;
-	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));
-	for (int i = page*(MEH_EXEC_LIST_SIZE); i < g_queue_get_length(data->executables); i++) {
-		Executable* executable = g_queue_peek_nth(data->executables, i);
-
-		gchar* text = g_utf8_strup(executable->display_name, -1);
-		meh_window_render_text(app->window, app->small_font, text, black, 62, 132+(j*32));
-		meh_window_render_text(app->window, app->small_font, text, white, 60, 130+(j*32));
-		g_free(text);
-
-		j++;
-		if (j >= MEH_EXEC_LIST_SIZE) {
-			break;
-		}
+	/* Render all the executables names. */
+	for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
+		meh_widget_text_render(app->window, g_queue_peek_nth(data->executable_widgets, i));
 	}
 
 	meh_window_render(app->window);
