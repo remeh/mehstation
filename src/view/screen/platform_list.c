@@ -76,8 +76,6 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 		meh_widget_text_destroy(data->no_platforms_widget);
 		meh_widget_text_destroy(data->selection_widget);
 	}
-
-	g_free(screen->data);
 }
 
 /*
@@ -106,8 +104,7 @@ int meh_screen_platform_list_messages_handler(App* app, Screen* screen, Message*
 			break;
 		case MEH_MSG_UPDATE:
 			{
-				int* delta_time = (int*)message->data;
-				meh_screen_platform_list_update(screen, *delta_time);
+				meh_screen_platform_list_update(screen);
 			}
 			break;
 		case MEH_MSG_RENDER:
@@ -178,7 +175,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 	}
 }
 
-int meh_screen_platform_list_update(Screen* screen, int delta_time) {
+int meh_screen_platform_list_update(Screen* screen) {
 	g_assert(screen != NULL);
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);

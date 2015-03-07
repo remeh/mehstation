@@ -209,8 +209,6 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 		/* We must free the textures cache */
 		meh_screen_exec_list_destroy_resources(screen);
 	}
-
-	g_free(screen->data);
 }
 
 /*
@@ -446,8 +444,7 @@ int meh_screen_exec_list_messages_handler(App* app, Screen* screen, Message* mes
 			break;
 		case MEH_MSG_UPDATE:
 			{
-				int* delta_time = (int*)message->data;
-				meh_screen_exec_list_update(screen, *delta_time);
+				meh_screen_exec_list_update(screen);
 			}
 			break;
 		case MEH_MSG_RENDER:
@@ -741,7 +738,7 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 /*
  * meh_screen_exec_list_update updates the executable list.
  */
-int meh_screen_exec_list_update(Screen* screen, int delta_time) {
+int meh_screen_exec_list_update(Screen* screen) {
 	g_assert(screen != NULL);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);

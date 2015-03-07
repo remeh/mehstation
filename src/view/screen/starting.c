@@ -6,6 +6,7 @@
 #include "view/image.h"
 #include "view/screen.h"
 #include "view/widget_rect.h"
+#include "view/screen/fade.h"
 #include "view/screen/starting.h"
 #include "view/screen/platform_list.h"
 #include "view/window.h"
@@ -50,12 +51,7 @@ int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* mess
 			break;
 		case MEH_MSG_UPDATE:
 			{
-				if (message->data == NULL) {
-					g_warning("No data with a MEH_MSG_UPDATE in starting screen.");
-					return 2;
-				}
-				int* delta_time = (int*)message->data;
-				meh_screen_starting_update(app, screen, *delta_time);
+				meh_screen_starting_update(app, screen);
 			}
 			break;
 		case MEH_MSG_RENDER:
@@ -83,16 +79,16 @@ StartingData* meh_screen_starting_get_data(Screen* screen) {
 	if (screen->data == NULL) {
 		return NULL;
 	}
-
 	return (StartingData*) screen->data;
 }
 
 static void meh_screen_starting_go_to_platform_list(App* app, Screen* screen) {
 	/* create and switch  to the system list screen. */
 	Screen* platform_list_screen = meh_screen_platform_list_new(app);
-	meh_app_set_current_screen(app, platform_list_screen);
-	/* free the memory of the starting screen */
-	meh_screen_destroy(screen);
+	Screen* fade_screen = meh_screen_fade_new(app, screen, platform_list_screen);
+	meh_app_set_current_screen(app, fade_screen);
+	/* NOTE we don't free the memory of the screen, the fade screen
+	 * will do it. */
 }
 
 /*
@@ -119,12 +115,12 @@ void meh_screen_starting_button_pressed(App* app, Screen* screen, int pressed_bu
  * meh_screen_starting_update received a call by the main_loop when we 
  * can update this screen.
  */
-int meh_screen_starting_update(App* app, Screen* screen, int delta_time) {
+int meh_screen_starting_update(App* app, Screen* screen) {
 	/* Animate the splashscreen */
 	meh_screen_update_transitions(screen);
 
 	/*
-	 * Wait 5s before going to the system list selection.
+	 * Wait 5s before going to the platform list selection.
 	 */
 	if (SDL_GetTicks() > 5000) {
 		meh_screen_starting_go_to_platform_list(app, screen);

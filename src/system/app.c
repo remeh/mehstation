@@ -250,9 +250,7 @@ void meh_app_main_loop_update(App* app) {
 	g_assert(app != NULL);
 
 	/* sends the update message */
-	int* delta_time = g_new(int, 1);
-	*delta_time = 0;
-	Message* message = meh_message_new(MEH_MSG_UPDATE, delta_time); // TODO Remove this useless delta time.
+	Message* message = meh_message_new(MEH_MSG_UPDATE, NULL);
 	meh_app_send_message(app, message);
 	meh_message_destroy(message);
 	message = NULL;
