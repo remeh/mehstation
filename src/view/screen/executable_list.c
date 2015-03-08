@@ -148,6 +148,10 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 	data->cover_widget = meh_widget_image_new(NULL, 1030, 140, 200, 300);
 }
 
+/*
+ * meh_screen_exec_list_start_bg_anim slighty moves the background to give
+ * an impression of dynamic.
+ */
 static void meh_screen_exec_list_start_bg_anim(Screen* screen) {
 	g_assert(screen != NULL);
 
@@ -637,7 +641,8 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	int relative_new = data->selected_executable%MEH_EXEC_LIST_SIZE;
 	int relative_old = prev_selected_exec%MEH_EXEC_LIST_SIZE;
 	if ((relative_new == 0 && relative_old != 1) || /* Last -> First */
-			(relative_new == MEH_EXEC_LIST_SIZE-1 && relative_old != MEH_EXEC_LIST_SIZE-2))	{						          
+		/* TODO Doesn't work with incomplete list. */
+	    (relative_new == MEH_EXEC_LIST_SIZE-1 && relative_old == 0))	{
 		meh_screen_exec_list_refresh_executables_widget(app, screen);
 	}
 
