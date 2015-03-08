@@ -19,6 +19,7 @@ typedef struct {
 	SDL_Texture* splash_texture;
 
 	WidgetImage* splash;
+	gboolean done;
 } StartingData;
 
 Screen* meh_screen_starting_new(struct App* app);

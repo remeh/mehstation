@@ -33,6 +33,7 @@ Screen* meh_screen_starting_new(App* app) {
 	/* Splashscreen */
 	data->splash_texture = meh_image_load_file(app->window->sdl_renderer, "res/splashscreen.png");
 	data->splash = meh_widget_image_new(data->splash_texture, 0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT);
+	data->done = FALSE;
 
 	screen->data = data;
 
@@ -127,11 +128,15 @@ int meh_screen_starting_update(App* app, Screen* screen) {
 	/* Animate the splashscreen */
 	meh_screen_update_transitions(screen);
 
+	StartingData* data = meh_screen_starting_get_data(screen);
+	g_assert(data != NULL);
+
 	/*
 	 * Wait 5s before going to the platform list selection.
 	 */
-	if (SDL_GetTicks() > 5000) {
+	if (SDL_GetTicks() > 5000 && data->done == FALSE) {
 		meh_screen_starting_go_to_platform_list(app, screen);
+		data->done = TRUE; /* don't redo it while the fading screen is refreshing */
 	}
 
 	return 0;
