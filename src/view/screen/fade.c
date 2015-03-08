@@ -12,7 +12,7 @@
 
 #define MEH_FADE_DURATION 300 /* TODO In configuration file ? */
 
-static void meh_screen_fade_send_empty_msg(App* app, Screen* screen, int msg_type);
+static void meh_screen_fade_send_msg(App* app, Screen* screen, int msg_type, void* data);
 
 Screen* meh_screen_fade_new(App* app, Screen* src_screen, Screen* dst_screen) {
 	g_assert(app != NULL);
@@ -35,7 +35,7 @@ Screen* meh_screen_fade_new(App* app, Screen* src_screen, Screen* dst_screen) {
 	/* Fading rect */
 	SDL_Color black = { 0, 0, 0 ,0 };
 	data->fade_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, black, TRUE);
-	data->fade_widget->a = meh_transition_start(MEH_TRANSITION_LINEAR, 0, 255, MEH_FADE_DURATION);
+	data->fade_widget->a = meh_transition_start(MEH_TRANSITION_LINEAR, 1, 254, MEH_FADE_DURATION);
 	meh_screen_add_rect_transitions(screen, data->fade_widget);
 
 	screen->data = data;
@@ -71,26 +71,33 @@ int meh_screen_fade_update(struct App* app, Screen* screen) {
 	FadeData* data = meh_screen_fade_get_data(screen);
 	g_assert(data != NULL);
 
+	/* update the src and dst screen */
 	switch (data->state) {
 		case MEH_FADE_STATE_IN:
-			meh_screen_fade_send_empty_msg(app, data->src_screen, MEH_MSG_UPDATE);
+			meh_screen_fade_send_msg(app, data->src_screen, MEH_MSG_UPDATE, NULL);
 			break;
 		case MEH_FADE_STATE_OUT:
-			meh_screen_fade_send_empty_msg(app, data->dst_screen, MEH_MSG_UPDATE);
+			meh_screen_fade_send_msg(app, data->dst_screen, MEH_MSG_UPDATE, NULL);
 			break;
 	}
 
 	if (data->fade_widget->a.ended == TRUE) {
 		switch (data->state) {
 			case MEH_FADE_STATE_IN:
-				data->fade_widget->a = meh_transition_start(MEH_TRANSITION_LINEAR, 255, 0, MEH_FADE_DURATION);
+				/* Next step of the fade. */
+				data->fade_widget->a = meh_transition_start(MEH_TRANSITION_LINEAR, 254, 1, MEH_FADE_DURATION);
 				meh_screen_add_rect_transitions(screen, data->fade_widget);
 				data->state = MEH_FADE_STATE_OUT;
 				break;
 			case MEH_FADE_STATE_OUT:
-				meh_screen_destroy(data->src_screen);
+				/* Don't delete the src screen if it's
+				 * the parent of the dst one, because it means
+				 * that we'll re-use it */
+				if (data->dst_screen->parent_screen != data->src_screen) {
+					meh_screen_destroy(data->src_screen);
+				}
 				meh_app_set_current_screen(app, data->dst_screen);
-				meh_screen_destroy(screen);
+				meh_screen_destroy(screen); /* destroy the fade screen */
 				return 0;
 		}
 	}
@@ -99,12 +106,12 @@ int meh_screen_fade_update(struct App* app, Screen* screen) {
 }
 
 /*
- * meh_screen_fade_send_empty_msg sends an empty message to the given screen.
+ * meh_screen_fade_send_msg sends a message to the given screen.
  */
-static void meh_screen_fade_send_empty_msg(App* app, Screen* screen, int msg_type) {
+static void meh_screen_fade_send_msg(App* app, Screen* screen, int msg_type, void* data) {
 	g_assert(screen != NULL);
 
-	Message* message = meh_message_new(msg_type, NULL);
+	Message* message = meh_message_new(msg_type, data);
 	screen->messages_handler(app, screen, message);
 	meh_message_destroy(message);
 }
@@ -137,12 +144,20 @@ void meh_screen_fade_render(struct App* app, Screen* screen) {
 	FadeData* data = meh_screen_fade_get_data(screen);
 	g_assert(data != NULL);
 
+	gboolean* flip = g_new(gboolean, 1);
+	*flip = FALSE;
 	switch (data->state) {
+		case MEH_FADE_STATE_IN:
+			/* render the dest screen behind the fade widget */
+			meh_screen_fade_send_msg(app, data->src_screen, MEH_MSG_RENDER, flip);
+			break;
 		case MEH_FADE_STATE_OUT:
-			meh_screen_fade_send_empty_msg(app, data->dst_screen, MEH_MSG_RENDER);
+			/* render the dest screen behind the fade widget */
+			meh_screen_fade_send_msg(app, data->dst_screen, MEH_MSG_RENDER, flip);
 			break;
 	}
 
+	/* render the fade widget */
 	meh_widget_rect_render(app->window, data->fade_widget);
 
 	meh_window_render(app->window);
