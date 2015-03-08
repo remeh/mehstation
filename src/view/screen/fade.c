@@ -10,8 +10,6 @@
 #include "view/widget_rect.h"
 #include "view/screen/fade.h"
 
-#define MEH_FADE_DURATION 300 /* TODO In configuration file ? */
-
 static void meh_screen_fade_send_msg(App* app, Screen* screen, int msg_type, void* data);
 
 Screen* meh_screen_fade_new(App* app, Screen* src_screen, Screen* dst_screen) {
@@ -35,7 +33,7 @@ Screen* meh_screen_fade_new(App* app, Screen* src_screen, Screen* dst_screen) {
 	/* Fading rect */
 	SDL_Color black = { 0, 0, 0 ,0 };
 	data->fade_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, black, TRUE);
-	data->fade_widget->a = meh_transition_start(MEH_TRANSITION_LINEAR, 1, 254, MEH_FADE_DURATION);
+	data->fade_widget->a = meh_transition_start(MEH_TRANSITION_LINEAR, 1, 254, app->settings.fade_duration);
 	meh_screen_add_rect_transitions(screen, data->fade_widget);
 
 	screen->data = data;
@@ -85,7 +83,7 @@ int meh_screen_fade_update(struct App* app, Screen* screen) {
 		switch (data->state) {
 			case MEH_FADE_STATE_IN:
 				/* Next step of the fade. */
-				data->fade_widget->a = meh_transition_start(MEH_TRANSITION_LINEAR, 254, 1, MEH_FADE_DURATION);
+				data->fade_widget->a = meh_transition_start(MEH_TRANSITION_LINEAR, 254, 1, app->settings.fade_duration);
 				meh_screen_add_rect_transitions(screen, data->fade_widget);
 				data->state = MEH_FADE_STATE_OUT;
 				break;

@@ -13,6 +13,7 @@ typedef struct {
 	/* render */
 	guint max_update_per_second;
 	guint max_frameskip;
+	guint fade_duration;
 } Settings;
 
 gboolean meh_settings_read(Settings *settings, const gchar *filename);
