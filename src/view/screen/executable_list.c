@@ -18,6 +18,7 @@
 #include "view/image.h"
 #include "view/widget_text.h"
 #include "view/screen.h"
+#include "view/screen/fade.h"
 #include "view/screen/executable_list.h"
 
 #define MEH_EXEC_LIST_MAX_CACHE (7)
@@ -449,7 +450,12 @@ int meh_screen_exec_list_messages_handler(App* app, Screen* screen, Message* mes
 			break;
 		case MEH_MSG_RENDER:
 			{
-				meh_screen_exec_list_render(app, screen);
+				if (message->data == NULL) {
+					meh_screen_exec_list_render(app, screen, TRUE);
+				} else {
+					gboolean* flip = (gboolean*)message->data;
+					meh_screen_exec_list_render(app, screen, *flip);
+				}
 			}
 			break;
 	}
@@ -687,9 +693,12 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			break;
 		case MEH_INPUT_BUTTON_B:
 			if (screen->parent_screen != NULL) {
-				/* back to the platform screen */
-				meh_app_set_current_screen(app, screen->parent_screen);
-				meh_screen_destroy(screen);
+				/* back to the platform screen using a fade
+				 * screen for the transition */
+				Screen* fade_screen = meh_screen_fade_new(app, screen, screen->parent_screen);
+				meh_app_set_current_screen(app, fade_screen);
+				/* NOTE we don't free the memory of the starting screen, the fade screen
+				 * will do it. */
 			}
 			break;
 		case MEH_INPUT_BUTTON_A:
@@ -753,7 +762,7 @@ int meh_screen_exec_list_update(Screen* screen) {
 /*
  * meh_screen_exec_list_render renders the executable list view.
  */
-int meh_screen_exec_list_render(App* app, Screen* screen) {
+int meh_screen_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
@@ -819,7 +828,9 @@ int meh_screen_exec_list_render(App* app, Screen* screen) {
 		meh_widget_text_render(app->window, g_queue_peek_nth(data->executable_widgets, i));
 	}
 
-	meh_window_render(app->window);
+	if (flip == TRUE) {
+		meh_window_render(app->window);
+	}
 	return 0;
 }
 

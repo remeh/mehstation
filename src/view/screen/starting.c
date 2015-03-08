@@ -1,3 +1,8 @@
+/*
+ * mehstation - Splashscreen.
+ *
+ * Copyright © 2015 Rémy Mathieu
+ */
 #include "glib-2.0/glib.h"
 
 #include "system/app.h"
@@ -55,8 +60,11 @@ int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* mess
 			}
 			break;
 		case MEH_MSG_RENDER:
-			{
-				meh_screen_starting_render(app, screen);
+			if (message->data == NULL) {
+				meh_screen_starting_render(app, screen, TRUE);
+			} else {
+				gboolean* flip = (gboolean*)message->data;
+				meh_screen_starting_render(app, screen, *flip);
 			}
 			break;
 	}
@@ -83,11 +91,11 @@ StartingData* meh_screen_starting_get_data(Screen* screen) {
 }
 
 static void meh_screen_starting_go_to_platform_list(App* app, Screen* screen) {
-	/* create and switch  to the system list screen. */
+	/* create and switch to the system list screen. */
 	Screen* platform_list_screen = meh_screen_platform_list_new(app);
 	Screen* fade_screen = meh_screen_fade_new(app, screen, platform_list_screen);
 	meh_app_set_current_screen(app, fade_screen);
-	/* NOTE we don't free the memory of the screen, the fade screen
+	/* NOTE we don't free the memory of the starting screen, the fade screen
 	 * will do it. */
 }
 
@@ -132,7 +140,7 @@ int meh_screen_starting_update(App* app, Screen* screen) {
 /*
  * meh_screen_starting_render is the rendering of the starting screen.
  */
-void meh_screen_starting_render(App* app, Screen* screen) {
+void meh_screen_starting_render(App* app, Screen* screen, gboolean flip) {
 	g_assert(screen != NULL);
 	g_assert(app != NULL);
 
@@ -146,5 +154,7 @@ void meh_screen_starting_render(App* app, Screen* screen) {
 	/* draw the splashscreen */
 	meh_widget_image_render(app->window, data->splash);
 
-	meh_window_render(app->window);
+	if (flip == TRUE) {
+		meh_window_render(app->window);
+	}
 }

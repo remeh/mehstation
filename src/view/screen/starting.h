@@ -28,4 +28,4 @@ int meh_screen_starting_messages_handler(struct App* app, Screen* screen, Messag
 void meh_screen_starting_button_pressed(struct App* app, Screen* screen, int pressed_button);
 int meh_screen_starting_update(struct App* app, Screen* screen);
 Screen* meh_screen_starting_create_next_screen(Screen* screen);
-void meh_screen_starting_render(struct App* app, Screen* screen);
+void meh_screen_starting_render(struct App* app, Screen* screen, gboolean flip);

@@ -14,6 +14,7 @@
 #include "view/screen.h"
 #include "view/widget_text.h"
 #include "view/screen/executable_list.h"
+#include "view/screen/fade.h"
 #include "view/screen/platform_list.h"
 
 Screen* meh_screen_platform_list_new(App* app) {
@@ -109,7 +110,12 @@ int meh_screen_platform_list_messages_handler(App* app, Screen* screen, Message*
 			break;
 		case MEH_MSG_RENDER:
 			{
-				meh_screen_platform_list_render(app, screen);
+				if (message->data == NULL) {
+					meh_screen_platform_list_render(app, screen, TRUE);
+				} else {
+					gboolean* flip = (gboolean*)message->data;
+					meh_screen_platform_list_render(app, screen, *flip);
+				}
 			}
 			break;
 	}
@@ -127,7 +133,10 @@ static void meh_screen_platform_list_start_platform(App* app, Screen* screen) {
 		/* create the child screen */
 		Screen* exec_list_screen = meh_screen_exec_list_new(app, platform->id);
 		exec_list_screen->parent_screen = screen;
-		meh_app_set_current_screen(app, exec_list_screen);
+		Screen* fade_screen = meh_screen_fade_new(app, screen, exec_list_screen);
+		meh_app_set_current_screen(app, fade_screen);
+		/* NOTE we don't free the memory of the starting screen, the fade screen
+		 * will do it. */
 	}
 }
 
@@ -187,7 +196,7 @@ int meh_screen_platform_list_update(Screen* screen) {
 	return 0;
 }
 
-int meh_screen_platform_list_render(App* app, Screen* screen) {
+int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
@@ -213,6 +222,9 @@ int meh_screen_platform_list_render(App* app, Screen* screen) {
 
 	meh_widget_text_render(app->window, data->selection_widget);
 	
-	meh_window_render(app->window);
+	if (flip == TRUE) {
+		meh_window_render(app->window);
+	}
+
 	return 0;
 }
