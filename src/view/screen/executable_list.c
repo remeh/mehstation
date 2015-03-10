@@ -637,12 +637,13 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	}
 
 	/* do we need to refresh the executable widgets ?
-	 * Only on page changes */
+	  Only on page changes */
 	int relative_new = data->selected_executable%MEH_EXEC_LIST_SIZE;
 	int relative_old = prev_selected_exec%MEH_EXEC_LIST_SIZE;
 	if ((relative_new == 0 && relative_old != 1) || /* Last -> First */
-		/* TODO Doesn't work with incomplete list. */
-	    (relative_new == MEH_EXEC_LIST_SIZE-1 && relative_old == 0))	{
+		/* The two cases of First -> last */
+	    (relative_new == MEH_EXEC_LIST_SIZE-1 && relative_old == 0) ||
+		(data->selected_executable == data->executables_length-1))	{
 		meh_screen_exec_list_refresh_executables_widget(app, screen);
 	}
 
