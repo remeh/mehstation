@@ -63,7 +63,6 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->textures = NULL;
 	data->background = -1;
 	data->cover = -1;
-	data->header_text = g_utf8_strup(data->platform->name, -1);
 
 	data->executable_widgets = g_queue_new();
 
@@ -107,12 +106,14 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 	data->background_hover_widget = meh_widget_rect_new(0, 0, app->window->width, app->window->height, white_transparent, TRUE); 
 
 	/* Header */
-	data->header_text_widget = meh_widget_text_new(app->big_font, data->header_text, 20, 10, white, TRUE);
+	data->header_text_widget = meh_widget_text_new(app->big_font, data->platform->name, 20, 10, white, TRUE);
+	data->header_text_widget->uppercase = TRUE;
 	data->header_widget = meh_widget_rect_new(0, 0, app->window->width, 70, gray, TRUE);
 
 	/* Executables */
 	for (int i = 0; i < MEH_EXEC_LIST_SIZE; i++) {
 		WidgetText* text = meh_widget_text_new(app->small_font, "", 60, 130+(i*32), white, FALSE);
+		text->uppercase = TRUE; /* executables name in uppercase */
 		g_queue_push_tail(data->executable_widgets, text);
 	}
 
@@ -207,9 +208,6 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 			g_free(g_queue_peek_nth(data->cache_executables_id, i));
 		}
 		g_queue_free(data->cache_executables_id);
-
-		/* Misc */
-		g_free(data->header_text);
 
 		/* We must free the textures cache */
 		meh_screen_exec_list_destroy_resources(screen);
@@ -839,4 +837,3 @@ int meh_screen_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	}
 	return 0;
 }
-
