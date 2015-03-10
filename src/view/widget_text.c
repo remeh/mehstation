@@ -33,6 +33,9 @@ WidgetText* meh_widget_text_new(const Font* font, const char* text, float x, flo
 	t->shadow = shadow;
 	t->texture = NULL;
 
+	/* By default, not uppercase */
+	t->uppercase = FALSE;
+
 	return t;
 }
 
@@ -61,7 +64,17 @@ void meh_widget_text_reload(Window* window, WidgetText* text) {
 		text->a.value,
 	};
 
-	text->texture = meh_window_render_text_texture(window, text->font, text->text, color);
+	gchar* to_render = text->text;
+	if (text->uppercase) {
+		to_render = g_utf8_strup(text->text, -1);
+	}
+
+	/* Render the text on a texture. */
+	text->texture = meh_window_render_text_texture(window, text->font, to_render, color);
+
+	if (text->uppercase) {
+		g_free(to_render);
+	}
 
 	SDL_QueryTexture(text->texture, NULL, NULL, &text->tex_w, &text->tex_h);
 	g_debug("Texture for text %s loaded.", text->text);

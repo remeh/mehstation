@@ -25,6 +25,7 @@ typedef struct {
 	Transition a;
 
 	gboolean shadow;
+	gboolean uppercase;
 
 	/* At first rendering, the texture is cached for performance purpose.
 	 * Use meh_widget_text_reload to refresh the texture. */
