@@ -34,6 +34,7 @@ static void meh_screen_exec_list_start_executable(App* app, Screen* screen);
 static void meh_screen_exec_list_select_resources(Screen* screen);
 static void meh_screen_exec_list_start_bg_anim(Screen* screen);
 static void meh_screen_exec_list_refresh_executables_widget(App* app, Screen* screen);
+static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* screen, int prev_selected_exec);
 
 Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
@@ -74,11 +75,12 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 
 	/*
 	 * Select and load the first resources
+	 * then refresh all the text textures by faking
+	 * a cursor movement.
 	 */
 	meh_screen_exec_list_select_resources(screen);
 	meh_screen_exec_list_load_resources(app, screen);
-	meh_screen_exec_list_start_bg_anim(screen);
-	meh_screen_exec_list_refresh_executables_widget(app, screen);
+	meh_screen_exec_list_refresh_after_cursor_move(app, screen, -1);
 
 	return screen;
 }
@@ -666,7 +668,7 @@ static void meh_screen_exec_list_refresh_executables_widget(App* app, Screen* sc
 
 	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));
 
-	/* For every executable text widget */
+	/* for every executable text widget */
 	for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 		WidgetText* text = g_queue_peek_nth(data->executable_widgets, i);
 		text->text = "";
@@ -680,7 +682,7 @@ static void meh_screen_exec_list_refresh_executables_widget(App* app, Screen* sc
 			}
 		}
 
-		// reload the text texture.
+		/* reload the text texture. */
 		meh_widget_text_reload(app->window, text);
 	}
 }
