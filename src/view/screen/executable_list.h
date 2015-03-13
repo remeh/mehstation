@@ -25,8 +25,9 @@ typedef struct ExecutableListData {
 
 	GQueue *cache_executables_id; /* Contains the executables for which we have load the resources
 									 The first loaded is the first in the queue. */
-	int background; /* Reference to a texture in the map, should NOT be freed ! */
-	int cover; /* Reference to a texture in the map, shouldn't be freed! */
+	int background; /* Index of the background in the textures cache */
+	int cover; /* Index of the cover in the textures cache. */
+	int screenshots[3]; /* Index of the first screenshot in the texture cache. */
 
 	/*
 	 * Widgets
@@ -36,8 +37,10 @@ typedef struct ExecutableListData {
 	WidgetRect* header_widget;
 	WidgetRect* list_background_widget;
 	WidgetText* header_text_widget;
+
 	WidgetImage* cover_widget;
 	WidgetImage* background_widget;
+	WidgetImage* screenshots_widget[3];
 
 	WidgetText* genres_widget;
 	WidgetText* genres_l_widget;

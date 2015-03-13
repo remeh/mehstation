@@ -65,6 +65,8 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->textures = NULL;
 	data->background = -1;
 	data->cover = -1;
+	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
+	data->header_text = g_utf8_strup(data->platform->name, -1);
 
 	data->executable_widgets = g_queue_new();
 
@@ -78,8 +80,6 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	 * then refresh all the text textures by faking
 	 * a cursor movement.
 	 */
-	meh_screen_exec_list_select_resources(screen);
-	meh_screen_exec_list_load_resources(app, screen);
 	meh_screen_exec_list_refresh_after_cursor_move(app, screen, -1);
 
 	return screen;
@@ -151,6 +151,11 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 	/* Cover */
 	data->cover_widget = meh_widget_image_new(NULL, 1030, 140, 200, 300);
 
+	/* Screenshots */
+	for (int i = 0; i < 3; i++) {
+		data->screenshots_widget[i] = meh_widget_image_new(NULL, 580 + (230*i), 460, 190, 80);
+	}
+
 	/* Description */
 	data->description_widget = meh_widget_multi_text_new(app->small_font, NULL, 580, 135, white, FALSE, 450.0f);
 }
@@ -188,6 +193,9 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 		meh_widget_rect_destroy(data->background_hover_widget);
 		meh_widget_rect_destroy(data->list_background_widget);
 		meh_widget_image_destroy(data->cover_widget);
+		for (int i = 0; i < 3; i++) {
+			meh_widget_image_destroy(data->screenshots_widget[i]);
+		}
 		meh_widget_text_destroy(data->header_text_widget);
 
 		meh_widget_text_destroy(data->genres_l_widget);
@@ -413,16 +421,20 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 	}
 
 	/*
-	 * Select a cover
+	 * Select a cover and some screenshots.
 	 */
 	int i = 0;
+	int found_screenshots = 0;
 	for (i = 0; i < g_queue_get_length(executable->resources); i++) {
-		ExecutableResource* res = g_queue_peek_nth(executable->resources, i++);
+		ExecutableResource* res = g_queue_peek_nth(executable->resources, i);
 		if (res != NULL) {
 			if (g_strcmp0(res->type, "cover") == 0) {
 				data->cover = res->id;
 				g_debug("Selected cover: %d", res->id);
-				break;
+			} else if (g_strcmp0(res->type, "screenshot") == 0 && found_screenshots < 3) {
+				data->screenshots[found_screenshots] = res->id;
+				g_debug("Selected %d screenshot: %d", found_screenshots, res->id);
+				found_screenshots++;
 			}
 		}
 	}
@@ -507,7 +519,10 @@ static void meh_screen_exec_list_load_resources(App* app, Screen* screen) {
 		}
 
 		/* Load only the needed resources. */
-		if (resource->id != data->background && resource->id != data->cover) {
+		int rid = resource->id;
+		if (rid != data->background && rid != data->cover &&
+			rid != data->screenshots[0] && rid != data->screenshots[1] &&
+			rid != data->screenshots[2]) {
 			continue;
 		}
 
@@ -812,6 +827,13 @@ int meh_screen_exec_list_render(App* app, Screen* screen, gboolean flip) {
 		data->cover_widget->texture = g_hash_table_lookup(data->textures, &(data->cover));
 	}
 	meh_widget_image_render(app->window, data->cover_widget);
+
+	for (int i = 0; i < 3; i++) {
+		if (data->screenshots[i] > -1) {
+			data->screenshots_widget[i]->texture = g_hash_table_lookup(data->textures, &(data->screenshots[i]));
+		}
+		meh_widget_image_render(app->window, data->screenshots_widget[i]);
+	}
 
 	/*
 	 * Extra info

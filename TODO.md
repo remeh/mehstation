@@ -1,3 +1,3 @@
-* The `mehstation.conf` uri is hardcoded
-* The `arial.ttf` is hardcoded
 * Disable the screensaver
+* What to do with a platform which has not the %exec% flag ?
+* Gray colors for Unknown information
