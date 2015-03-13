@@ -21,6 +21,7 @@ SET(
         src/view/window.c
         src/view/widget_image.c
         src/view/widget_rect.c
+        src/view/widget_multi_text.c
         src/view/widget_text.c
         src/view/screen/executable_list.c
         src/view/screen/fade.c
