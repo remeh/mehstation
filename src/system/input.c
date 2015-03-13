@@ -1,5 +1,5 @@
-#include "SDL2/SDL.h"
-#include "glib-2.0/glib.h"
+#include <glib.h>
+#include <SDL2/SDL.h>
 
 #include "system/message.h"
 #include "system/input.h"

@@ -70,7 +70,7 @@ void meh_widget_text_reload(Window* window, WidgetText* text) {
 	}
 
 	/* Render the text on a texture. */
-	text->texture = meh_window_render_text_texture(window, text->font, to_render, color);
+	text->texture = meh_window_render_text_texture(window, text->font, to_render, color, -1.0f);
 
 	if (text->uppercase) {
 		g_free(to_render);
@@ -94,6 +94,6 @@ void meh_widget_text_render(Window* window, WidgetText* text) {
 		text->tex_w,
 		text->tex_h
 	};
-	
+
 	meh_window_render_texture(window, text->texture, position);
 }

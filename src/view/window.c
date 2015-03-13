@@ -96,16 +96,18 @@ void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect po
 /*
  * meh_window_render_text directly renders text on the rendered with the given font
  * at the given position.
+ * To render on a single line : max_width should be equal to -1.0f
+ * If max_width != 1.0f, the text is rendered wrapped.
  * Returns:
  *  0 if everything succeed
  *  1 if an error occurred
  */
-int meh_window_render_text(Window* window, const Font* font, const char* text, SDL_Color color, int x, int y) {
+int meh_window_render_text(Window* window, const Font* font, const char* text, SDL_Color color, int x, int y, float max_width) {
 	g_assert(window != NULL);
 	g_assert(font != NULL);
 
 	/* Write the text on a texture. */
-	SDL_Texture* texture = meh_window_render_text_texture(window, font, text, color);
+	SDL_Texture* texture = meh_window_render_text_texture(window, font, text, color, max_width);
 
 	/* Renders at the good position */
 	int w, h;
@@ -123,7 +125,7 @@ int meh_window_render_text(Window* window, const Font* font, const char* text, S
  * meh_window_render_text_texture renders the given text with the given font on a SDL_Texture
  * and returns it.
  */
-SDL_Texture* meh_window_render_text_texture(Window* window, const Font* font, const char* text, SDL_Color color) {
+SDL_Texture* meh_window_render_text_texture(Window* window, const Font* font, const char* text, SDL_Color color, float max_width) {
 	g_assert(window != NULL);
 	g_assert(font != NULL);
 
@@ -136,7 +138,7 @@ SDL_Texture* meh_window_render_text_texture(Window* window, const Font* font, co
 		rendered_text = text;
 	}
 
-	SDL_Texture* texture = meh_font_render_on_texture(window->sdl_renderer, font, rendered_text, color);
+	SDL_Texture* texture = meh_font_render_on_texture(window->sdl_renderer, font, rendered_text, color, max_width);
 
 	if (texture == NULL) {
 		g_critical("Can't render text on a texture.\n");

@@ -36,13 +36,23 @@ void meh_font_destroy(Font* font) {
  * meh_font_render_on_surface uses the given font to render a text in the given
  * color on a surface.
  *
+ * If max_width == -1.0f, render to a single line, otherwise render wrapped.
+ *
  * The returned surface should be freed by the caller.
  */
-SDL_Texture* meh_font_render_on_texture(SDL_Renderer* renderer, const Font* font, const char* text, SDL_Color color) {
+SDL_Texture* meh_font_render_on_texture(SDL_Renderer* renderer, const Font* font, const char* text, SDL_Color color, float max_width) {
 	g_assert(font != NULL);
 	g_assert(text != NULL);
 
-	SDL_Surface* surface = TTF_RenderText_Blended(font->sdl_font, text, color);
+	SDL_Surface* surface = NULL;
+	/* either render on a single line or on multiple lines. */
+	printf("%f\n", max_width);
+	if (max_width == -1.0f) {
+		surface = TTF_RenderText_Blended(font->sdl_font, text, color);
+	} else {
+		surface = TTF_RenderText_Blended_Wrapped(font->sdl_font, text, color, max_width);
+	}
+
 	SDL_Texture* texture = NULL;
 
 	if (surface == NULL) {
