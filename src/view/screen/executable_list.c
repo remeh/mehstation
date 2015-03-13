@@ -66,7 +66,6 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->background = -1;
 	data->cover = -1;
 	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
-	data->header_text = g_utf8_strup(data->platform->name, -1);
 
 	data->executable_widgets = g_queue_new();
 
@@ -95,7 +94,7 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 	SDL_Color gray = { 10, 10, 10, 245 };
 
 	/* Selection. */
-	data->selection_widget = meh_widget_rect_new(40, -100, 550, 28, white_transparent, TRUE);
+	data->selection_widget = meh_widget_rect_new(40, -100, 530, 28, white_transparent, TRUE);
 	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 130, 500);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 
