@@ -2,12 +2,13 @@
 
 #include "system/db/platform.h"
 
-Platform* meh_model_platform_new(int id, const char* name, const char* command) {
+Platform* meh_model_platform_new(int id, const char* name, const char* command, const char* icon) {
 	Platform* platform = g_new(Platform, 1);
 
 	platform->id = id;
 	platform->name = g_strdup(name);
 	platform->command = g_strdup(command);
+	platform->icon = g_strdup(icon);
 
 	return platform;
 }
@@ -17,6 +18,8 @@ void meh_model_platform_destroy(Platform* platform) {
 
 	g_free(platform->name);
 	g_free(platform->command);
+	g_free(platform->icon);
+
 	g_free(platform);
 }
 

@@ -1,9 +1,10 @@
-CREATE TABLE `platform`  (
+CREATE TABLE "platform"  (
 	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	`name`	TEXT NOT NULL,
-	`command`	TEXT NOT NULL
+	`command`	TEXT NOT NULL,
+    `icon`  TEXT
 );
-CREATE TABLE `mehstation` (
+CREATE TABLE "mehstation" (
     `name` TEXT NOT NULL PRIMARY KEY UNIQUE,
     `value` TEXT
 );

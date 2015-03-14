@@ -34,7 +34,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	 */
 
 	/* Title */
-	SDL_Color white = { 255, 255, 255 };
+	SDL_Color white = { 255, 255, 255, 255 };
 	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 50, 50, white, FALSE);
 	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 50, 1000);
 	meh_screen_add_text_transitions(screen, data->title);
@@ -43,13 +43,41 @@ Screen* meh_screen_platform_list_new(App* app) {
 	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured", 100, 100, white, FALSE);
 
 	/* Platforms */
-	data->platform_widgets = g_queue_new();
+	data->icons_widgets = g_queue_new();
+	data->platforms_icons = g_queue_new();
+
+	/* Load the data / icons / widgets of every platforms */
 	for (int i = 0; i < g_queue_get_length(data->platforms); i++) {
 		Platform* platform = g_queue_peek_nth(data->platforms, i);
-		g_queue_push_tail(data->platform_widgets, meh_widget_text_new(app->small_font, platform->name, 100, 100 + (i*30), white, FALSE));
+
+		/* load the platform icon */
+		SDL_Texture* p_texture = NULL;
+		if (platform->icon == NULL || strlen(platform->icon) == 0) {
+			/* create a texture with just the text of the platform */
+			p_texture = meh_font_render_on_texture(
+					app->window->sdl_renderer,
+					app->small_font,
+					platform->name,
+					white,
+					TRUE);
+		} else {
+			/* load the icon */
+			p_texture = meh_image_load_file(app->window->sdl_renderer, platform->icon);
+		}
+
+		if (p_texture == NULL) {
+			g_critical("Can't load the icon of the platform %s" ,platform->name);
+		}
+
+		g_queue_push_tail(data->platforms_icons, p_texture);
+
+		/* create the platform widget */
+		WidgetImage* platform_widget = meh_widget_image_new(p_texture, 100, 100 + (i*110), 100, 100);
+		g_queue_push_tail(data->icons_widgets, platform_widget);
 	}
+
 	/* Selection */
-	data->selection_widget = meh_widget_text_new(app->small_font, ">", 85, 100, white, FALSE);
+	data->selection_widget = meh_widget_rect_new(95, 95, 110, 110, white, FALSE);
 
 	screen->data = data;
 
@@ -64,18 +92,28 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	if (data != NULL) {
-		/* Platform text widget. */
-		for (int i = 0; i < g_queue_get_length(data->platform_widgets); i++) {
-			WidgetText* widget = g_queue_peek_nth(data->platform_widgets, i);
-			meh_widget_text_destroy(widget);
+		/* free platforms widget */
+		for (int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
+			WidgetImage* widget = g_queue_peek_nth(data->icons_widgets, i);
+			meh_widget_image_destroy(widget);
 		}
-		g_queue_free(data->platform_widgets);
+		g_queue_free(data->platforms_icons);
 
+		/* free platforms icons texture */
+		for (int i = 0; i < g_queue_get_length(data->platforms_icons); i++) {
+			SDL_Texture* text = g_queue_peek_nth(data->platforms_icons, i);
+			SDL_DestroyTexture(text);
+		}
+		g_queue_free(data->platforms_icons);
+
+		/* free platform models */
 		meh_model_platforms_destroy(data->platforms);
 
+		/* various widgets */
 		meh_widget_text_destroy(data->title);
 		meh_widget_text_destroy(data->no_platforms_widget);
-		meh_widget_text_destroy(data->selection_widget);
+
+		meh_widget_rect_destroy(data->selection_widget);
 	}
 }
 
@@ -171,7 +209,8 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform -= 1;
 			}
-			data->selection_widget->y.value = data->selected_platform*30 + 100;
+			data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, data->selection_widget->y.value, data->selected_platform*110 + 95, 100);
+			meh_screen_add_rect_transitions(screen, data->selection_widget);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 			if (data->selected_platform == g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1) {
@@ -179,7 +218,8 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform += 1;
 			}
-			data->selection_widget->y.value = data->selected_platform*30 + 100;
+			data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, data->selection_widget->y.value, data->selected_platform*110 + 95, 100);
+			meh_screen_add_rect_transitions(screen, data->selection_widget);
 			break;
 	}
 }
@@ -215,12 +255,14 @@ int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 		meh_widget_text_render(app->window, data->no_platforms_widget);
 	}
 
-	for (int i = 0; i < g_queue_get_length(data->platform_widgets); i++) {
-		WidgetText* widget = g_queue_peek_nth(data->platform_widgets, i);
-		meh_widget_text_render(app->window, widget);
-	}
+	/* selection */
+	meh_widget_rect_render(app->window, data->selection_widget);
 
-	meh_widget_text_render(app->window, data->selection_widget);
+	/* icon */
+	for (int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
+		WidgetImage* widget = g_queue_peek_nth(data->icons_widgets, i);
+		meh_widget_image_render(app->window, widget);
+	}
 	
 	if (flip == TRUE) {
 		meh_window_render(app->window);

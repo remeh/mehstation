@@ -19,8 +19,10 @@ typedef struct PlatformListData {
 	 */
 	WidgetText* no_platforms_widget;
 	WidgetText* title;
-	WidgetText* selection_widget;
-	GQueue* platform_widgets;
+	WidgetRect* selection_widget;
+
+	GQueue* platforms_icons; /* Queue of SDL_Texture*, memory must be freed */
+	GQueue* icons_widgets; /* List of WidgetImage*, memory must be freed */
 } PlatformListData;
 
 Screen* meh_screen_platform_list_new(struct App* app);

@@ -217,7 +217,7 @@ GSList* meh_input_manager_append_button_pressed(GSList* list, int pressed_button
  * meh_input_create_default_keyboard_config create an input config
  * from the SDL_Event of the keyboard mapped to the internal
  * mehstation button configuration.
- * Can be used as a fallback.
+ 
  */
 static GHashTable* meh_input_create_default_keyboard_mapping() {
 	GHashTable* mapping = g_hash_table_new(g_int_hash, g_int_equal);

@@ -141,7 +141,7 @@ GQueue* meh_db_get_platforms(DB* db) {
 
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM platform ORDER BY name";
+	const char* sql = "SELECT \"id\", \"name\", \"command\", \"icon\" FROM platform ORDER BY name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
@@ -163,8 +163,9 @@ GQueue* meh_db_get_platforms(DB* db) {
 		int id = sqlite3_column_int(statement, 0);
 		const char* name = (const char*)sqlite3_column_text(statement, 1);	
 		const char* command = (const char*)sqlite3_column_text(statement, 2);
+		const char* icon = (const char*)sqlite3_column_text(statement, 3);
 		/* build the object */
-		Platform* platform = meh_model_platform_new(id, name, command);
+		Platform* platform = meh_model_platform_new(id, name, command, icon);
 		/* append in the list */
 		g_queue_push_tail(list, platform);
 	}
@@ -183,7 +184,7 @@ Platform* meh_db_get_platform(DB* db, int platform_id) {
 	Platform* platform = NULL;
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"name\", \"command\" FROM platform WHERE id = ?1 ORDER BY name";
+	const char* sql = "SELECT \"id\", \"name\", \"command\", \"icon\" FROM platform WHERE id = ?1 ORDER BY name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
@@ -205,8 +206,9 @@ Platform* meh_db_get_platform(DB* db, int platform_id) {
 		int id = sqlite3_column_int(statement, 0);
 		const char* name = (const char*)sqlite3_column_text(statement, 1);
 		const char* command = (const char*)sqlite3_column_text(statement, 2);
+		const char* icon = (const char*)sqlite3_column_text(statement, 3);
 		/* build the object */
-		platform = meh_model_platform_new(id, name, command);
+		platform = meh_model_platform_new(id, name, command, icon);
 	}
 
 	sqlite3_finalize(statement);

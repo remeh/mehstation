@@ -91,7 +91,7 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 
 	SDL_Color white = { 255, 255, 255, 255 };
 	SDL_Color white_transparent = { 255, 255, 255, 50 };
-	SDL_Color gray = { 10, 10, 10, 245 };
+	SDL_Color gray = { 10, 10, 10, 235 };
 
 	/* Selection. */
 	data->selection_widget = meh_widget_rect_new(40, -100, 530, 28, white_transparent, TRUE);
