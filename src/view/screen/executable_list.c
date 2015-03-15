@@ -422,6 +422,10 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 	/*
 	 * Select a cover and some screenshots.
 	 */
+
+	/* start by re-init the screenshots */
+	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
+
 	int i = 0;
 	int found_screenshots = 0;
 	for (i = 0; i < g_queue_get_length(executable->resources); i++) {
@@ -827,6 +831,7 @@ int meh_screen_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	}
 	meh_widget_image_render(app->window, data->cover_widget);
 
+	/* render the screenshots */
 	for (int i = 0; i < 3; i++) {
 		if (data->screenshots[i] > -1) {
 			data->screenshots_widget[i]->texture = g_hash_table_lookup(data->textures, &(data->screenshots[i]));
@@ -835,7 +840,7 @@ int meh_screen_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	}
 
 	/*
-	 * Extra info
+	 * extra info
 	 */
 	if (current_executable != NULL) {
 		/* Genres */
