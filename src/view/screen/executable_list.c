@@ -425,6 +425,7 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 
 	/* start by re-init the screenshots */
 	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
+	data->screenshots_widget[0]->texture = data->screenshots_widget[1]->texture = data->screenshots_widget[2]->texture = NULL;
 
 	int i = 0;
 	int found_screenshots = 0;
@@ -434,9 +435,11 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 			if (g_strcmp0(res->type, "cover") == 0) {
 				data->cover = res->id;
 				g_debug("Selected cover: %d", res->id);
-			} else if (g_strcmp0(res->type, "screenshot") == 0 && found_screenshots < 3) {
+			} else if ((g_strcmp0(res->type, "screenshot") == 0 ||  /* TODO Select random ones */
+					   g_strcmp0(res->type, "fanart") == 0) &&
+					   found_screenshots < 3) {
 				data->screenshots[found_screenshots] = res->id;
-				g_debug("Selected %d screenshot: %d", found_screenshots, res->id);
+				g_debug("Selected %d screenshot/fanart: %d", found_screenshots, res->id);
 				found_screenshots++;
 			}
 		}
