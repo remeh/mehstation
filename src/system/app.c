@@ -71,7 +71,7 @@ int meh_app_init(App* app) {
 	app->window = window;
 
 	/* Opens some font. */
-	Font* font = meh_font_open("res/fonts/OpenSans-Regular.ttf", meh_window_convert_width(window, 20));
+	Font* font = meh_font_open("res/fonts/OpenSans-Regular.ttf", meh_window_convert_width(window, 18));
 	app->small_font = font;
 	font = meh_font_open("res/fonts/OpenSans-Bold.ttf", meh_window_convert_width(window, 22));
 	app->small_bold_font = font;
