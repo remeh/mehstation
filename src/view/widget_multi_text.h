@@ -25,3 +25,4 @@ void meh_widget_multi_text_destroy(WidgetMultiText* text);
 void meh_widget_multi_text_render(Window* window, WidgetMultiText* text);
 void meh_widget_multi_text_reload(Window* window, WidgetMultiText* text);
 void meh_widget_multi_text_update(struct Screen* screen, WidgetMultiText* text);
+void meh_widget_multi_text_reset_move(WidgetMultiText* text);

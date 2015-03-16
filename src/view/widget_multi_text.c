@@ -61,6 +61,12 @@ void meh_widget_multi_text_render(Window* window, WidgetMultiText* text) {
 	meh_widget_text_render(window, text->widget_text);
 }
 
+void meh_widget_multi_text_reset_move(WidgetMultiText* text) {
+	g_assert(text != NULL);
+
+	meh_widget_text_reset_move(text->widget_text);
+}
+
 void meh_widget_multi_text_update(Screen* screen, WidgetMultiText* text) {
 	g_assert(screen != NULL);
 	g_assert(text != NULL);

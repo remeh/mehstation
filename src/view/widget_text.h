@@ -38,6 +38,7 @@ typedef struct {
 	int h;
 
 	int start_timestamp;
+	int restart_timestamp;
 	float off_x;
 	float off_y;
 
@@ -53,4 +54,5 @@ WidgetText* meh_widget_text_new(const Font* font, const char* text, int x, int y
 void meh_widget_text_destroy(WidgetText* text);
 void meh_widget_text_render(Window* window, WidgetText* text);
 void meh_widget_text_reload(Window* window, WidgetText* text);
+void meh_widget_text_reset_move(WidgetText* text);
 void meh_widget_text_update(struct Screen* screen, WidgetText* text);

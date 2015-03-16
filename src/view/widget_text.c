@@ -35,6 +35,7 @@ WidgetText* meh_widget_text_new(const Font* font, const char* text, int x, int y
 	t->texture = NULL;
 
 	t->start_timestamp = -1;
+	t->restart_timestamp = -1;
 	t->off_x = 0;
 	t->off_y = 0;
 
@@ -88,27 +89,43 @@ void meh_widget_text_reload(Window* window, WidgetText* text) {
 	g_debug("Texture for text %s loaded.", text->text);
 
 	/* restart the movement infos */
-	text->start_timestamp = -1;
-	text->off_x = 0;
-	text->off_y = 0;
+	meh_widget_text_reset_move(text);
 }
 
 void meh_widget_text_update(Screen* screen, WidgetText* text) {
 	g_assert(screen != NULL);
 	g_assert(text != NULL);
 
+	/* do we need to restart the move ? */
+	if (text->restart_timestamp != -1 && SDL_GetTicks() > text->restart_timestamp) {
+		meh_widget_text_reset_move(text);
+	}
+
+	/* do we need to start the move ? */
 	if (text->start_timestamp == -1 && (text->tex_w > text->w || text->tex_h > text->h)) {
 		text->start_timestamp = SDL_GetTicks() + MEH_TEXT_MOVING_AFTER;
 	}
 
-	if (SDL_GetTicks() > text->start_timestamp) {
+	if (text->restart_timestamp == -1 && SDL_GetTicks() > text->start_timestamp) {
 		if (text->tex_w > text->w && (text->off_x + text->w) < text->tex_w) {
-			text->off_x += 0.2f;
+			text->off_x += 0.15f;
 		}
 		if (text->tex_h > text->h && (text->off_y + text->h) < text->tex_h) {
-			text->off_y += 0.2f;
+			text->off_y += 0.15f;
+		}
+
+		/* movement over, restart timestamp */
+		if ((text->off_y + text->h) >= text->tex_h && (text->off_x + text->w) >= text->tex_w) {
+			text->restart_timestamp = SDL_GetTicks() + MEH_TEXT_MOVING_AFTER*2;
 		}
 	}
+}
+
+void meh_widget_text_reset_move(WidgetText* text) {
+	text->start_timestamp = -1;
+	text->restart_timestamp = -1;
+	text->off_x = 0;
+	text->off_y = 0;
 }
 
 void meh_widget_text_render(Window* window, WidgetText* text) {
@@ -139,7 +156,6 @@ void meh_widget_text_render(Window* window, WidgetText* text) {
 		src_w,
 		src_h
 	};
-
 
 	/* dst target */
 

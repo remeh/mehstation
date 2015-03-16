@@ -114,7 +114,7 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 
 	/* Executables */
 	for (int i = 0; i < MEH_EXEC_LIST_SIZE; i++) {
-		WidgetText* text = meh_widget_text_new(app->small_font, "", 60, 130+(i*32), 300, 30, white, FALSE);
+		WidgetText* text = meh_widget_text_new(app->small_font, "", 60, 130+(i*32), 500, 30, white, FALSE);
 		text->uppercase = TRUE; /* executables name in uppercase */
 		g_queue_push_tail(data->executable_widgets, text);
 	}
@@ -125,27 +125,27 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 
 	/* Genres */
 	data->genres_l_widget = meh_widget_text_new(app->small_bold_font, "Genres", 580, 558, 100, 30, white, TRUE);
-	data->genres_widget = meh_widget_text_new(app->small_font, NULL, 710, 560, 100, 30, white, TRUE);
+	data->genres_widget = meh_widget_text_new(app->small_font, NULL, 710, 560, 150, 30, white, TRUE);
 
 	/* Players */
-	data->players_l_widget = meh_widget_text_new(app->small_bold_font, "Players", 870, 558, 100, 30, white, TRUE);
-	data->players_widget = meh_widget_text_new(app->small_font, NULL, 1030, 560, 100, 30, white, TRUE);
+	data->players_l_widget = meh_widget_text_new(app->small_bold_font, "Players", 870, 558, 150, 30, white, TRUE);
+	data->players_widget = meh_widget_text_new(app->small_font, NULL, 1030, 560, 200, 30, white, TRUE);
 
 	/* Publisher */
 	data->publisher_l_widget = meh_widget_text_new(app->small_bold_font, "Publisher", 580, 588, 120, 30, white, TRUE);
-	data->publisher_widget = meh_widget_text_new(app->small_font, NULL, 710, 590, 100, 30, white, TRUE);
+	data->publisher_widget = meh_widget_text_new(app->small_font, NULL, 710, 590, 150, 30, white, TRUE);
 
 	/* Developer */
-	data->developer_l_widget = meh_widget_text_new(app->small_bold_font, "Developer", 870, 588, 100, 30, white, TRUE);
-	data->developer_widget = meh_widget_text_new(app->small_font, NULL, 1030, 590, 100, 30, white, TRUE);
+	data->developer_l_widget = meh_widget_text_new(app->small_bold_font, "Developer", 870, 588, 150, 30, white, TRUE);
+	data->developer_widget = meh_widget_text_new(app->small_font, NULL, 1030, 590, 200, 30, white, TRUE);
 
 	/* Rating */
 	data->rating_l_widget = meh_widget_text_new(app->small_bold_font, "Rating", 580, 618, 100, 30, white, TRUE);
-	data->rating_widget = meh_widget_text_new(app->small_font, NULL, 710, 620, 100, 30, white, TRUE);
+	data->rating_widget = meh_widget_text_new(app->small_font, NULL, 710, 620, 150, 30, white, TRUE);
 
 	/* Release date */
-	data->release_date_l_widget = meh_widget_text_new(app->small_bold_font, "Release date", 870, 618, 100, 30, white, TRUE);
-	data->release_date_widget = meh_widget_text_new(app->small_font, NULL, 1030, 620, 100, 30, white, TRUE);
+	data->release_date_l_widget = meh_widget_text_new(app->small_bold_font, "Release date", 870, 618, 150, 30, white, TRUE);
+	data->release_date_widget = meh_widget_text_new(app->small_font, NULL, 1030, 620, 200, 30, white, TRUE);
 
 	/* Cover */
 	data->cover_widget = meh_widget_image_new(NULL, 1030, 140, 200, 300);
@@ -677,6 +677,13 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	}
 
 	meh_screen_exec_list_start_bg_anim(screen);
+
+	/* reset the move of the texts */
+	meh_widget_multi_text_reset_move(data->description_widget);
+
+	for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
+		meh_widget_text_reset_move(g_queue_peek_nth(data->executable_widgets, i));
+	}
 }
 
 /*
@@ -791,13 +798,21 @@ int meh_screen_exec_list_update(Screen* screen) {
 	/* updates all the transition in the screen */
 	meh_screen_update_transitions(screen);
 
-	/* updates the text */
-	for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
-		WidgetText* t = g_queue_peek_nth(data->executable_widgets, i);
+	/* updates the text of the selected game */
+	int selected = data->selected_executable % (MEH_EXEC_LIST_SIZE);
+	WidgetText* t = g_queue_peek_nth(data->executable_widgets, selected);
+	if (t != NULL) {
 		meh_widget_text_update(screen, t);
 	}
 
 	meh_widget_multi_text_update(screen, data->description_widget);
+
+	meh_widget_text_update(screen ,data->genres_widget);
+	meh_widget_text_update(screen ,data->rating_widget);
+	meh_widget_text_update(screen ,data->publisher_widget);
+	meh_widget_text_update(screen ,data->release_date_widget);
+	meh_widget_text_update(screen ,data->developer_widget);
+	meh_widget_text_update(screen ,data->players_widget);
 
 	return 0;
 }
