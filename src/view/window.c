@@ -86,11 +86,11 @@ void meh_window_render(Window* window) {
 /*
  * meh_window_render_texture renders the given texture at the given position.
  */
-void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect position) {
+void meh_window_render_texture(Window* window, SDL_Texture* texture, SDL_Rect* src, SDL_Rect* dst) {
 	g_assert(window != NULL);
 	g_assert(texture != NULL);
 
-	SDL_RenderCopyEx(window->sdl_renderer, texture, NULL, &position, 0.0, NULL, SDL_FLIP_NONE);
+	SDL_RenderCopyEx(window->sdl_renderer, texture, src, dst, 0.0, NULL, SDL_FLIP_NONE);
 }
 
 /*
@@ -112,8 +112,8 @@ int meh_window_render_text(Window* window, const Font* font, const char* text, S
 	/* Renders at the good position */
 	int w, h;
 	SDL_QueryTexture(texture, NULL, NULL, &w, &h);
-	SDL_Rect viewport = { x, y, w, h };
-	meh_window_render_texture(window, texture, viewport);
+	SDL_Rect dst = { x, y, w, h };
+	meh_window_render_texture(window, texture, NULL, &dst);
 
 	/* Free the texture. */
 	SDL_DestroyTexture(texture);

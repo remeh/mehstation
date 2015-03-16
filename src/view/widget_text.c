@@ -9,8 +9,9 @@
 #include "view/text.h"
 #include "view/widget_text.h"
 #include "view/window.h"
+#include "view/screen.h"
 
-WidgetText* meh_widget_text_new(const Font* font, const char* text, float x, float y, SDL_Color color, gboolean shadow) {
+WidgetText* meh_widget_text_new(const Font* font, const char* text, int x, int y, int w, int h, SDL_Color color, gboolean shadow) {
 	WidgetText* t = g_new(WidgetText, 1);
 
 	t->font = font;
@@ -32,6 +33,13 @@ WidgetText* meh_widget_text_new(const Font* font, const char* text, float x, flo
 
 	t->shadow = shadow;
 	t->texture = NULL;
+
+	t->start_timestamp = -1;
+	t->off_x = 0;
+	t->off_y = 0;
+
+	t->w = w;
+	t->h = h;
 
 	/* By default, not uppercase */
 	t->uppercase = FALSE;
@@ -78,6 +86,29 @@ void meh_widget_text_reload(Window* window, WidgetText* text) {
 
 	SDL_QueryTexture(text->texture, NULL, NULL, &text->tex_w, &text->tex_h);
 	g_debug("Texture for text %s loaded.", text->text);
+
+	/* restart the movement infos */
+	text->start_timestamp = -1;
+	text->off_x = 0;
+	text->off_y = 0;
+}
+
+void meh_widget_text_update(Screen* screen, WidgetText* text) {
+	g_assert(screen != NULL);
+	g_assert(text != NULL);
+
+	if (text->start_timestamp == -1 && (text->tex_w > text->w || text->tex_h > text->h)) {
+		text->start_timestamp = SDL_GetTicks() + MEH_TEXT_MOVING_AFTER;
+	}
+
+	if (SDL_GetTicks() > text->start_timestamp) {
+		if (text->tex_w > text->w && (text->off_x + text->w) < text->tex_w) {
+			text->off_x += 0.2f;
+		}
+		if (text->tex_h > text->h && (text->off_y + text->h) < text->tex_h) {
+			text->off_y += 0.2f;
+		}
+	}
 }
 
 void meh_widget_text_render(Window* window, WidgetText* text) {
@@ -88,12 +119,47 @@ void meh_widget_text_render(Window* window, WidgetText* text) {
 		meh_widget_text_reload(window, text);
 	}
 
-	SDL_Rect position = { 
-		meh_window_convert_width(window, text->x.value),
-		meh_window_convert_height(window, text->y.value),
-		text->tex_w,
-		text->tex_h
+	/* compute the src rect to use in the texture */
+	int src_x, src_y, src_w, src_h;
+	src_x = text->off_x;
+	src_y = text->off_y;
+	src_w = text->tex_w;
+	src_h = text->tex_h;
+
+	if (text->tex_w > text->w) {
+		src_w = text->w;
+	}
+	if (text->tex_h > text->h) {
+		src_h = text->h;
+	}
+
+	SDL_Rect src = {
+		src_x,
+		src_y,
+		src_w,
+		src_h
 	};
 
-	meh_window_render_texture(window, text->texture, position);
+
+	/* dst target */
+
+	/* don't render to large */
+	int dst_w = text->w;
+	int dst_h = text->h;
+	if (text->tex_w < text->w) {
+		dst_w = text->tex_w;
+	}
+	if (text->tex_h < text->h) {
+		dst_h = text->tex_h;
+	}
+
+	SDL_Rect dst = { 
+		meh_window_convert_width(window, text->x.value),
+		meh_window_convert_height(window, text->y.value),
+		meh_window_convert_width(window, dst_w),
+		meh_window_convert_height(window, dst_h)
+	};
+
+	/* draw */
+	meh_window_render_texture(window, text->texture, &src, &dst);
 }

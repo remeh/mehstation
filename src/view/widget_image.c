@@ -52,5 +52,5 @@ void meh_widget_image_render(Window* window, const WidgetImage* image) {
 		meh_window_convert_height(window, image->h.value)
 	};
 
-	meh_window_render_texture(window, image->texture, rect);
+	meh_window_render_texture(window, image->texture, NULL, &rect);
 }

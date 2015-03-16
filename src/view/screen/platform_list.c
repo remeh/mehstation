@@ -35,12 +35,12 @@ Screen* meh_screen_platform_list_new(App* app) {
 
 	/* Title */
 	SDL_Color white = { 255, 255, 255, 255 };
-	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 50, 50, white, FALSE);
+	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 50, 50, 300, 50, white, FALSE);
 	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 50, 1000);
 	meh_screen_add_text_transitions(screen, data->title);
 
 	/* No platforms text */
-	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured", 100, 100, white, FALSE);
+	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured", 100, 100, 200, 40, white, FALSE);
 
 	/* Platforms */
 	data->icons_widgets = g_queue_new();
@@ -72,12 +72,12 @@ Screen* meh_screen_platform_list_new(App* app) {
 		g_queue_push_tail(data->platforms_icons, p_texture);
 
 		/* create the platform widget */
-		WidgetImage* platform_widget = meh_widget_image_new(p_texture, 100, 100 + (i*110), 100, 100);
+		WidgetImage* platform_widget = meh_widget_image_new(p_texture, 100, 100 + (i*160), 150, 150);
 		g_queue_push_tail(data->icons_widgets, platform_widget);
 	}
 
 	/* Selection */
-	data->selection_widget = meh_widget_rect_new(95, 95, 110, 110, white, FALSE);
+	data->selection_widget = meh_widget_rect_new(95, 95, 160, 160, white, FALSE);
 
 	screen->data = data;
 
@@ -209,7 +209,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform -= 1;
 			}
-			data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, data->selection_widget->y.value, data->selected_platform*110 + 95, 100);
+			data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, data->selection_widget->y.value, data->selected_platform*160 + 95, 100);
 			meh_screen_add_rect_transitions(screen, data->selection_widget);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
@@ -218,7 +218,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform += 1;
 			}
-			data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, data->selection_widget->y.value, data->selected_platform*110 + 95, 100);
+			data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, data->selection_widget->y.value, data->selected_platform*160 + 95, 100);
 			meh_screen_add_rect_transitions(screen, data->selection_widget);
 			break;
 	}
