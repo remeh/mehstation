@@ -97,6 +97,10 @@ void meh_widget_text_reload(Window* window, WidgetText* text) {
 	meh_widget_text_reset_move(text);
 }
 
+/*
+ * meh_widget_text_update is dealing with updating the internal
+ * content of the text (when it's cropped to fit the given max size)
+ */
 void meh_widget_text_update(Screen* screen, WidgetText* text) {
 	g_assert(screen != NULL);
 	g_assert(screen->window != NULL);
@@ -130,7 +134,12 @@ void meh_widget_text_update(Screen* screen, WidgetText* text) {
 	}
 }
 
+/*
+ * meh_widget_text_reset_move resets the internal movement of the given text
+ */
 void meh_widget_text_reset_move(WidgetText* text) {
+	g_assert(text != NULL);
+
 	text->start_timestamp = -1;
 	text->restart_timestamp = -1;
 	text->off_x = 0;
@@ -154,7 +163,9 @@ void meh_widget_text_render(Window* window, WidgetText* text) {
 	int c_text_w = meh_window_convert_width(window, text->w);
 	int c_text_h = meh_window_convert_height(window, text->h);
 
-	/* compute the src rect to use in the texture */
+	/*
+	 * compute the src rect to use in the texture
+	 */
 	int src_x, src_y, src_w, src_h;
 	src_x = text->off_x;
 	src_y = text->off_y;
@@ -175,9 +186,13 @@ void meh_widget_text_render(Window* window, WidgetText* text) {
 		src_h
 	};
 
-	/* dst target */
+	/* 
+	 * compute the dst target rect.
+	 */
 
-	/* don't render to large */
+	/* don't render to large because it will stretch
+	 * if we ask a dst larger than the generated surface,
+	 * use the generated surface value.*/
 	int dst_w = c_text_w;
 	int dst_h = c_text_h;
 	if (text->tex_w < c_text_w) {

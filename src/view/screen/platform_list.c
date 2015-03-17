@@ -69,6 +69,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 			g_critical("Can't load the icon of the platform %s" ,platform->name);
 		}
 
+		/* store the texture */
 		g_queue_push_tail(data->platforms_icons, p_texture);
 
 		/* create the platform widget */
@@ -92,19 +93,19 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	if (data != NULL) {
-		/* free platforms widget */
-		for (int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
-			WidgetImage* widget = g_queue_peek_nth(data->icons_widgets, i);
-			meh_widget_image_destroy(widget);
-		}
-		g_queue_free(data->platforms_icons);
-
 		/* free platforms icons texture */
 		for (int i = 0; i < g_queue_get_length(data->platforms_icons); i++) {
 			SDL_Texture* text = g_queue_peek_nth(data->platforms_icons, i);
 			SDL_DestroyTexture(text);
 		}
 		g_queue_free(data->platforms_icons);
+
+		/* free platforms widget */
+		for (int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
+			WidgetImage* widget = g_queue_peek_nth(data->icons_widgets, i);
+			meh_widget_image_destroy(widget);
+		}
+		g_queue_free(data->icons_widgets);
 
 		/* free platform models */
 		meh_model_platforms_destroy(data->platforms);

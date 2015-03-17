@@ -38,7 +38,7 @@ void meh_font_destroy(Font* font) {
  *
  * If max_width == -1.0f, render to a single line, otherwise render wrapped.
  *
- * The returned surface should be freed by the caller.
+ * The returned texture should be freed by the caller.
  */
 SDL_Texture* meh_font_render_on_texture(SDL_Renderer* renderer, const Font* font, const char* text, SDL_Color color, float max_width) {
 	g_assert(font != NULL);

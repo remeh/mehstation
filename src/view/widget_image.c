@@ -33,6 +33,7 @@ WidgetImage* meh_widget_image_new(SDL_Texture* texture, float x, float y, float 
  * meh_widget_image_destroy frees the resource of the given widget.
  */
 void meh_widget_image_destroy(WidgetImage* image) {
+	image->texture = NULL;
 	g_free(image);
 }
 
