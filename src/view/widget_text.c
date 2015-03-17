@@ -33,6 +33,7 @@ WidgetText* meh_widget_text_new(const Font* font, const char* text, int x, int y
 
 	t->shadow = shadow;
 	t->texture = NULL;
+	t->multi = FALSE;
 
 	t->start_timestamp = -1;
 	t->restart_timestamp = -1;
@@ -79,7 +80,11 @@ void meh_widget_text_reload(Window* window, WidgetText* text) {
 	}
 
 	/* Render the text on a texture. */
-	text->texture = meh_window_render_text_texture(window, text->font, to_render, color, -1.0f);
+	if (!text->multi) {
+		text->texture = meh_window_render_text_texture(window, text->font, to_render, color, -1.0f);
+	} else {
+		text->texture = meh_window_render_text_texture(window, text->font, to_render, color, meh_window_convert_width(window, text->w));
+	}
 
 	if (text->uppercase) {
 		g_free(to_render);

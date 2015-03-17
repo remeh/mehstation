@@ -17,7 +17,6 @@
 #include "system/db/models.h"
 #include "view/image.h"
 #include "view/widget_text.h"
-#include "view/widget_multi_text.h"
 #include "view/screen.h"
 #include "view/screen/fade.h"
 #include "view/screen/executable_list.h"
@@ -156,7 +155,8 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 	}
 
 	/* Description */
-	data->description_widget = meh_widget_multi_text_new(app->small_font, NULL, 580, 135, 450, 300, white, FALSE);
+	data->description_widget = meh_widget_text_new(app->small_font, NULL, 580, 135, 450, 300, white, FALSE);
+	data->description_widget->multi = TRUE;
 }
 
 /*
@@ -210,7 +210,7 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 		meh_widget_text_destroy(data->release_date_l_widget);
 		meh_widget_text_destroy(data->release_date_widget);
 
-		meh_widget_multi_text_destroy(data->description_widget);
+		meh_widget_text_destroy(data->description_widget);
 
 		for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 			meh_widget_text_destroy( g_queue_peek_nth( data->executable_widgets, i) );
@@ -661,8 +661,8 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 		meh_widget_text_reload(app->window, data->rating_widget);
 		data->release_date_widget->text = current_executable->release_date;
 		meh_widget_text_reload(app->window, data->release_date_widget);
-		data->description_widget->widget_text->text = current_executable->description;
-		meh_widget_multi_text_reload(app->window, data->description_widget);
+		data->description_widget->text = current_executable->description;
+		meh_widget_text_reload(app->window, data->description_widget);
 	}
 
 	/* do we need to refresh the executable widgets ?
@@ -679,7 +679,7 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	meh_screen_exec_list_start_bg_anim(screen);
 
 	/* reset the move of the texts */
-	meh_widget_multi_text_reset_move(data->description_widget);
+	meh_widget_text_reset_move(data->description_widget);
 
 	for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 		meh_widget_text_reset_move(g_queue_peek_nth(data->executable_widgets, i));
@@ -805,7 +805,7 @@ int meh_screen_exec_list_update(Screen* screen) {
 		meh_widget_text_update(screen, t);
 	}
 
-	meh_widget_multi_text_update(screen, data->description_widget);
+	meh_widget_text_update(screen, data->description_widget);
 
 	meh_widget_text_update(screen ,data->genres_widget);
 	meh_widget_text_update(screen ,data->rating_widget);
@@ -888,7 +888,7 @@ int meh_screen_exec_list_render(App* app, Screen* screen, gboolean flip) {
 		meh_widget_text_render(app->window, data->release_date_l_widget);
 		meh_widget_text_render(app->window, data->release_date_widget);
 		/* Description */
-		meh_widget_multi_text_render(app->window, data->description_widget);
+		meh_widget_text_render(app->window, data->description_widget);
 	}
 
 	/* Render all the executables names. */

@@ -11,7 +11,6 @@
 #include "system/message.h"
 #include "view/screen.h"
 #include "view/widget_rect.h"
-#include "view/widget_multi_text.h"
 
 /* cross-reference */
 struct App;
@@ -60,7 +59,7 @@ typedef struct ExecutableListData {
 	WidgetText* release_date_widget;
 	WidgetText* release_date_l_widget;
 
-	WidgetMultiText* description_widget;
+	WidgetText* description_widget;
 
 	GQueue* executable_widgets;
 } ExecutableListData;

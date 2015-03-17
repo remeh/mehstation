@@ -30,7 +30,7 @@ typedef struct {
 
 	gboolean shadow;
 	gboolean uppercase;
-
+	gboolean multi;
 
 	/* which part of the text texture we wanna render */
 	SDL_Rect srcrect;
