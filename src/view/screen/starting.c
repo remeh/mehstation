@@ -19,7 +19,7 @@
 Screen* meh_screen_starting_new(App* app) {
 	g_assert(app != NULL);
 
-	Screen* screen = meh_screen_new();
+	Screen* screen = meh_screen_new(app->window);
 
 	screen->name = g_strdup("Starting screen");
 	screen->messages_handler = &meh_screen_starting_messages_handler;

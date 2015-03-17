@@ -86,7 +86,7 @@ void meh_widget_text_reload(Window* window, WidgetText* text) {
 	}
 
 	SDL_QueryTexture(text->texture, NULL, NULL, &text->tex_w, &text->tex_h);
-	g_debug("Texture for text %s loaded.", text->text);
+	g_debug("Texture for text %s loaded (%dx%d).", text->text, text->tex_w, text->tex_h);
 
 	/* restart the movement infos */
 	meh_widget_text_reset_move(text);
@@ -94,7 +94,11 @@ void meh_widget_text_reload(Window* window, WidgetText* text) {
 
 void meh_widget_text_update(Screen* screen, WidgetText* text) {
 	g_assert(screen != NULL);
+	g_assert(screen->window != NULL);
 	g_assert(text != NULL);
+
+	int c_text_w = meh_window_convert_width(screen->window, text->w);
+	int c_text_h = meh_window_convert_width(screen->window, text->h);
 
 	/* do we need to restart the move ? */
 	if (text->restart_timestamp != -1 && SDL_GetTicks() > text->restart_timestamp) {
@@ -102,20 +106,20 @@ void meh_widget_text_update(Screen* screen, WidgetText* text) {
 	}
 
 	/* do we need to start the move ? */
-	if (text->start_timestamp == -1 && (text->tex_w > text->w || text->tex_h > text->h)) {
+	if (text->start_timestamp == -1 && (text->tex_w > c_text_w || text->tex_h > c_text_h)) {
 		text->start_timestamp = SDL_GetTicks() + MEH_TEXT_MOVING_AFTER;
 	}
 
 	if (text->restart_timestamp == -1 && SDL_GetTicks() > text->start_timestamp) {
-		if (text->tex_w > text->w && (text->off_x + text->w) < text->tex_w) {
+		if (text->tex_w > c_text_w && (text->off_x + c_text_w) < text->tex_w) {
 			text->off_x += 0.15f;
 		}
-		if (text->tex_h > text->h && (text->off_y + text->h) < text->tex_h) {
+		if (text->tex_h > c_text_h && (text->off_y + c_text_h) < text->tex_h) {
 			text->off_y += 0.15f;
 		}
 
 		/* movement over, restart timestamp */
-		if ((text->off_y + text->h) >= text->tex_h && (text->off_x + text->w) >= text->tex_w) {
+		if ((text->off_y + c_text_h) >= text->tex_h && (text->off_x + c_text_w) >= text->tex_w) {
 			text->restart_timestamp = SDL_GetTicks() + MEH_TEXT_MOVING_AFTER*2;
 		}
 	}
@@ -128,6 +132,12 @@ void meh_widget_text_reset_move(WidgetText* text) {
 	text->off_y = 0;
 }
 
+/*
+ * meh_widget_text_render renders the given text.
+ * NOTE that the internal x,y,w,h are in relative resolution (must be converted)
+ * but the generated texture name are in the current display mode and
+ * doesn't need to be converted
+ */
 void meh_widget_text_render(Window* window, WidgetText* text) {
 	g_assert(text != NULL);
 	g_assert(window != NULL);
@@ -136,6 +146,9 @@ void meh_widget_text_render(Window* window, WidgetText* text) {
 		meh_widget_text_reload(window, text);
 	}
 
+	int c_text_w = meh_window_convert_width(window, text->w);
+	int c_text_h = meh_window_convert_height(window, text->h);
+
 	/* compute the src rect to use in the texture */
 	int src_x, src_y, src_w, src_h;
 	src_x = text->off_x;
@@ -143,11 +156,11 @@ void meh_widget_text_render(Window* window, WidgetText* text) {
 	src_w = text->tex_w;
 	src_h = text->tex_h;
 
-	if (text->tex_w > text->w) {
-		src_w = text->w;
+	if (text->tex_w > c_text_w) {
+		src_w = c_text_w;
 	}
-	if (text->tex_h > text->h) {
-		src_h = text->h;
+	if (text->tex_h > c_text_h) {
+		src_h = c_text_h;
 	}
 
 	SDL_Rect src = {
@@ -160,20 +173,20 @@ void meh_widget_text_render(Window* window, WidgetText* text) {
 	/* dst target */
 
 	/* don't render to large */
-	int dst_w = text->w;
-	int dst_h = text->h;
-	if (text->tex_w < text->w) {
+	int dst_w = c_text_w;
+	int dst_h = c_text_h;
+	if (text->tex_w < c_text_w) {
 		dst_w = text->tex_w;
 	}
-	if (text->tex_h < text->h) {
+	if (text->tex_h < c_text_h) {
 		dst_h = text->tex_h;
 	}
 
 	SDL_Rect dst = { 
 		meh_window_convert_width(window, text->x.value),
 		meh_window_convert_height(window, text->y.value),
-		meh_window_convert_width(window, dst_w),
-		meh_window_convert_height(window, dst_h)
+		dst_w,
+		dst_h
 	};
 
 	/* draw */

@@ -4,9 +4,11 @@
 #include "system/transition.h"
 #include "view/widget_text.h"
 #include "view/screen.h"
+#include "view/window.h"
 
-Screen* meh_screen_new() {
+Screen* meh_screen_new(Window* window) {
 	Screen* screen = g_new(Screen, 1);
+	screen->window = window;
 	screen->parent_screen = NULL;
 	screen->data = NULL;
 	screen->transitions = g_queue_new();

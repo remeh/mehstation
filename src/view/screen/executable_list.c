@@ -39,7 +39,7 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
 
-	Screen* screen = meh_screen_new();
+	Screen* screen = meh_screen_new(app->window);
 
 	screen->name = g_strdup("Executable list screen");
 	screen->messages_handler = &meh_screen_exec_list_messages_handler;

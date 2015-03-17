@@ -18,7 +18,7 @@
 #include "view/screen/platform_list.h"
 
 Screen* meh_screen_platform_list_new(App* app) {
-	Screen* screen = meh_screen_new();
+	Screen* screen = meh_screen_new(app->window);
 
 	screen->name = g_strdup("Platform list screen");
 	screen->messages_handler = &meh_screen_platform_list_messages_handler;

@@ -10,13 +10,17 @@
 #include "view/widget_image.h"
 #include "view/widget_rect.h"
 #include "view/widget_text.h"
+#include "view/window.h"
 #include "system/message.h"
 #include "system/transition.h"
 
 /* cross-reference. */
 struct App;
+struct Window;
 
 typedef struct Screen {
+	/* To which window this screen is attached. This memory shouldn't be freed. */
+	Window* window;
 	/* Parent screen of this screen, nullable. */
 	struct Screen* parent_screen;
 	/* Displayable name of the screen */
@@ -31,7 +35,7 @@ typedef struct Screen {
 	void (*destroy_data) ();
 } Screen;
 
-Screen* meh_screen_new();
+Screen* meh_screen_new(Window*);
 void meh_screen_destroy(Screen* screen);
 void meh_screen_destroy_data_stub(Screen* screen);
 void meh_screen_add_transition(Screen* screen, Transition* transition);
