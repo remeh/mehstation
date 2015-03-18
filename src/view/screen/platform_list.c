@@ -17,6 +17,8 @@
 #include "view/screen/fade.h"
 #include "view/screen/platform_list.h"
 
+static void meh_screen_platform_move_icons(App* app, Screen* screen);
+
 Screen* meh_screen_platform_list_new(App* app) {
 	Screen* screen = meh_screen_new(app->window);
 
@@ -35,6 +37,8 @@ Screen* meh_screen_platform_list_new(App* app) {
 
 	/* Title */
 	SDL_Color white = { 255, 255, 255, 255 };
+	SDL_Color black = { 0, 0, 0, 210 };
+	SDL_Color transparent_white = { 255, 255, 255, 35 };
 	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 50, 50, 300, 50, white, FALSE);
 	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 50, 1000);
 	meh_screen_add_text_transitions(screen, data->title);
@@ -73,18 +77,21 @@ Screen* meh_screen_platform_list_new(App* app) {
 		g_queue_push_tail(data->platforms_icons, p_texture);
 
 		/* create the platform widget */
-		WidgetImage* platform_widget = meh_widget_image_new(p_texture, 100, 100 + (i*160), 150, 150);
+		WidgetImage* platform_widget = meh_widget_image_new(p_texture, 100, 280 + (i*200), 150, 150);
 		g_queue_push_tail(data->icons_widgets, platform_widget);
 	}
 
-	/* Selection */
-	data->selection_widget = meh_widget_rect_new(95, 95, 160, 160, white, FALSE);
+
+	data->background_hover = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, transparent_white, TRUE);
+	data->hover = meh_widget_rect_new(0, 260, MEH_FAKE_WIDTH, 200, black, TRUE);
+	data->platform_name = meh_widget_text_new(app->big_font, "", 320, 340, 500, 100, white, FALSE);
 
 	screen->data = data;
 
+	meh_screen_platform_move_icons(app, screen);
+
 	return screen;
 }
-
 /*
  * meh_screen_platform_list_destroy_data role is to delete the typed data of the screen
  */
@@ -114,7 +121,9 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 		meh_widget_text_destroy(data->title);
 		meh_widget_text_destroy(data->no_platforms_widget);
 
-		meh_widget_rect_destroy(data->selection_widget);
+		meh_widget_rect_destroy(data->background_hover);
+		meh_widget_rect_destroy(data->hover);
+		meh_widget_text_destroy(data->platform_name);
 	}
 }
 
@@ -210,8 +219,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform -= 1;
 			}
-			data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, data->selection_widget->y.value, data->selected_platform*160 + 95, 100);
-			meh_screen_add_rect_transitions(screen, data->selection_widget);
+			meh_screen_platform_move_icons(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 			if (data->selected_platform == g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1) {
@@ -219,9 +227,31 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform += 1;
 			}
-			data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, data->selection_widget->y.value, data->selected_platform*160 + 95, 100);
-			meh_screen_add_rect_transitions(screen, data->selection_widget);
+			meh_screen_platform_move_icons(app, screen);
 			break;
+	}
+}
+
+static void meh_screen_platform_move_icons(App* app, Screen* screen) {
+	g_assert(screen != NULL);
+
+	PlatformListData* data = meh_screen_platform_list_get_data(screen);
+
+	for (int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
+		int y = 280;
+		if (i < data->selected_platform) {
+			y += (i - data->selected_platform) * 200;
+		} else if (i > data->selected_platform) {
+			y -= (data->selected_platform - i) * 200;
+		}
+
+		WidgetImage* image = g_queue_peek_nth(data->icons_widgets, i);
+		image->y = meh_transition_start(MEH_TRANSITION_CUBIC, image->y.value, y, 200);
+		meh_screen_add_image_transitions(screen, image);
+
+		Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
+		data->platform_name->text = platform->name;
+		meh_widget_text_reload(app->window, data->platform_name);
 	}
 }
 
@@ -250,14 +280,17 @@ int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 	/* clear the screen */
 	meh_window_clear(app->window, black);
 
+	/* background hover */
+	meh_widget_rect_render(app->window, data->background_hover);
+	/* selection hover */
+	meh_widget_rect_render(app->window, data->hover);
+
 	meh_widget_text_render(app->window, data->title);
+	meh_widget_text_render(app->window, data->platform_name);
 	
 	if (platform_count == 0) {
 		meh_widget_text_render(app->window, data->no_platforms_widget);
 	}
-
-	/* selection */
-	meh_widget_rect_render(app->window, data->selection_widget);
 
 	/* icon */
 	for (int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {

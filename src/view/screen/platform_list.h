@@ -19,7 +19,10 @@ typedef struct PlatformListData {
 	 */
 	WidgetText* no_platforms_widget;
 	WidgetText* title;
-	WidgetRect* selection_widget;
+
+	WidgetRect* background_hover;
+	WidgetRect* hover;
+	WidgetText* platform_name;
 
 	GQueue* platforms_icons; /* Queue of SDL_Texture*, memory must be freed */
 	GQueue* icons_widgets; /* List of WidgetImage*, memory must be freed */
