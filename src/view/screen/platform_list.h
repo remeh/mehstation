@@ -20,6 +20,9 @@ typedef struct PlatformListData {
 	WidgetText* no_platforms_widget;
 	WidgetText* title;
 
+	SDL_Texture* background;
+	WidgetImage* background_widget;
+
 	WidgetRect* background_hover;
 	WidgetRect* hover;
 	WidgetText* platform_name;

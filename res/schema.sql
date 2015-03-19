@@ -2,7 +2,8 @@ CREATE TABLE "platform"  (
 	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	`name`	TEXT NOT NULL,
 	`command`	TEXT NOT NULL,
-    `icon`  TEXT
+    `icon`  TEXT,
+    `background` TEXT
 );
 CREATE TABLE "mehstation" (
     `name` TEXT NOT NULL PRIMARY KEY UNIQUE,

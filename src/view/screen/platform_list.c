@@ -17,7 +17,7 @@
 #include "view/screen/fade.h"
 #include "view/screen/platform_list.h"
 
-static void meh_screen_platform_move_icons(App* app, Screen* screen);
+static void meh_screen_platform_change_platform(App* app, Screen* screen);
 
 Screen* meh_screen_platform_list_new(App* app) {
 	Screen* screen = meh_screen_new(app->window);
@@ -30,6 +30,9 @@ Screen* meh_screen_platform_list_new(App* app) {
 	PlatformListData* data = g_new(PlatformListData, 1);	
 	data->platforms = meh_db_get_platforms(app->db);
 	data->selected_platform = 0;
+
+	data->background = NULL;
+	data->background_widget = meh_widget_image_new(NULL, 0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT);
 
 	/*
 	 * Widgets
@@ -81,14 +84,16 @@ Screen* meh_screen_platform_list_new(App* app) {
 		g_queue_push_tail(data->icons_widgets, platform_widget);
 	}
 
-
+	/* background hovers */
 	data->background_hover = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, transparent_white, TRUE);
 	data->hover = meh_widget_rect_new(0, 260, MEH_FAKE_WIDTH, 200, black, TRUE);
+
+	/* misc */
 	data->platform_name = meh_widget_text_new(app->big_font, "", 320, 340, 500, 100, white, FALSE);
 
 	screen->data = data;
 
-	meh_screen_platform_move_icons(app, screen);
+	meh_screen_platform_change_platform(app, screen);
 
 	return screen;
 }
@@ -120,6 +125,12 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 		/* various widgets */
 		meh_widget_text_destroy(data->title);
 		meh_widget_text_destroy(data->no_platforms_widget);
+
+		/* background */
+		if (data->background != NULL) {
+			SDL_DestroyTexture(data->background);
+		}
+		meh_widget_image_destroy(data->background_widget);
 
 		meh_widget_rect_destroy(data->background_hover);
 		meh_widget_rect_destroy(data->hover);
@@ -219,7 +230,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform -= 1;
 			}
-			meh_screen_platform_move_icons(app, screen);
+			meh_screen_platform_change_platform(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 			if (data->selected_platform == g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1) {
@@ -227,16 +238,20 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform += 1;
 			}
-			meh_screen_platform_move_icons(app, screen);
+			meh_screen_platform_change_platform(app, screen);
 			break;
 	}
 }
 
-static void meh_screen_platform_move_icons(App* app, Screen* screen) {
+static void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	g_assert(screen != NULL);
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 
+	Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
+	g_assert(platform != NULL);
+
+	/* animate icons and platform name */
 	for (int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
 		int y = 280;
 		if (i < data->selected_platform) {
@@ -249,9 +264,20 @@ static void meh_screen_platform_move_icons(App* app, Screen* screen) {
 		image->y = meh_transition_start(MEH_TRANSITION_CUBIC, image->y.value, y, 200);
 		meh_screen_add_image_transitions(screen, image);
 
-		Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
 		data->platform_name->text = platform->name;
 		meh_widget_text_reload(app->window, data->platform_name);
+	}
+
+	/* background image */
+	if (platform->background != NULL) {
+		/* start by destroying the last one if any */
+		if (data->background != NULL) {
+			SDL_DestroyTexture(data->background);
+		}
+		if (platform->background != NULL && strlen(platform->background) != 0) {
+			data->background = meh_image_load_file(app->window->sdl_renderer, platform->background);
+			data->background_widget->texture = data->background;
+		}
 	}
 }
 
@@ -279,6 +305,11 @@ int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 
 	/* clear the screen */
 	meh_window_clear(app->window, black);
+	
+	/* background image */
+	if (data->background != NULL) {
+		meh_widget_image_render(app->window, data->background_widget);
+	}
 
 	/* background hover */
 	meh_widget_rect_render(app->window, data->background_hover);
