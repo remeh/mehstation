@@ -34,6 +34,7 @@ static void meh_screen_exec_list_select_resources(Screen* screen);
 static void meh_screen_exec_list_start_bg_anim(Screen* screen);
 static void meh_screen_exec_list_refresh_executables_widget(App* app, Screen* screen);
 static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* screen, int prev_selected_exec);
+static void meh_screen_exec_list_resolve_tex(Screen* screen);
 
 Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
@@ -424,6 +425,7 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 	 */
 
 	/* start by re-init the screenshots */
+	data->cover = -1;
 	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
 	data->screenshots_widget[0]->texture = data->screenshots_widget[1]->texture = data->screenshots_widget[2]->texture = NULL;
 
@@ -638,15 +640,51 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 	meh_screen_exec_list_select_resources(screen);
 	meh_screen_exec_list_load_resources(app, screen);
 	meh_screen_exec_list_delete_some_cache(screen);
+	meh_screen_exec_list_resolve_tex(screen);
 
 	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+
+	/*
+	 * move the selection cursor
+	 */
 
 	int selected = data->selected_executable % (MEH_EXEC_LIST_SIZE);
 	int prev_selected = prev_selected_exec % (MEH_EXEC_LIST_SIZE);
 	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected*32, 130 + (selected*32), 100);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 
-	/* Refreshes the text widgets about game info. */
+	/*
+	 * look whether the image is a portrait / landscape image
+	 * and change the size of the description / cover in function
+	 */
+
+	if (data->cover == -1 || data->cover_widget->texture == NULL) {
+		/* no cover, use the full width for the description */
+		data->description_widget->w = 650;
+		data->cover_widget->texture = NULL;
+	} else {
+		/* detect the landscape/portrait mode */
+		int w = 0,h = 0;
+		SDL_QueryTexture(data->cover_widget->texture, NULL, NULL, &w, &h);
+		if (w >= h) {
+			/* landscape */
+			data->cover_widget->x.value = 930;
+			data->cover_widget->w.value = 300;
+			data->cover_widget->h.value = 200;
+			data->description_widget->w = 340;
+		} else {
+			/* portrait */
+			data->cover_widget->x.value = 1030;
+			data->cover_widget->w.value = 200;
+			data->cover_widget->h.value = 300;
+			data->description_widget->w = 440;
+		}
+	}
+
+	/* 
+	 * refreshes the text widgets about game info.
+	 */
+
 	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
 	if (current_executable != NULL) {
 		data->genres_widget->text = current_executable->genres;
@@ -665,8 +703,11 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 		meh_widget_text_reload(app->window, data->description_widget);
 	}
 
-	/* do we need to refresh the executable widgets ?
-	  Only on page changes */
+	/*
+	 * do we need to refresh the executable widgets ?
+	 * only on page changes
+	 */
+
 	int relative_new = data->selected_executable%MEH_EXEC_LIST_SIZE;
 	int relative_old = prev_selected_exec%MEH_EXEC_LIST_SIZE;
 	if ((relative_new == 0 && relative_old != 1) || /* Last -> First */
@@ -676,9 +717,16 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 		meh_screen_exec_list_refresh_executables_widget(app, screen);
 	}
 
+	/*
+	 * anim the bg
+	 */
+
 	meh_screen_exec_list_start_bg_anim(screen);
 
-	/* reset the move of the texts */
+	/*
+	 * reset the move of the texts
+	 */
+
 	meh_widget_text_reset_move(data->description_widget);
 
 	for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
@@ -818,6 +866,29 @@ int meh_screen_exec_list_update(Screen* screen) {
 }
 
 /*
+ * meh_screen_exec_list_resolve_tex resolves all the tex index
+ * to real textures for object referencing them.
+ */
+static void meh_screen_exec_list_resolve_tex(Screen* screen) {
+	g_assert(screen != NULL);
+
+	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	g_assert(data != NULL);
+
+	if (data->background > -1) {
+		data->background_widget->texture = g_hash_table_lookup(data->textures, &(data->background));
+	}
+	if (data->cover > -1) {
+		data->cover_widget->texture = g_hash_table_lookup(data->textures, &(data->cover));
+	}
+	for (int i = 0; i < 3; i++) {
+		if (data->screenshots[i] > -1) {
+			data->screenshots_widget[i]->texture = g_hash_table_lookup(data->textures, &(data->screenshots[i]));
+		}
+	}
+}
+
+/*
  * meh_screen_exec_list_render renders the executable list view.
  */
 int meh_screen_exec_list_render(App* app, Screen* screen, gboolean flip) {
@@ -833,9 +904,6 @@ int meh_screen_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
 
 	/* background */
-	if (data->background > -1) {
-		data->background_widget->texture = g_hash_table_lookup(data->textures, &(data->background));
-	}
 	meh_widget_image_render(app->window, data->background_widget);
 
 	/* background hover */
@@ -852,16 +920,10 @@ int meh_screen_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	meh_widget_rect_render(app->window, data->selection_widget);
 
 	/* cover */
-	if (data->cover > -1) {
-		data->cover_widget->texture = g_hash_table_lookup(data->textures, &(data->cover));
-	}
 	meh_widget_image_render(app->window, data->cover_widget);
 
 	/* render the screenshots */
 	for (int i = 0; i < 3; i++) {
-		if (data->screenshots[i] > -1) {
-			data->screenshots_widget[i]->texture = g_hash_table_lookup(data->textures, &(data->screenshots[i]));
-		}
 		meh_widget_image_render(app->window, data->screenshots_widget[i]);
 	}
 
