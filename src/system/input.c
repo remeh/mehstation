@@ -1,3 +1,11 @@
+/*
+ * mehstation - Input manager
+ *
+ * TODO store/restore mapping from sqlite
+ * TODO auto-assign the default mappings
+ *
+ * Copyright © 2015 Rémy Mathieu
+ */
 #include <glib.h>
 #include <SDL2/SDL.h>
 
@@ -7,6 +15,7 @@
 
 static GHashTable* meh_input_create_default_keyboard_mapping();
 static GHashTable* meh_input_create_default_gamepad_mapping();
+static InputState* meh_input_manager_get_input_state(InputManager* input_manager, SDL_Event* sdl_event);
 static void meh_input_manager_reset_button_state(InputManager* input_manager, int button);
 
 /*
@@ -16,7 +25,13 @@ InputManager* meh_input_manager_new(Settings settings) {
 	InputManager* input_manager = g_new(InputManager, 1);
 	input_manager->settings = settings;
 
-	meh_input_manager_reset_buttons_state(input_manager);
+	input_manager->input_states = g_queue_new();
+
+	/* keyboard input state at index 0 */
+	InputState* keyboard_state = g_new(InputState, 1);
+	keyboard_state->id = g_strdup("keyboard");
+	g_queue_push_tail(input_manager->input_states, keyboard_state);
+	g_debug("Adding keyboard with id : %s", keyboard_state->id);
 
 	/* default keyboard and gamepad mapping */
 	input_manager->keyboard_mapping = meh_input_create_default_keyboard_mapping();
@@ -30,10 +45,27 @@ InputManager* meh_input_manager_new(Settings settings) {
 
 	for (int i = 0; i < gamepad_count; i++)
 	{
-		SDL_Joystick* gamepad = SDL_JoystickOpen(i);
+		SDL_Joystick* joystick = SDL_JoystickOpen(i);
+		gchar* guid = g_new(gchar, 33);
+		SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(joystick), guid, 33); /* gets the guid */
+
+		Gamepad* gamepad = g_new(Gamepad, 1);	
+		gamepad->joystick = joystick;
+		gamepad->instance_id = SDL_JoystickInstanceID(joystick);
+		gamepad->guid = guid;
+
+		/* create the gamepad input state */
+		InputState* gamepad_state = g_new(InputState, 1);
+		gamepad_state->id = guid;
+
 		g_queue_push_tail(input_manager->gamepads, gamepad);
 		g_message("Using gamepad: %s", SDL_JoystickNameForIndex(i));
+		g_queue_push_tail(input_manager->input_states, gamepad_state);
+		g_debug("Adding gamepad %d with id : %s", i, gamepad_state->id);
 	}
+
+	/* TODO resets the button state of every InputState */
+	meh_input_manager_reset_buttons_state(input_manager);
 
 	return input_manager;
 }
@@ -46,10 +78,22 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 
 	/* close all gamepads */
 	for (int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
-		SDL_Joystick* gamepad = g_queue_peek_nth(input_manager->gamepads, i);
-		SDL_JoystickClose(gamepad);
+		Gamepad* gamepad = g_queue_peek_nth(input_manager->gamepads, i);
+
+		SDL_JoystickClose(gamepad->joystick);
+		g_free(gamepad->guid);
+		g_free(gamepad);
+	}
+
+	/* release each input state */
+	for (int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
+		InputState* state = g_queue_peek_nth(input_manager->input_states, i);
+		g_free(state->id); /* free the string used as ID */
+		g_free(state);
 	}
 	g_queue_free(input_manager->gamepads);
+
+	g_queue_free(input_manager->input_states);
 
 	g_hash_table_destroy(input_manager->keyboard_mapping);
 	g_hash_table_destroy(input_manager->gamepad_mapping);
@@ -62,6 +106,8 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 void meh_input_manager_reset_buttons_state(InputManager* input_manager) {
 	g_assert(input_manager != NULL);
 
+	/* TODO reset the input state of each controller */
+
 	for (int i = 0; i < MEH_INPUT_END; i++) {
 		meh_input_manager_reset_button_state(input_manager, i);
 	}
@@ -72,8 +118,62 @@ static void meh_input_manager_reset_button_state(InputManager* input_manager, in
 	g_assert(button > -1);
 	g_assert(button < MEH_INPUT_END);
 
+	/* TODO reset the input state of each controller */
+
 	input_manager->buttons_state[button] = MEH_INPUT_NOT_PRESSED;
 	input_manager->buttons_next_message[button] = MEH_INPUT_NOT_PRESSED;
+}
+
+/*
+ * meh_input_manager_get_input_state uses the given SDL Event to
+ * return the concerned input state.
+ */
+static InputState* meh_input_manager_get_input_state(InputManager* input_manager, SDL_Event* sdl_event) {
+	g_assert(input_manager != NULL);
+	g_assert(sdl_event != NULL);
+
+	/* if it's a joystick */
+	gchar* guid = NULL;
+	if (sdl_event->type == SDL_JOYBUTTONDOWN || sdl_event->type == SDL_JOYBUTTONUP ||
+			sdl_event->type == SDL_JOYAXISMOTION) {
+		/* looks which gamepad has done the event */
+		for (int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
+			Gamepad* gamepad = g_queue_peek_nth(input_manager->gamepads, i);
+
+			SDL_JoystickID gamepad_event_id;
+			if (sdl_event->type == SDL_JOYAXISMOTION) {
+				gamepad_event_id = sdl_event->jaxis.which;	
+			} else {
+				gamepad_event_id = sdl_event->jbutton.which;	
+			}
+
+			/* if this this joystick having done the event ? */
+			if (gamepad->instance_id == gamepad_event_id) {
+				guid = gamepad->guid;
+				break;
+			}
+		}
+	}
+
+	/* the event hasn't been done by a gamepad so,
+	 * took the InputState of the keyboard. */
+	if (guid == NULL) {
+		guid = "keyboard";
+	}
+
+	InputState* found = NULL;
+	/* yes it is, now, find its input state */
+	for (int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
+		InputState* input_state = g_queue_peek_nth(input_manager->input_states, i);
+		if (g_strcmp0(guid, input_state->id) == 0) {
+			found = input_state;
+			break;
+		}
+	}
+
+	g_assert(found != NULL);
+
+	return found;
 }
 
 /*
@@ -87,8 +187,11 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 		return;
 	}
 
-	int sdl_button = -1;
+	/* get the use 'input_state' having done the event */
+	InputState* input_state = meh_input_manager_get_input_state(input_manager, sdl_event);
+	printf("%s\n", input_state->id);
 
+	int sdl_button = -1;
 	gboolean keyboard = TRUE;
 	int* pressed = NULL;
 
@@ -138,6 +241,7 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 	}
 
 	/* Apply the mapping */
+	/* TODO use the mapping of the InputState */
 	if (keyboard == TRUE) {
 		pressed = g_hash_table_lookup(input_manager->keyboard_mapping, &sdl_button);
 	} else {
@@ -178,6 +282,9 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 	GSList* list = NULL;
 	int i = 0;
 
+	/* TODO generate the messages for all input states
+	 * TODO of the InputManager */
+
 	for (i = 0; i < MEH_INPUT_END; i++) {
 		switch (input_manager->buttons_state[i]) {
 			case MEH_INPUT_JUST_PRESSED:
@@ -208,6 +315,7 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 GSList* meh_input_manager_append_button_pressed(GSList* list, int pressed_button) {
 	int* data = g_new(int, 1);
 	*data = pressed_button;
+	/* TODO add the concerned controller id */
 	Message* m = meh_message_new(MEH_MSG_BUTTON_PRESSED, data);
 	list = g_slist_append(list, m);
 	return list;

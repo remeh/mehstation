@@ -1,5 +1,5 @@
-#include "SDL2/SDL.h"
-#include "glib-2.0/glib.h"
+#include <glib.h>
+#include <SDL2/SDL.h>
 
 #include "view/image.h"
 #include "view/text.h"
