@@ -53,10 +53,12 @@ InputManager* meh_input_manager_new(Settings settings) {
 		gamepad->joystick = joystick;
 		gamepad->instance_id = SDL_JoystickInstanceID(joystick);
 		gamepad->guid = guid;
+		gamepad->name = SDL_JoystickName(joystick);
 
 		/* create the gamepad input state */
 		InputState* gamepad_state = g_new(InputState, 1);
-		gamepad_state->id = guid;
+		gamepad_state->id = g_strdup(guid);
+		gamepad_state->last_sdl_key = -1;
 
 		g_queue_push_tail(input_manager->gamepads, gamepad);
 		g_message("Using gamepad: %s", SDL_JoystickNameForIndex(i));
@@ -84,6 +86,7 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 		g_free(gamepad->guid);
 		g_free(gamepad);
 	}
+	g_queue_free(input_manager->gamepads);
 
 	/* release each input state */
 	for (int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
@@ -91,13 +94,27 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 		g_free(state->id); /* free the string used as ID */
 		g_free(state);
 	}
-	g_queue_free(input_manager->gamepads);
-
 	g_queue_free(input_manager->input_states);
 
 	g_hash_table_destroy(input_manager->keyboard_mapping);
 	g_hash_table_destroy(input_manager->gamepad_mapping);
 	g_free(input_manager);
+}
+
+Gamepad* meh_input_manager_gamepad_by_guid(InputManager* input_manager, gchar* guid) {
+	g_assert(input_manager != NULL);
+	g_assert(guid != NULL);
+
+	for (int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
+		Gamepad* gamepad = g_queue_peek_nth(input_manager->gamepads, i);
+
+		printf("%s %s\n", gamepad->guid, guid);
+		if (g_strcmp0(gamepad->guid, guid) == 0) {
+			return gamepad;
+		}
+	}
+
+	return NULL;
 }
 
 /*
@@ -246,12 +263,17 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 		pressed = g_hash_table_lookup(input_manager->gamepad_mapping, &sdl_button);
 	}
 
-	/* Not configured key pressed. Ignore. */
-	if (pressed == NULL || sdl_button == -1) {
+	/* Not configured key pressed. Just store the last. */
+	if (sdl_button == -1) {
 		return;
 	}
 
-	int key_pressed = *pressed;
+	int key_pressed = MEH_INPUT_SPECIAL_UNKNOWN;
+	if (pressed != NULL) {
+		key_pressed = *pressed;
+	}
+
+	input_state->last_sdl_key = sdl_button;
 
 	/* This is a known key set it as pressed / unpressed */
 	switch (sdl_event->type) {
@@ -290,12 +312,12 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 					input_state->buttons_next_message[i] = SDL_GetTicks() + input_manager->settings.input_repeat_delay;
 					input_state->buttons_state[i] = MEH_INPUT_HOLD;
 					/* creates/appends a button pressed message */
-					list = meh_input_manager_append_button_pressed(list, i);
+					list = meh_input_manager_append_button_pressed(list, i, input_state->last_sdl_key, input_state->id);
 					break;
 				case MEH_INPUT_HOLD:
 					if (SDL_GetTicks() > input_state->buttons_next_message[i]) {
 						/* creates/appends a button pressed message */
-						list = meh_input_manager_append_button_pressed(list, i);
+						list = meh_input_manager_append_button_pressed(list, i, input_state->last_sdl_key, input_state->id);
 						/* compute the next message time */
 						input_state->buttons_next_message[i] = SDL_GetTicks() + input_manager->settings.input_repeat_frequency;
 					}
@@ -311,13 +333,31 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
  * meh_input_manager_append_button_pressed creates a MEH_MSG_BUTTON_PRESSED message
  * and appends the id of the button in the data.
  */
-GSList* meh_input_manager_append_button_pressed(GSList* list, int pressed_button) {
-	int* data = g_new(int, 1);
-	*data = pressed_button;
-	/* TODO add the concerned controller id */
-	Message* m = meh_message_new(MEH_MSG_BUTTON_PRESSED, data);
+GSList* meh_input_manager_append_button_pressed(GSList* list, int pressed_button, int last_sdl_key, gchar* guid) {
+	InputMessageData* message = meh_input_message_new(pressed_button, last_sdl_key, guid);
+	Message* m = meh_message_new(MEH_MSG_BUTTON_PRESSED, message);
 	list = g_slist_append(list, m);
 	return list;
+}
+
+InputMessageData* meh_input_message_new(int pressed_button, int last_sdl_key, gchar* guid) {
+	InputMessageData* data = g_new(InputMessageData, 1);
+
+	data->button = pressed_button;
+	data->sdl_key = last_sdl_key;
+	data->guid = g_strdup(guid);
+
+	return data;
+}
+
+void meh_input_message_destroy(Message* message) {
+	g_assert(message != NULL);
+
+	InputMessageData* data = (InputMessageData*)message->data;
+
+	g_free(data->guid);
+	g_free(message->data);
+	g_free(message);
 }
 
 /*

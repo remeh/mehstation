@@ -19,3 +19,5 @@ GQueue* meh_db_get_platforms(DB* db);
 struct Platform* meh_db_get_platform(DB* db, int platform_id);
 GQueue* meh_db_get_platform_executables(DB* db, const struct Platform* platform, gboolean get_resources);
 GQueue* meh_db_get_executable_resources(DB* db, const struct Executable* executable);
+GHashTable* meh_db_get_mapping(DB* db, gchar* id);
+int meh_db_count_mapping(DB* db);

@@ -7,11 +7,14 @@
 
 #include "system/app.h"
 #include "system/consts.h"
+#include "system/input.h"
 #include "system/message.h"
 #include "view/image.h"
 #include "view/screen.h"
 #include "view/widget_rect.h"
+#include "view/screen/fade.h"
 #include "view/screen/mapping.h"
+#include "view/screen/platform_list.h"
 #include "view/window.h"
 
 Screen* meh_screen_mapping_new(App* app) {
@@ -27,6 +30,14 @@ Screen* meh_screen_mapping_new(App* app) {
 	 * Custom data
 	 */
 	MappingData* data = g_new(MappingData, 1);
+
+	SDL_Color white = { 255, 255, 255, 255 };
+
+	data->title = meh_widget_text_new(app->big_font, "Press a key on the controller to configure", 50, 50, 1230, 50, white, FALSE);
+	data->device_configuring = NULL;
+	data->action = NULL;
+
+	data->step = MEH_MAPPING_STEP_IDENTIFY;
 
 	screen->data = data;
 
@@ -44,8 +55,8 @@ int meh_screen_mapping_messages_handler(App* app, Screen* screen, Message* messa
 	switch (message->id) {
 		case MEH_MSG_BUTTON_PRESSED:
 			{
-				int* pressed_button = (int*)message->data;
-				meh_screen_mapping_button_pressed(app, screen, *pressed_button);
+				InputMessageData* data = (InputMessageData*)message->data;
+				meh_screen_mapping_button_pressed(app, screen, data->button, data->sdl_key, data->guid);
 			}
 			break;
 		case MEH_MSG_UPDATE:
@@ -71,6 +82,16 @@ void meh_screen_mapping_destroy_data(Screen* screen) {
 
 	MappingData* data = meh_screen_mapping_get_data(screen);
 
+	meh_widget_text_destroy(data->title);
+
+	if (data->device_configuring != NULL) {
+		meh_widget_text_destroy(data->device_configuring);
+	}
+
+	if (data->action != NULL) {
+		meh_widget_text_destroy(data->action);
+	}
+
 	screen->data = NULL;
 }
 
@@ -86,24 +107,98 @@ MappingData* meh_screen_mapping_get_data(Screen* screen) {
 	return (MappingData*) screen->data;
 }
 
+static void meh_screen_mapping_next_screen(App* app, Screen* screen) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
+
+	/* create the child screen */
+	Screen* platform_screen = meh_screen_platform_list_new(app);
+	Screen* fade_screen = meh_screen_fade_new(app, screen, platform_screen);
+	meh_app_set_current_screen(app, fade_screen);
+	/* NOTE we don't free the memory of the starting screen, the fade screen
+	 * will do it. */
+}
+
 /*
  * meh_screen_mapping_button_pressed is called when we received a button pressed
  * message.
  */
-void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_button) {
-	switch (pressed_button) {
-		/* Escape on the starting screen quit the app */
-		case MEH_INPUT_SPECIAL_ESCAPE:
-			/* TODO close the current screen */
+void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_button, int sdl_key, gchar*  guid) {
+	MappingData* data = meh_screen_mapping_get_data(screen);
+	g_assert(data != NULL);
+
+	SDL_Color white = { 255, 255, 255, 255 };
+
+	Gamepad* gamepad = meh_input_manager_gamepad_by_guid(app->input_manager, guid);
+	const char* name = "keyboard";
+	if (gamepad != NULL) {
+		name = gamepad->name;
+	}
+
+	switch (data->step) {
+		case MEH_MAPPING_STEP_IDENTIFY:
+			meh_widget_text_destroy(data->title);
+			data->title = meh_widget_text_new(app->big_font, "Configuring:", 50, 50, 1230, 50, white, FALSE);
+			data->device_configuring = meh_widget_text_new(app->big_font, name, 300, 50, 1030, 50, white, FALSE);
+			data->action = meh_widget_text_new(app->big_font, "Press the key for up", 200, 150, 1030, 50, white, FALSE);
 			break;
-		case MEH_INPUT_BUTTON_START:
-		case MEH_INPUT_BUTTON_B:
-		case MEH_INPUT_BUTTON_A:
-		case MEH_INPUT_BUTTON_L:
-		case MEH_INPUT_BUTTON_R:
-			/* TODO */
+		case MEH_MAPPING_STEP_UP:
+			meh_widget_text_destroy(data->action);
+			data->action = meh_widget_text_new(app->big_font, "Press the key for down", 200, 150, 1030, 50, white, FALSE);
+			data->up = sdl_key;
+			break;
+		case MEH_MAPPING_STEP_DOWN:
+			meh_widget_text_destroy(data->action);
+			data->action = meh_widget_text_new(app->big_font, "Press the key for left", 200, 150, 1030, 50, white, FALSE);
+			data->down = sdl_key;
+			break;
+		case MEH_MAPPING_STEP_LEFT:
+			meh_widget_text_destroy(data->action);
+			data->action = meh_widget_text_new(app->big_font, "Press the key for right", 200, 150, 1030, 50, white, FALSE);
+			data->left = sdl_key;
+			break;
+		case MEH_MAPPING_STEP_RIGHT:
+			meh_widget_text_destroy(data->action);
+			data->action = meh_widget_text_new(app->big_font, "Press the key for A button", 200, 150, 1030, 50, white, FALSE);
+			data->right = sdl_key;
+			break;
+		case MEH_MAPPING_STEP_A:
+			meh_widget_text_destroy(data->action);
+			data->action = meh_widget_text_new(app->big_font, "Press the key for B button", 200, 150, 1030, 50, white, FALSE);
+			data->a = sdl_key;
+			break;
+		case MEH_MAPPING_STEP_B:
+			meh_widget_text_destroy(data->action);
+			data->action = meh_widget_text_new(app->big_font, "Press the key for L button", 200, 150, 1030, 50, white, FALSE);
+			data->b = sdl_key;
+			break;
+		case MEH_MAPPING_STEP_L:
+			meh_widget_text_destroy(data->action);
+			data->action = meh_widget_text_new(app->big_font, "Press the key for R button", 200, 150, 1030, 50, white, FALSE);
+			data->l = sdl_key;
+			break;
+		case MEH_MAPPING_STEP_R:
+			meh_widget_text_destroy(data->action);
+			data->action = meh_widget_text_new(app->big_font, "Press the key for START button", 200, 150, 1030, 50, white, FALSE);
+			data->r = sdl_key;
+			break;
+		case MEH_MAPPING_STEP_START:
+			meh_widget_text_destroy(data->action);
+			data->action = meh_widget_text_new(app->big_font, "Press the key for SELECT button", 200, 150, 1030, 50, white, FALSE);
+			data->start = sdl_key;
+			break;
+		case MEH_MAPPING_STEP_SELECT:
+			meh_widget_text_destroy(data->action);
+			data->action = meh_widget_text_new(app->big_font, "All done", 200, 150, 1030, 50, white, FALSE);
+			data->select = sdl_key;
+			break;
+		case MEH_MAPPING_STEP_END:
+			meh_screen_mapping_next_screen(app, screen);
+
 			break;
 	}
+
+	data->step++;
 }
 
 /*
@@ -133,11 +228,14 @@ void meh_screen_mapping_render(App* app, Screen* screen, gboolean flip) {
 	SDL_Color black = { 0, 0, 0 };
 	meh_window_clear(app->window, black);
 
-	/* if any, render the parent screen */
-	/* TODO */
+	meh_widget_text_render(app->window, data->title);
 
-	/* render the overlay */
-	meh_widget_rect_render(app->window, data->overlay);
+	if (data->device_configuring != NULL) {
+		meh_widget_text_render(app->window, data->device_configuring);
+	}
+	if (data->action != NULL) {
+		meh_widget_text_render(app->window, data->action);
+	}
 
 	if (flip == TRUE) {
 		meh_window_render(app->window);

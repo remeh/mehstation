@@ -158,8 +158,8 @@ int meh_screen_platform_list_messages_handler(App* app, Screen* screen, Message*
 	switch (message->id) {
 		case MEH_MSG_BUTTON_PRESSED:
 			{
-				int* pressed_button = (int*)message->data;
-				meh_screen_platform_list_button_pressed(app, screen, *pressed_button);
+				InputMessageData* data = (InputMessageData*)message->data;
+				meh_screen_platform_list_button_pressed(app, screen, data->button);
 			}
 			break;
 		case MEH_MSG_UPDATE:

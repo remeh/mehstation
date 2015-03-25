@@ -28,4 +28,17 @@ CREATE TABLE "executable" (
 	`players`	TEXT,
 	`rating`	TEXT
 );
+CREATE TABLE "mapping" (
+    `id` TEXT NOT NULL,
+    `left` INTEGER,
+    `right` INTEGER,
+    `up` INTEGER,
+    `down` INTEGER,
+    `a` INTEGER,
+    `b` INTEGER,
+    `start` INTEGER,
+    `select` INTEGER,
+    `l` INTEGER,
+    `r` INTEGER
+);
 INSERT INTO `mehstation` VALUES ('schema','1');

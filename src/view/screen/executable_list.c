@@ -108,7 +108,7 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 	data->background_hover_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, white_transparent, TRUE); 
 
 	/* Header */
-	data->header_text_widget = meh_widget_text_new(app->big_font, data->platform->name, 20, 10, 300, 40, white, TRUE);
+	data->header_text_widget = meh_widget_text_new(app->big_font, data->platform->name, 20, 10, 1000, 40, white, TRUE);
 	data->header_text_widget->uppercase = TRUE;
 	data->header_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, 70, gray, TRUE);
 
@@ -469,8 +469,8 @@ int meh_screen_exec_list_messages_handler(App* app, Screen* screen, Message* mes
 	switch (message->id) {
 		case MEH_MSG_BUTTON_PRESSED:
 			{
-				int* pressed_button = (int*)message->data;
-				meh_screen_exec_list_button_pressed(app, screen, *pressed_button);
+				InputMessageData* data = (InputMessageData*)message->data;
+				meh_screen_exec_list_button_pressed(app, screen, data->button);
 			}
 			break;
 		case MEH_MSG_UPDATE:

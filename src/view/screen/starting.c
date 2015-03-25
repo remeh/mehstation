@@ -13,6 +13,7 @@
 #include "view/widget_rect.h"
 #include "view/screen/fade.h"
 #include "view/screen/starting.h"
+#include "view/screen/mapping.h"
 #include "view/screen/platform_list.h"
 #include "view/window.h"
 
@@ -51,8 +52,8 @@ int meh_screen_starting_messages_handler(App* app, Screen* screen, Message* mess
 	switch (message->id) {
 		case MEH_MSG_BUTTON_PRESSED:
 			{
-				int* pressed_button = (int*)message->data;
-				meh_screen_starting_button_pressed(app, screen, *pressed_button);
+				InputMessageData* data = (InputMessageData*)message->data;
+				meh_screen_starting_button_pressed(app, screen, data->button);
 			}
 			break;
 		case MEH_MSG_UPDATE:
@@ -91,11 +92,18 @@ StartingData* meh_screen_starting_get_data(Screen* screen) {
 	return (StartingData*) screen->data;
 }
 
-static void meh_screen_starting_go_to_platform_list(App* app, Screen* screen) {
-	/* create and switch to the system list screen. */
-	Screen* platform_list_screen = meh_screen_platform_list_new(app);
-	Screen* fade_screen = meh_screen_fade_new(app, screen, platform_list_screen);
-	meh_app_set_current_screen(app, fade_screen);
+static void meh_screen_starting_go_to_next_screen(App* app, Screen* screen) {
+	/* create and switch to the platform list screen
+	 * if we don't need to configure a mapping */
+	if (meh_db_count_mapping(app->db) > 0) {
+		Screen* platform_list_screen = meh_screen_platform_list_new(app);
+		Screen* fade_screen = meh_screen_fade_new(app, screen, platform_list_screen);
+		meh_app_set_current_screen(app, fade_screen);
+	} else {
+		Screen* mapping_screen = meh_screen_mapping_new(app);
+		Screen* fade_screen = meh_screen_fade_new(app, screen, mapping_screen);
+		meh_app_set_current_screen(app, fade_screen);
+	}
 	/* NOTE we don't free the memory of the starting screen, the fade screen
 	 * will do it. */
 }
@@ -110,12 +118,8 @@ void meh_screen_starting_button_pressed(App* app, Screen* screen, int pressed_bu
 		case MEH_INPUT_SPECIAL_ESCAPE:
 			app->mainloop.running = FALSE;
 			break;
-		case MEH_INPUT_BUTTON_START:
-		case MEH_INPUT_BUTTON_B:
-		case MEH_INPUT_BUTTON_A:
-		case MEH_INPUT_BUTTON_L:
-		case MEH_INPUT_BUTTON_R:
-			meh_screen_starting_go_to_platform_list(app, screen);
+		default:
+			meh_screen_starting_go_to_next_screen(app, screen);
 			break;
 	}
 }
@@ -132,10 +136,10 @@ int meh_screen_starting_update(App* app, Screen* screen) {
 	g_assert(data != NULL);
 
 	/*
-	 * Wait 5s before going to the platform list selection.
+	 * Wait 5s before going to the next screen.
 	 */
 	if (SDL_GetTicks() > 5000 && data->done == FALSE) {
-		meh_screen_starting_go_to_platform_list(app, screen);
+		meh_screen_starting_go_to_next_screen(app, screen);
 		data->done = TRUE; /* don't redo it while the fading screen is refreshing */
 	}
 

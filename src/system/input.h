@@ -47,13 +47,23 @@ typedef struct {
 	/* time at which the key produce a new message */
 	guint buttons_next_message[MEH_INPUT_END];
 	/* TODO embed the mapping */
+
+	/* last pressed sdl key */
+	int last_sdl_key; 
 } InputState;
 
 typedef struct {
 	SDL_Joystick* joystick; /* SDL joystick */
 	SDL_JoystickID instance_id;
 	gchar* guid; 
+	const gchar* name;
 } Gamepad;
+
+typedef struct {
+	int button;
+	int sdl_key;
+	gchar* guid;
+} InputMessageData;
 
 
 /* input manager */
@@ -62,4 +72,8 @@ void meh_input_manager_destroy(InputManager* input_manager);
 void meh_input_manager_reset_buttons_state(InputManager* input_manager);
 void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* event);
 GSList* meh_input_manager_generate_messages(InputManager* input_manager);
-GSList* meh_input_manager_append_button_pressed(GSList* list, int pressed_button);
+GSList* meh_input_manager_append_button_pressed(GSList* list, int pressed_button, int last_sdl_key, gchar* guid);
+Gamepad* meh_input_manager_gamepad_by_guid(InputManager* input_manager, gchar* guid);
+
+InputMessageData* meh_input_message_new(int pressed_button, int last_sdl_key, gchar* guid);
+void meh_input_message_destroy(Message* message);

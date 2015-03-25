@@ -239,7 +239,7 @@ void meh_app_main_loop_event(App* app) {
 		/* send it to the current screen */
 		meh_app_send_message(app, message);
 		/* release the message */
-		meh_message_destroy(message);
+		meh_input_message_destroy(message);
 	}
 
 	/* release the memory of the list */
