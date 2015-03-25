@@ -25,11 +25,6 @@ typedef struct {
 	GHashTable* keyboard_mapping;
 	GHashTable* gamepad_mapping;
 
-	/* contains all the pressed buttons after reading of the events */
-	guint buttons_state[MEH_INPUT_END];
-	/* time at which the key produce a new message */
-	guint buttons_next_message[MEH_INPUT_END];
-
 	/* the input states of each controller
 	 * NOTE we could use a map here but as we're sure there
 	 * won't have a lot of entries in this queue, I prefer
@@ -47,7 +42,9 @@ typedef struct {
  */
 typedef struct {
 	gchar* id; /* this memory should be freed */
+	/* contains all the pressed buttons after reading of the events */
 	guint buttons_state[MEH_INPUT_END];
+	/* time at which the key produce a new message */
 	guint buttons_next_message[MEH_INPUT_END];
 	/* TODO embed the mapping */
 } InputState;

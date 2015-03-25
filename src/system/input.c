@@ -106,8 +106,6 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 void meh_input_manager_reset_buttons_state(InputManager* input_manager) {
 	g_assert(input_manager != NULL);
 
-	/* TODO reset the input state of each controller */
-
 	for (int i = 0; i < MEH_INPUT_END; i++) {
 		meh_input_manager_reset_button_state(input_manager, i);
 	}
@@ -118,10 +116,11 @@ static void meh_input_manager_reset_button_state(InputManager* input_manager, in
 	g_assert(button > -1);
 	g_assert(button < MEH_INPUT_END);
 
-	/* TODO reset the input state of each controller */
-
-	input_manager->buttons_state[button] = MEH_INPUT_NOT_PRESSED;
-	input_manager->buttons_next_message[button] = MEH_INPUT_NOT_PRESSED;
+	for (int j = 0; j < g_queue_get_length(input_manager->input_states); j++) {
+		InputState* input_state = g_queue_peek_nth(input_manager->input_states, j);
+		input_state->buttons_state[button] = MEH_INPUT_NOT_PRESSED;
+		input_state->buttons_next_message[button] = MEH_INPUT_NOT_PRESSED;
+	}
 }
 
 /*
@@ -189,7 +188,6 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 
 	/* get the use 'input_state' having done the event */
 	InputState* input_state = meh_input_manager_get_input_state(input_manager, sdl_event);
-	printf("%s\n", input_state->id);
 
 	int sdl_button = -1;
 	gboolean keyboard = TRUE;
@@ -261,13 +259,13 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 		case SDL_JOYBUTTONDOWN:
 		case SDL_JOYAXISMOTION:
 			if (sdl_event->key.repeat == 0 || keyboard == FALSE) {
-				input_manager->buttons_state[key_pressed] = MEH_INPUT_JUST_PRESSED;
+				input_state->buttons_state[key_pressed] = MEH_INPUT_JUST_PRESSED;
 			}
 			break;
 		case SDL_KEYUP:
 		case SDL_JOYBUTTONUP:
-			input_manager->buttons_state[key_pressed] = MEH_INPUT_NOT_PRESSED;
-			input_manager->buttons_next_message[key_pressed] = 0;
+			input_state->buttons_state[key_pressed] = MEH_INPUT_NOT_PRESSED;
+			input_state->buttons_next_message[key_pressed] = 0;
 			break;
 	}
 }
@@ -282,26 +280,27 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 	GSList* list = NULL;
 	int i = 0;
 
-	/* TODO generate the messages for all input states
-	 * TODO of the InputManager */
+	for (int j = 0; j < g_queue_get_length(input_manager->input_states); j++) {
+		InputState* input_state = g_queue_peek_nth(input_manager->input_states, j);
 
-	for (i = 0; i < MEH_INPUT_END; i++) {
-		switch (input_manager->buttons_state[i]) {
-			case MEH_INPUT_JUST_PRESSED:
-				/* Just pressed, we'll immediatly send a message */
-				input_manager->buttons_next_message[i] = SDL_GetTicks() + input_manager->settings.input_repeat_delay;
-				input_manager->buttons_state[i] = MEH_INPUT_HOLD;
-				/* creates/appends a button pressed message */
-				list = meh_input_manager_append_button_pressed(list, i);
-				break;
-			case MEH_INPUT_HOLD:
-				if (SDL_GetTicks() > input_manager->buttons_next_message[i]) {
+		for (i = 0; i < MEH_INPUT_END; i++) {
+			switch (input_state->buttons_state[i]) {
+				case MEH_INPUT_JUST_PRESSED:
+					/* Just pressed, we'll immediatly send a message */
+					input_state->buttons_next_message[i] = SDL_GetTicks() + input_manager->settings.input_repeat_delay;
+					input_state->buttons_state[i] = MEH_INPUT_HOLD;
 					/* creates/appends a button pressed message */
 					list = meh_input_manager_append_button_pressed(list, i);
-					/* compute the next message time */
-					input_manager->buttons_next_message[i] = SDL_GetTicks() + input_manager->settings.input_repeat_frequency;
-				}
-				break;
+					break;
+				case MEH_INPUT_HOLD:
+					if (SDL_GetTicks() > input_state->buttons_next_message[i]) {
+						/* creates/appends a button pressed message */
+						list = meh_input_manager_append_button_pressed(list, i);
+						/* compute the next message time */
+						input_state->buttons_next_message[i] = SDL_GetTicks() + input_manager->settings.input_repeat_frequency;
+					}
+					break;
+			}
 		}
 	}
 
