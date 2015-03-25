@@ -198,6 +198,8 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			break;
 	}
 
+	meh_input_manager_reset_buttons_state(app->input_manager);
+
 	data->step++;
 }
 
@@ -208,8 +210,6 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 int meh_screen_mapping_update(App* app, Screen* screen) {
 	/* update the transition of the current screen */
 	meh_screen_update_transitions(screen);
-
-	/* TODO */
 
 	return 0;
 }

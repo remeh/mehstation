@@ -1,8 +1,9 @@
 /*
  * mehstation - Input manager
  *
+ * TODO assign the mapping to the input_state
  * TODO store/restore mapping from sqlite
- * TODO auto-assign the default mappings
+ * TODO detection of new device
  *
  * Copyright © 2015 Rémy Mathieu
  */
@@ -66,7 +67,6 @@ InputManager* meh_input_manager_new(Settings settings) {
 		g_debug("Adding gamepad %d with id : %s", i, gamepad_state->id);
 	}
 
-	/* TODO resets the button state of every InputState */
 	meh_input_manager_reset_buttons_state(input_manager);
 
 	return input_manager;
@@ -101,6 +101,10 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 	g_free(input_manager);
 }
 
+/*
+ * meh_input_manager_gamepad_by_guid finds the instance of Gamepad matching
+ * the given ID.
+ */
 Gamepad* meh_input_manager_gamepad_by_guid(InputManager* input_manager, gchar* guid) {
 	g_assert(input_manager != NULL);
 	g_assert(guid != NULL);
@@ -108,7 +112,6 @@ Gamepad* meh_input_manager_gamepad_by_guid(InputManager* input_manager, gchar* g
 	for (int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
 		Gamepad* gamepad = g_queue_peek_nth(input_manager->gamepads, i);
 
-		printf("%s %s\n", gamepad->guid, guid);
 		if (g_strcmp0(gamepad->guid, guid) == 0) {
 			return gamepad;
 		}
@@ -256,12 +259,13 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 	}
 
 	/* Apply the mapping */
-	/* TODO use the mapping of the InputState */
+	/* TODO use the mapping of the InputState
 	if (keyboard == TRUE) {
 		pressed = g_hash_table_lookup(input_manager->keyboard_mapping, &sdl_button);
 	} else {
 		pressed = g_hash_table_lookup(input_manager->gamepad_mapping, &sdl_button);
 	}
+	*/
 
 	/* Not configured key pressed. Just store the last. */
 	if (sdl_button == -1) {
@@ -340,6 +344,9 @@ GSList* meh_input_manager_append_button_pressed(GSList* list, int pressed_button
 	return list;
 }
 
+/*
+ * meh_input_message_new creates the special message to send on input.
+ */
 InputMessageData* meh_input_message_new(int pressed_button, int last_sdl_key, gchar* guid) {
 	InputMessageData* data = g_new(InputMessageData, 1);
 
@@ -350,6 +357,9 @@ InputMessageData* meh_input_message_new(int pressed_button, int last_sdl_key, gc
 	return data;
 }
 
+/*
+ * meh_input_message_destroy destroys the special message sent on input.
+ */
 void meh_input_message_destroy(Message* message) {
 	g_assert(message != NULL);
 
@@ -360,11 +370,14 @@ void meh_input_message_destroy(Message* message) {
 	g_free(message);
 }
 
+/* TODO method to create a mapping. Re-use the code wrote in db.c
+GHashTable* meh_input_create_mapping(int up, int down, ...)
+*/
+
 /*
  * meh_input_create_default_keyboard_config create an input config
  * from the SDL_Event of the keyboard mapped to the internal
  * mehstation button configuration.
- 
  */
 static GHashTable* meh_input_create_default_keyboard_mapping() {
 	GHashTable* mapping = g_hash_table_new(g_int_hash, g_int_equal);
