@@ -117,4 +117,5 @@ void meh_screen_add_text_transitions(Screen* screen, WidgetText* text) {
 	meh_screen_add_transition(screen, &text->r);
 	meh_screen_add_transition(screen, &text->g);
 	meh_screen_add_transition(screen, &text->b);
+	meh_screen_add_transition(screen, &text->a);
 }

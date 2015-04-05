@@ -12,9 +12,10 @@ SET(
         src/system/message.c
         src/system/settings.c
         src/system/transition.c
-        src/system/db/platform.c
         src/system/db/executable.c
         src/system/db/executable_resource.c
+        src/system/db/mapping.c
+        src/system/db/platform.c
         src/view/image.c
         src/view/screen.c
         src/view/text.c

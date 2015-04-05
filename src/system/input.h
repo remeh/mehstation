@@ -77,3 +77,4 @@ Gamepad* meh_input_manager_gamepad_by_guid(InputManager* input_manager, gchar* g
 
 InputMessageData* meh_input_message_new(int pressed_button, int last_sdl_key, gchar* guid);
 void meh_input_message_destroy(Message* message);
+GHashTable* meh_input_create_mapping(int up, int down, int left, int right, int start, int select, int a, int b, int l, int r, int escape);

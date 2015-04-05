@@ -370,9 +370,60 @@ void meh_input_message_destroy(Message* message) {
 	g_free(message);
 }
 
-/* TODO method to create a mapping. Re-use the code wrote in db.c
-GHashTable* meh_input_create_mapping(int up, int down, ...)
-*/
+/* TODO comment */
+GHashTable* meh_input_create_mapping(int up, int down, int left, int right, int start,
+									int select, int a, int b, int l, int r, int escape) {
+	GHashTable* mapping = g_hash_table_new(g_int_hash, g_int_equal);
+
+	int* sdl = g_new(int, 1); *sdl = up;
+	int* button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_UP;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+
+	sdl = g_new(int, 1); *sdl = down;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_DOWN;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+
+	sdl = g_new(int, 1); *sdl = left;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_LEFT;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+
+	sdl = g_new(int, 1); *sdl = right;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_RIGHT;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+
+	sdl = g_new(int, 1); *sdl = start;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_START;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+
+	sdl = g_new(int, 1); *sdl = select;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_SELECT;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+
+	sdl = g_new(int, 1); *sdl = a;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_A;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+
+	sdl = g_new(int, 1); *sdl = b;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_B;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+	
+	sdl = g_new(int, 1); *sdl = l;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_L;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+	
+	sdl = g_new(int, 1); *sdl = r;
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_R;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+
+	sdl = g_new(int, 1); *sdl = SDLK_ESCAPE;
+	if (escape != 0) {
+		*sdl = escape;
+	}
+	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_SPECIAL_ESCAPE;
+	g_hash_table_insert(mapping, sdl, button_mapping);
+
+	return mapping;
+}
 
 /*
  * meh_input_create_default_keyboard_config create an input config

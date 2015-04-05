@@ -9,6 +9,8 @@
 #include "system/consts.h"
 #include "system/input.h"
 #include "system/message.h"
+#include "system/db.h"
+#include "system/db/models.h"
 #include "view/image.h"
 #include "view/screen.h"
 #include "view/widget_rect.h"
@@ -110,6 +112,15 @@ MappingData* meh_screen_mapping_get_data(Screen* screen) {
 static void meh_screen_mapping_next_screen(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
+
+
+	MappingData* data = meh_screen_mapping_get_data(screen);
+	g_assert(data != NULL);
+
+	/* save the created mapping */
+	Mapping* mapping = meh_model_mapping_new(data->device_configuring->text, data->up, data->down, data->left, data->right,
+												data->start, data->select, data->a, data->b, data->l, data->r);
+	meh_db_save_mapping(app->db, mapping);
 
 	/* create the child screen */
 	Screen* platform_screen = meh_screen_platform_list_new(app);

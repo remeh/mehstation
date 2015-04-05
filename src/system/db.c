@@ -195,22 +195,58 @@ int meh_db_count_mapping(DB* db) {
 		return 0;
 	}
 
-	int count = (int)sqlite3_column_int(statement, 1);
+	int count = (int)sqlite3_column_int(statement, 0);
 
 	sqlite3_finalize(statement);
 	return count;
 }
 
 /*
+ * meh_db_save_mapping saves the key mapping to the DB.
+ */
+void meh_db_save_mapping(DB* db, Mapping* mapping) {
+	g_assert(db != NULL);
+	g_assert(mapping != NULL);
+
+	sqlite3_stmt* statement = NULL;
+	const char* sql = "INSERT INTO mapping (id, up, down, left, right, `start`, `select`, a, b, l, r) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)";
+
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	if (statement == NULL || return_code != SQLITE_OK) {
+		g_critical("Can't execute the query :%s\nError :%s\n", sql, sqlite3_errstr(return_code));
+		return;
+	}
+
+	sqlite3_bind_text(statement, 1, mapping->id, -1, NULL);
+
+	sqlite3_bind_int(statement, 2, mapping->up);
+	sqlite3_bind_int(statement, 3, mapping->down);
+	sqlite3_bind_int(statement, 4, mapping->left);
+	sqlite3_bind_int(statement, 5, mapping->right);
+	sqlite3_bind_int(statement, 6, mapping->start);
+	sqlite3_bind_int(statement, 7, mapping->select);
+	sqlite3_bind_int(statement, 8, mapping->a);
+	sqlite3_bind_int(statement, 9, mapping->b);
+	sqlite3_bind_int(statement, 10, mapping->l);
+	sqlite3_bind_int(statement, 11, mapping->r);
+
+	if (sqlite3_step(statement) != SQLITE_ROW) {
+		return;
+	}
+
+	g_debug("Stored the mapping: %s", mapping->id);
+}
+
+/*
  * meh_db_get_mapping looks for the given mapping in the database.
  */
-GHashTable* meh_db_get_mapping(DB* db, gchar* id) {
+Mapping* meh_db_get_mapping(DB* db, gchar* id) {
 	g_assert(db != NULL);
 	g_assert(id != NULL);
 	g_assert(strlen(id) > 0);
 
 	sqlite3_stmt* statement = NULL;
-	const char* sql = "SELECT \"id\", \"left\", \"right\", \"up\", \"down\", \"start\", \"select\", \"a\", \"b\", \"l\", \"r\" FROM mapping WHERE \"id\" = ?1";
+	const char* sql = "SELECT \"id\", \"up\", \"down\", \"left\", \"right\", \"start\", \"select\", \"a\", \"b\", \"l\", \"r\" FROM mapping WHERE \"id\" = ?1";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
@@ -224,51 +260,24 @@ GHashTable* meh_db_get_mapping(DB* db, gchar* id) {
 		return NULL;
 	}
 
-	GHashTable* mapping = g_hash_table_new(g_int_hash, g_int_equal);
+	const char* read_id = (const char*)sqlite3_column_text(statement, 0);
 
-	int* left = g_new(int, 1); *left = (int)sqlite3_column_int(statement, 1);
-	int* button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_LEFT;
-	g_hash_table_insert(mapping, left, button_mapping);
-
-	int* right = g_new(int, 1); *right = (int)sqlite3_column_int(statement, 2);
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_RIGHT;
-	g_hash_table_insert(mapping, right, button_mapping);
-
-	int* up = g_new(int, 1); *up = (int)sqlite3_column_int(statement, 3);
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_UP;
-	g_hash_table_insert(mapping, up, button_mapping);
-
-	int* down = g_new(int, 1); *down = (int)sqlite3_column_int(statement, 4);
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_DOWN;
-	g_hash_table_insert(mapping, down, button_mapping);
-
-	int* start = g_new(int, 1); *start = (int)sqlite3_column_int(statement, 5);
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_START;
-	g_hash_table_insert(mapping, start, button_mapping);
-
-	int* select = g_new(int, 1); *select = (int)sqlite3_column_int(statement, 6);
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_SELECT;
-	g_hash_table_insert(mapping, select, button_mapping);
-
-	int* a = g_new(int, 1); *a = (int)sqlite3_column_int(statement, 7);
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_A;
-	g_hash_table_insert(mapping, a, button_mapping);
-
-	int* b = g_new(int, 1); *b = (int)sqlite3_column_int(statement, 8);
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_B;
-	g_hash_table_insert(mapping, b, button_mapping);
-
-	int* l = g_new(int, 1); *l = (int)sqlite3_column_int(statement, 9);
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_L;
-	g_hash_table_insert(mapping, l, button_mapping);
-
-	int* r = g_new(int, 1); *r = (int)sqlite3_column_int(statement, 10);
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_R;
-	g_hash_table_insert(mapping, r, button_mapping);
-
+	Mapping* m = meh_model_mapping_new(read_id,
+					(int)sqlite3_column_int(statement, 1),
+					(int)sqlite3_column_int(statement, 2), 
+					(int)sqlite3_column_int(statement, 3), 
+					(int)sqlite3_column_int(statement, 4), 
+					(int)sqlite3_column_int(statement, 5), 
+					(int)sqlite3_column_int(statement, 6), 
+					(int)sqlite3_column_int(statement, 7), 
+					(int)sqlite3_column_int(statement, 8), 
+					(int)sqlite3_column_int(statement, 9), 
+					(int)sqlite3_column_int(statement, 10)
+	);
 
 	sqlite3_finalize(statement);
-	return mapping;
+
+	return m;
 }
 
 /*
