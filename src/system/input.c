@@ -67,6 +67,8 @@ InputManager* meh_input_manager_new(Settings settings) {
 		g_debug("Adding gamepad %d with id : %s", i, gamepad_state->id);
 	}
 
+	/* TODO load every mapping */
+
 	meh_input_manager_reset_buttons_state(input_manager);
 
 	return input_manager;
@@ -95,6 +97,8 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 		g_free(state);
 	}
 	g_queue_free(input_manager->input_states);
+
+	/* TODO destroy every mappings */
 
 	g_hash_table_destroy(input_manager->keyboard_mapping);
 	g_hash_table_destroy(input_manager->gamepad_mapping);
@@ -429,6 +433,7 @@ GHashTable* meh_input_create_mapping(int up, int down, int left, int right, int 
  * meh_input_create_default_keyboard_config create an input config
  * from the SDL_Event of the keyboard mapped to the internal
  * mehstation button configuration.
+ * TODO use meh_input_create_mapping
  */
 static GHashTable* meh_input_create_default_keyboard_mapping() {
 	GHashTable* mapping = g_hash_table_new(g_int_hash, g_int_equal);
@@ -484,6 +489,7 @@ static GHashTable* meh_input_create_default_keyboard_mapping() {
  * meh_input_create_default_gamepad_config create an input config
  * from the SDL_Event of the gamepad mapped to the internal
  * mehstation button configuration.
+ * TODO use meh_input_create_mapping
  * It is based on a basic USB gamepad. Can be used as a fallback.
  */
 static GHashTable* meh_input_create_default_gamepad_mapping() {
