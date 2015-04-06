@@ -1,8 +1,6 @@
 /*
  * mehstation - Input manager
  *
- * TODO assign the mapping to the input_state
- * TODO store/restore mapping from sqlite
  * TODO detection of new device
  *
  * Copyright © 2015 Rémy Mathieu
@@ -10,9 +8,11 @@
 #include <glib.h>
 #include <SDL2/SDL.h>
 
+#include "system/db.h"
 #include "system/message.h"
 #include "system/input.h"
 #include "system/settings.h"
+#include "system/db/mapping.h"
 
 static GHashTable* meh_input_create_default_keyboard_mapping();
 static GHashTable* meh_input_create_default_gamepad_mapping();
@@ -22,7 +22,7 @@ static void meh_input_manager_reset_button_state(InputManager* input_manager, in
 /*
  * meh_input_manager_new creates a new InputManager.
  */
-InputManager* meh_input_manager_new(Settings settings) {
+InputManager* meh_input_manager_new(DB* db, Settings settings) {
 	InputManager* input_manager = g_new(InputManager, 1);
 	input_manager->settings = settings;
 
@@ -31,6 +31,7 @@ InputManager* meh_input_manager_new(Settings settings) {
 	/* keyboard input state at index 0 */
 	InputState* keyboard_state = g_new(InputState, 1);
 	keyboard_state->id = g_strdup("keyboard");
+	keyboard_state->mapping = NULL;
 	g_queue_push_tail(input_manager->input_states, keyboard_state);
 	g_debug("Adding keyboard with id : %s", keyboard_state->id);
 
@@ -60,6 +61,7 @@ InputManager* meh_input_manager_new(Settings settings) {
 		InputState* gamepad_state = g_new(InputState, 1);
 		gamepad_state->id = g_strdup(guid);
 		gamepad_state->last_sdl_key = -1;
+		gamepad_state->mapping = NULL; /* NOTE will be assigned later */
 
 		g_queue_push_tail(input_manager->gamepads, gamepad);
 		g_message("Using gamepad: %s", SDL_JoystickNameForIndex(i));
@@ -67,11 +69,60 @@ InputManager* meh_input_manager_new(Settings settings) {
 		g_debug("Adding gamepad %d with id : %s", i, gamepad_state->id);
 	}
 
-	/* TODO load every mapping */
+	/* now that we've created all the input state, look in the database 
+	 * whether or not they have a mapping configured */
+	meh_input_manager_assign_mapping(db, input_manager);
 
 	meh_input_manager_reset_buttons_state(input_manager);
 
 	return input_manager;
+}
+
+/*
+ * meh_input_has_something_plugged returns true if at least one device 
+ * has been mapped */
+gboolean meh_input_manager_has_something_plugged(InputManager* input_manager) {
+	for (int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
+		InputState* state = g_queue_peek_nth(input_manager->input_states, i);
+		if (state->mapping != NULL) {
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+/*
+ * meh_input_manager_assign_mapping goes through all input states
+ * to see whether we can assign them a mapping from the database. */
+void meh_input_manager_assign_mapping(DB* db, InputManager* input_manager) {
+	g_assert(input_manager != NULL);	
+
+	for (int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
+		InputState* state =  g_queue_peek_nth(input_manager->input_states, i);
+
+		/* first, free the mapping if any */
+		if (state->mapping != NULL) {
+			meh_model_mapping_destroy(state->mapping);
+		}
+
+		/* look in the db if there is a mapping for this input state */
+		const char* name = NULL;
+		if (g_strcmp0(state->id, "keyboard") == 0) {
+			name = state->id;
+		} else {
+			Gamepad* gamepad = meh_input_manager_gamepad_by_guid(input_manager, state->id);
+			if (gamepad == NULL) {
+				continue; /* should never happen */
+			}
+			name = gamepad->name;
+		}
+
+		/* finally assign what is in the database to the InputState */
+		Mapping* mapping = meh_db_get_mapping(db, name);
+		if (mapping != NULL) {
+			state->mapping = mapping;
+		}
+	}
 }
 
 /*
@@ -93,12 +144,13 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 	/* release each input state */
 	for (int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
 		InputState* state = g_queue_peek_nth(input_manager->input_states, i);
+		if (state->mapping != NULL) {
+			meh_model_mapping_destroy(state->mapping);
+		}
 		g_free(state->id); /* free the string used as ID */
 		g_free(state);
 	}
 	g_queue_free(input_manager->input_states);
-
-	/* TODO destroy every mappings */
 
 	g_hash_table_destroy(input_manager->keyboard_mapping);
 	g_hash_table_destroy(input_manager->gamepad_mapping);
@@ -263,13 +315,9 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 	}
 
 	/* Apply the mapping */
-	/* TODO use the mapping of the InputState
-	if (keyboard == TRUE) {
-		pressed = g_hash_table_lookup(input_manager->keyboard_mapping, &sdl_button);
-	} else {
-		pressed = g_hash_table_lookup(input_manager->gamepad_mapping, &sdl_button);
+	if (input_state->mapping != NULL) {
+		pressed = g_hash_table_lookup(input_state->mapping->m, &sdl_button);
 	}
-	*/
 
 	/* Not configured key pressed. Just store the last. */
 	if (sdl_button == -1) {

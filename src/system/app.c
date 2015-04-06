@@ -79,7 +79,7 @@ int meh_app_init(App* app) {
 	app->big_font = font;
 
 	/* Input manager */
-	InputManager* input_manager = meh_input_manager_new(settings);
+	InputManager* input_manager = meh_input_manager_new(app->db, settings);
 	app->input_manager = input_manager;
 
 	/* Sets the starting screen as the current screen */

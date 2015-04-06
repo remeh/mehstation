@@ -122,6 +122,9 @@ static void meh_screen_mapping_next_screen(App* app, Screen* screen) {
 												data->start, data->select, data->a, data->b, data->l, data->r);
 	meh_db_save_mapping(app->db, mapping);
 
+	/* re-assign the mapping */
+	meh_input_manager_assign_mapping(app->db, app->input_manager);
+
 	/* create the child screen */
 	Screen* platform_screen = meh_screen_platform_list_new(app);
 	Screen* fade_screen = meh_screen_fade_new(app, screen, platform_screen);

@@ -95,7 +95,7 @@ StartingData* meh_screen_starting_get_data(Screen* screen) {
 static void meh_screen_starting_go_to_next_screen(App* app, Screen* screen) {
 	/* create and switch to the platform list screen
 	 * if we don't need to configure a mapping */
-	if (meh_db_count_mapping(app->db) > 0) {
+	if (meh_input_manager_has_something_plugged(app->input_manager)) {
 		Screen* platform_list_screen = meh_screen_platform_list_new(app);
 		Screen* fade_screen = meh_screen_fade_new(app, screen, platform_list_screen);
 		meh_app_set_current_screen(app, fade_screen);

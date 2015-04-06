@@ -240,7 +240,7 @@ void meh_db_save_mapping(DB* db, Mapping* mapping) {
 /*
  * meh_db_get_mapping looks for the given mapping in the database.
  */
-Mapping* meh_db_get_mapping(DB* db, gchar* id) {
+Mapping* meh_db_get_mapping(DB* db, const gchar* id) {
 	g_assert(db != NULL);
 	g_assert(id != NULL);
 	g_assert(strlen(id) > 0);

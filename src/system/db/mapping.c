@@ -1,5 +1,6 @@
 #include <glib.h>
 
+#include "system/input.h"
 #include "system/db/mapping.h"
 
 Mapping* meh_model_mapping_new(const gchar* id, int up, int down, int left, int right,
@@ -17,6 +18,8 @@ Mapping* meh_model_mapping_new(const gchar* id, int up, int down, int left, int 
 	m->b = b;
 	m->l = l;
 	m->r = r;
+
+	m->m = meh_input_create_mapping(up, down, left, right, start, select, a, b, l, r, 0);
 	
 	return m;
 }
@@ -24,12 +27,8 @@ Mapping* meh_model_mapping_new(const gchar* id, int up, int down, int left, int 
 void meh_model_mapping_destroy(Mapping* mapping) {
 	g_assert(mapping != NULL);
 
+	g_hash_table_destroy(mapping->m);
+
 	g_free(mapping->id);
 }
 
-/*
- * meh_model_mapping_generate creates the mapping used by the input manager.
- */
-GHashTable* meh_model_mapping_generate(Mapping* mapping) {
-	/* TODO */
-}

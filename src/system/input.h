@@ -6,12 +6,15 @@
 #include "system/consts.h"
 #include "system/message.h"
 #include "system/settings.h"
+#include "system/db/models.h"
 
 #define MEH_INPUT_NOT_PRESSED 0
 #define MEH_INPUT_JUST_PRESSED 1
 #define MEH_INPUT_HOLD 2
 
 #define MEH_INPUT_MAX_AXIS (32767-1)
+
+struct DB;
 
 /*
  * InputManager role is to receive events from
@@ -46,8 +49,8 @@ typedef struct {
 	guint buttons_state[MEH_INPUT_END];
 	/* time at which the key produce a new message */
 	guint buttons_next_message[MEH_INPUT_END];
-	/* TODO embed the mapping */
-
+	/* mapping of this input state */
+	Mapping* mapping;	
 	/* last pressed sdl key */
 	int last_sdl_key; 
 } InputState;
@@ -67,7 +70,7 @@ typedef struct {
 
 
 /* input manager */
-InputManager* meh_input_manager_new(Settings settings);
+InputManager* meh_input_manager_new(struct DB*, Settings settings);
 void meh_input_manager_destroy(InputManager* input_manager);
 void meh_input_manager_reset_buttons_state(InputManager* input_manager);
 void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* event);
@@ -78,3 +81,5 @@ Gamepad* meh_input_manager_gamepad_by_guid(InputManager* input_manager, gchar* g
 InputMessageData* meh_input_message_new(int pressed_button, int last_sdl_key, gchar* guid);
 void meh_input_message_destroy(Message* message);
 GHashTable* meh_input_create_mapping(int up, int down, int left, int right, int start, int select, int a, int b, int l, int r, int escape);
+void meh_input_manager_assign_mapping(struct DB* db, InputManager* input_manager);
+gboolean meh_input_manager_has_something_plugged(InputManager* input_manager);
