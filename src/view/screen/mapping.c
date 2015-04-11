@@ -36,6 +36,8 @@ Screen* meh_screen_mapping_new(App* app) {
 	SDL_Color white = { 255, 255, 255, 255 };
 
 	data->title = meh_widget_text_new(app->big_font, "Press a key on the controller to configure", 50, 50, 1230, 50, white, FALSE);
+	data->title->x = meh_transition_start(MEH_TRANSITION_LINEAR, -300, 50, 300);
+	meh_screen_add_text_transitions(screen, data->title);
 	data->device_configuring = NULL;
 	data->action = NULL;
 
@@ -160,55 +162,78 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->title = meh_widget_text_new(app->big_font, "Configuring:", 50, 50, 1230, 50, white, FALSE);
 			data->device_configuring = meh_widget_text_new(app->big_font, name, 300, 50, 1030, 50, white, FALSE);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for up", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
 			break;
 		case MEH_MAPPING_STEP_UP:
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for down", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
+
 			data->up = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_DOWN:
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for left", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
 			data->down = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_LEFT:
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for right", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
 			data->left = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_RIGHT:
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for A button", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
 			data->right = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_A:
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for B button", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
 			data->a = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_B:
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for L button", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
 			data->b = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_L:
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for R button", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
 			data->l = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_R:
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for START button", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
 			data->r = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_START:
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for SELECT button", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
 			data->start = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_SELECT:
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "All done", 200, 150, 1030, 50, white, FALSE);
+			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
+			meh_screen_add_text_transitions(screen, data->action);
 			data->select = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_END:

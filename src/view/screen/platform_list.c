@@ -90,6 +90,8 @@ Screen* meh_screen_platform_list_new(App* app) {
 
 	/* misc */
 	data->platform_name = meh_widget_text_new(app->big_font, "", 320, 340, 500, 100, white, FALSE);
+	data->platform_name->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
+	meh_screen_add_text_transitions(screen, data->platform_name);
 
 	screen->data = data;
 
@@ -266,6 +268,8 @@ static void meh_screen_platform_change_platform(App* app, Screen* screen) {
 
 		data->platform_name->text = platform->name;
 		meh_widget_text_reload(app->window, data->platform_name);
+		data->platform_name->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
+		meh_screen_add_text_transitions(screen, data->platform_name);
 	}
 
 	/* background image */
