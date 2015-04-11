@@ -20,6 +20,7 @@ GQueue* meh_db_get_platforms(DB* db);
 struct Platform* meh_db_get_platform(DB* db, int platform_id);
 GQueue* meh_db_get_platform_executables(DB* db, const struct Platform* platform, gboolean get_resources);
 GQueue* meh_db_get_executable_resources(DB* db, const struct Executable* executable);
+void meh_db_delete_mapping(DB* db, gchar* id);
 struct Mapping* meh_db_get_mapping(DB* db, const gchar* id);
 void meh_db_save_mapping(DB* db, struct Mapping* mapping);
 int meh_db_count_mapping(DB* db);

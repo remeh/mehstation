@@ -117,9 +117,14 @@ static void meh_screen_mapping_next_screen(App* app, Screen* screen) {
 	MappingData* data = meh_screen_mapping_get_data(screen);
 	g_assert(data != NULL);
 
-	/* save the created mapping */
+	/* build the mapping object */
 	Mapping* mapping = meh_model_mapping_new(data->device_configuring->text, data->up, data->down, data->left, data->right,
 												data->start, data->select, data->a, data->b, data->l, data->r);
+
+	/* delete an eventual mapping with the same id */
+	meh_db_delete_mapping(app->db, data->device_configuring->text);
+
+	/* save the created mapping */
 	meh_db_save_mapping(app->db, mapping);
 
 	/* re-assign the mapping */

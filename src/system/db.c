@@ -202,6 +202,35 @@ int meh_db_count_mapping(DB* db) {
 }
 
 /*
+ * meh_db_delete_mapping deletes the mapping with the given ID.
+ */
+void meh_db_delete_mapping(DB* db, gchar* id) {
+	g_assert(db != NULL);
+
+	if (id == NULL || strlen(id) == 0) {
+		g_warning("meh_db_delete_mapping called with an null or empty ID.");
+		return;
+	}
+
+	sqlite3_stmt* statement = NULL;
+	const char* sql = "DELETE FROM mapping WHERE id = ?1";
+
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	if (statement == NULL || return_code != SQLITE_OK) {
+		g_critical("Can't execute the query :%s\nError :%s\n", sql, sqlite3_errstr(return_code));
+		return;
+	}
+
+	sqlite3_bind_text(statement, 1, id, -1, NULL);
+
+	if (sqlite3_step(statement) != SQLITE_ROW) {
+		return;
+	}
+
+	g_debug("Deleted the mapping: %s", id);
+}
+
+/*
  * meh_db_save_mapping saves the key mapping to the DB.
  */
 void meh_db_save_mapping(DB* db, Mapping* mapping) {
