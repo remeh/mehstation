@@ -8,6 +8,7 @@ SET(
         src/main.c
         src/system/app.c
         src/system/db.c
+        src/system/flags.c
         src/system/input.c
         src/system/message.c
         src/system/settings.c

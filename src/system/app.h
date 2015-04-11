@@ -1,6 +1,7 @@
 #pragma once
 
 #include "system/db.h"
+#include "system/flags.h"
 #include "system/input.h"
 #include "system/message.h"
 #include "system/settings.h"
@@ -24,13 +25,14 @@ typedef struct App {
 	Font* small_bold_font;
 	Font* big_font;
 	DB* db;
+	Flags flags; /* cli params */
 	InputManager* input_manager;
 	Settings settings;
 	Mainloop mainloop;
 } App;
 
 App* meh_app_create();
-int meh_app_init();
+int meh_app_init(App* app, int argc, char* argv[]);
 void meh_app_exit(App* app);
 int meh_app_destroy(App* app);
 void meh_app_set_current_screen(App* app, Screen* screen);

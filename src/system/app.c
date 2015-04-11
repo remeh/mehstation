@@ -11,6 +11,7 @@
 #include "view/screen/starting.h"
 #include "system/app.h"
 #include "system/consts.h"
+#include "system/flags.h"
 #include "system/input.h"
 #include "system/message.h"
 #include "system/settings.h"
@@ -23,8 +24,11 @@ App* meh_app_create() {
 	return g_new(App, 1);
 }
 
-int meh_app_init(App* app) {
+int meh_app_init(App* app, int argc, char* argv[]) {
 	g_assert(app != NULL);
+
+	/* reads the flags */
+	app->flags = meh_flags_parse(argc, argv);
 
 	/* Nearly everything is used in the SDL. */
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {

@@ -10,7 +10,8 @@
 int main(int argc, char* argv[]) {
 	/* create and init the app. */
 	App* app = meh_app_create();
-	meh_app_init(app);
+
+	meh_app_init(app, argc, argv);
 
 	/* entering the main loop. */
 	meh_app_main_loop(app);
