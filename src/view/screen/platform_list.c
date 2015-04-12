@@ -16,9 +16,9 @@
 #include "view/screen/executable_list.h"
 #include "view/screen/fade.h"
 #include "view/screen/platform_list.h"
+#include "view/screen/settings.h"
 
 static void meh_screen_platform_change_platform(App* app, Screen* screen);
-static void meh_screen_platform_list_add_settings(App* app, Screen* screen);
 
 Screen* meh_screen_platform_list_new(App* app) {
 	Screen* screen = meh_screen_new(app->window);
@@ -63,11 +63,12 @@ Screen* meh_screen_platform_list_new(App* app) {
 		if (platform->icon == NULL || strlen(platform->icon) == 0) {
 			/* create a texture with just the text of the platform */
 			p_texture = meh_font_render_on_texture(
-					app->window->sdl_renderer,
-					app->small_font,
-					platform->name,
-					white,
-					TRUE);
+							app->window->sdl_renderer,
+							app->small_font,
+							platform->name,
+							white,
+							TRUE
+						);
 		} else {
 			/* load the icon */
 			p_texture = meh_image_load_file(app->window->sdl_renderer, platform->icon);
@@ -85,9 +86,6 @@ Screen* meh_screen_platform_list_new(App* app) {
 		g_queue_push_tail(data->icons_widgets, platform_widget);
 	}
 
-	/* add the settings entry */
-	meh_screen_platform_list_add_settings(app, screen);
-
 	/* background hovers */
 	data->background_hover = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, transparent_white, TRUE);
 	data->hover = meh_widget_rect_new(0, 260, MEH_FAKE_WIDTH, 200, black, TRUE);
@@ -102,13 +100,6 @@ Screen* meh_screen_platform_list_new(App* app) {
 	meh_screen_platform_change_platform(app, screen);
 
 	return screen;
-}
-
-static void meh_screen_platform_list_add_settings(App* app, Screen* screen) {
-	g_assert(app != NULL);
-	g_assert(screen != NULL);
-
-	/* TODO */
 }
 
 /*
@@ -196,7 +187,22 @@ int meh_screen_platform_list_messages_handler(App* app, Screen* screen, Message*
 	return 0;
 }
 
+static void meh_screen_platform_list_start_settings(App* app, Screen* screen) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
+
+	/* create the child screen */
+	Screen* settings_screen = meh_screen_settings_new(app);
+	settings_screen->parent_screen = screen;
+	Screen* fade_screen = meh_screen_fade_new(app, screen, settings_screen);
+	meh_app_set_current_screen(app, fade_screen);
+	/* NOTE we don't free the memory of the current screen, the fade screen
+	 * will go back to it later. */
+}
+
 static void meh_screen_platform_list_start_platform(App* app, Screen* screen) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
 
 	/* get the platform */
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
@@ -226,6 +232,9 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 	switch (pressed_button) {
 		case MEH_INPUT_SPECIAL_ESCAPE:
 			app->mainloop.running = FALSE;
+			break;
+		case MEH_INPUT_BUTTON_START:
+			meh_screen_platform_list_start_settings(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_A:
 			meh_screen_platform_list_start_platform(app, screen);

@@ -8,6 +8,7 @@
 #include "system/consts.h"
 #include "view/screen.h"
 #include "view/widget_rect.h"
+#include "view/screen/fade.h"
 #include "view/screen/settings.h"
 
 Screen* meh_screen_settings_new(App* app) {
@@ -69,6 +70,12 @@ int meh_screen_settings_messages_handler(App* app, Screen* screen, Message* mess
 				meh_screen_settings_render(app, screen, *flip);
 			}
 			break;
+		case MEH_MSG_BUTTON_PRESSED:
+			{
+				InputMessageData* data = (InputMessageData*)message->data;
+				meh_screen_settings_button_pressed(app, screen, data->button);
+			}
+			break;
 	}
 
 	return 0;
@@ -83,6 +90,24 @@ int meh_screen_settings_update(App* app, Screen* screen) {
 	return 0;
 }
 
+void meh_screen_settings_button_pressed(App* app, Screen* screen, int pressed_button) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
+
+	switch (pressed_button) {
+		case MEH_INPUT_BUTTON_B:
+			if (screen->parent_screen != NULL) {
+				/* back to the previous screen using a fade
+				 * screen for the transition */
+				Screen* fade_screen = meh_screen_fade_new(app, screen, screen->parent_screen);
+				meh_app_set_current_screen(app, fade_screen);
+				/* NOTE we don't free the memory of the current screen, the fade screen
+				 * will do it. */
+			}
+			break;
+	}
+}
+
 void meh_screen_settings_render(App* app, Screen* screen, gboolean flip) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
@@ -95,5 +120,3 @@ void meh_screen_settings_render(App* app, Screen* screen, gboolean flip) {
 		meh_window_render(app->window);
 	}
 }
-
-
