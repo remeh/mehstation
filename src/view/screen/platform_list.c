@@ -18,6 +18,7 @@
 #include "view/screen/platform_list.h"
 
 static void meh_screen_platform_change_platform(App* app, Screen* screen);
+static void meh_screen_platform_list_add_settings(App* app, Screen* screen);
 
 Screen* meh_screen_platform_list_new(App* app) {
 	Screen* screen = meh_screen_new(app->window);
@@ -84,6 +85,9 @@ Screen* meh_screen_platform_list_new(App* app) {
 		g_queue_push_tail(data->icons_widgets, platform_widget);
 	}
 
+	/* add the settings entry */
+	meh_screen_platform_list_add_settings(app, screen);
+
 	/* background hovers */
 	data->background_hover = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, transparent_white, TRUE);
 	data->hover = meh_widget_rect_new(0, 260, MEH_FAKE_WIDTH, 200, black, TRUE);
@@ -99,6 +103,14 @@ Screen* meh_screen_platform_list_new(App* app) {
 
 	return screen;
 }
+
+static void meh_screen_platform_list_add_settings(App* app, Screen* screen) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
+
+	/* TODO */
+}
+
 /*
  * meh_screen_platform_list_destroy_data role is to delete the typed data of the screen
  */
