@@ -35,7 +35,7 @@ App* meh_app_create();
 int meh_app_init(App* app, int argc, char* argv[]);
 void meh_app_exit(App* app);
 int meh_app_destroy(App* app);
-void meh_app_set_current_screen(App* app, Screen* screen);
+void meh_app_set_current_screen(App* app, Screen* screen, gboolean end_transitions);
 int meh_app_main_loop(App* app);
 void meh_app_main_loop_event(App* app);
 void meh_app_main_loop_update(App* app);

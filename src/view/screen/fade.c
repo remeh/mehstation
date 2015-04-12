@@ -94,7 +94,7 @@ int meh_screen_fade_update(struct App* app, Screen* screen) {
 				if (data->dst_screen->parent_screen != data->src_screen) {
 					meh_screen_destroy(data->src_screen);
 				}
-				meh_app_set_current_screen(app, data->dst_screen);
+				meh_app_set_current_screen(app, data->dst_screen, TRUE);
 				meh_screen_destroy(screen); /* destroy the fade screen */
 				return 0;
 		}

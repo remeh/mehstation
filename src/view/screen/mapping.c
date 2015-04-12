@@ -135,7 +135,7 @@ static void meh_screen_mapping_next_screen(App* app, Screen* screen) {
 	/* create the child screen */
 	Screen* platform_screen = meh_screen_platform_list_new(app);
 	Screen* fade_screen = meh_screen_fade_new(app, screen, platform_screen);
-	meh_app_set_current_screen(app, fade_screen);
+	meh_app_set_current_screen(app, fade_screen, TRUE);
 	/* NOTE we don't free the memory of the starting screen, the fade screen
 	 * will do it. */
 }

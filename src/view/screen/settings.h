@@ -12,6 +12,8 @@
 struct App;
 
 typedef struct {
+	WidgetText* title;
+	WidgetText* title_settings;
 } SettingsData;
 
 Screen* meh_screen_settings_new(App* app);

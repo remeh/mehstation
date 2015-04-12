@@ -772,7 +772,7 @@ static void meh_screen_exec_list_start_settings(App* app, Screen* screen) {
 	Screen* settings_screen = meh_screen_settings_new(app);
 	settings_screen->parent_screen = screen;
 	Screen* fade_screen = meh_screen_fade_new(app, screen, settings_screen);
-	meh_app_set_current_screen(app, fade_screen);
+	meh_app_set_current_screen(app, fade_screen, TRUE);
 	/* NOTE we don't free the memory of the current screen, the fade screen
 	 * will go back to it later. */
 }
@@ -800,7 +800,7 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 				/* back to the platform screen using a fade
 				 * screen for the transition */
 				Screen* fade_screen = meh_screen_fade_new(app, screen, screen->parent_screen);
-				meh_app_set_current_screen(app, fade_screen);
+				meh_app_set_current_screen(app, fade_screen, TRUE);
 				/* NOTE we don't free the memory of the starting screen, the fade screen
 				 * will do it. */
 			}

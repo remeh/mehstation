@@ -24,6 +24,13 @@ Screen* meh_screen_settings_new(App* app) {
 	 * Custom data
 	 */
 	SettingsData* data = g_new(SettingsData, 1);
+
+	SDL_Color white = { 255, 255, 255, 255 };
+	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 50, 50, 300, 50, white, FALSE);
+	data->title_settings = meh_widget_text_new(app->big_font, "- settings", MEH_FAKE_WIDTH, 50, 180, 50, white, FALSE);
+	data->title_settings->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 330, 750);
+	meh_screen_add_text_transitions(screen, data->title_settings);
+
 	screen->data = data;
 
 	return screen;
@@ -45,6 +52,10 @@ SettingsData* meh_screen_settings_get_data(Screen* screen) {
  */
 void meh_screen_settings_destroy_data(Screen* screen) {
 	SettingsData* data = meh_screen_settings_get_data(screen);
+
+	meh_widget_text_destroy(data->title);
+	meh_widget_text_destroy(data->title_settings);
+
 	screen->data = NULL;
 }
 
@@ -94,13 +105,19 @@ void meh_screen_settings_button_pressed(App* app, Screen* screen, int pressed_bu
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
+	SettingsData* data = meh_screen_settings_get_data(screen);
+
 	switch (pressed_button) {
 		case MEH_INPUT_BUTTON_B:
 			if (screen->parent_screen != NULL) {
+				/* make the - settings label go out */
+				data->title_settings->x = meh_transition_start(MEH_TRANSITION_CUBIC, 330, MEH_FAKE_WIDTH+200, 300);
+				meh_screen_add_text_transitions(screen, data->title_settings);
+
 				/* back to the previous screen using a fade
 				 * screen for the transition */
 				Screen* fade_screen = meh_screen_fade_new(app, screen, screen->parent_screen);
-				meh_app_set_current_screen(app, fade_screen);
+				meh_app_set_current_screen(app, fade_screen, FALSE);
 				/* NOTE we don't free the memory of the current screen, the fade screen
 				 * will do it. */
 			}
@@ -112,11 +129,14 @@ void meh_screen_settings_render(App* app, Screen* screen, gboolean flip) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
+	SettingsData* data = meh_screen_settings_get_data(screen);
+
 	/* clear the screen */
 	SDL_Color black = { 0, 0, 0 };
 	meh_window_clear(app->window, black);
 
-	if (flip == TRUE) {
+	meh_widget_text_render(app->window, data->title);
+	meh_widget_text_render(app->window, data->title_settings);
+
 		meh_window_render(app->window);
-	}
 }

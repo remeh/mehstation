@@ -93,7 +93,7 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 		return 1;
 	} 
 
-	meh_app_set_current_screen(app, starting_screen);
+	meh_app_set_current_screen(app, starting_screen, TRUE);
 
 	return 0;
 }
@@ -138,12 +138,12 @@ int meh_app_destroy(App* app) {
 	return 0;
 }
 
-void meh_app_set_current_screen(App* app, Screen* screen) {
+void meh_app_set_current_screen(App* app, Screen* screen, gboolean end_transitions) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
 	g_message("Setting the current screen to : %s", screen->name);
-	if (app->current_screen != NULL) {
+	if (app->current_screen != NULL && end_transitions) {
 		meh_transitions_end(app->current_screen->transitions); /* before leaving this screen, we must end all its transitions. */
 	}
 	app->current_screen = screen;

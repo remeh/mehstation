@@ -101,11 +101,11 @@ static void meh_screen_starting_go_to_next_screen(App* app, Screen* screen) {
 	if (meh_input_manager_has_something_plugged(app->input_manager) && !app->flags.configure_mapping) {
 		Screen* platform_list_screen = meh_screen_platform_list_new(app);
 		Screen* fade_screen = meh_screen_fade_new(app, screen, platform_list_screen);
-		meh_app_set_current_screen(app, fade_screen);
+		meh_app_set_current_screen(app, fade_screen, TRUE);
 	} else {
 		Screen* mapping_screen = meh_screen_mapping_new(app);
 		Screen* fade_screen = meh_screen_fade_new(app, screen, mapping_screen);
-		meh_app_set_current_screen(app, fade_screen);
+		meh_app_set_current_screen(app, fade_screen, TRUE);
 	}
 	/* NOTE we don't free the memory of the starting screen, the fade screen
 	 * will do it. */
