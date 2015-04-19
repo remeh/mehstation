@@ -422,7 +422,9 @@ void meh_input_message_destroy(Message* message) {
 	g_free(message);
 }
 
-/* TODO comment */
+/*
+ * meh_input_create_mapping creates the hash table mapping with the given bindings.
+ */
 GHashTable* meh_input_create_mapping(int up, int down, int left, int right, int start,
 									int select, int a, int b, int l, int r, int escape) {
 	GHashTable* mapping = g_hash_table_new(g_int_hash, g_int_equal);
@@ -481,111 +483,19 @@ GHashTable* meh_input_create_mapping(int up, int down, int left, int right, int 
  * meh_input_create_default_keyboard_config create an input config
  * from the SDL_Event of the keyboard mapped to the internal
  * mehstation button configuration.
- * TODO use meh_input_create_mapping
  */
 static GHashTable* meh_input_create_default_keyboard_mapping() {
-	GHashTable* mapping = g_hash_table_new(g_int_hash, g_int_equal);
-
-	int* sdl = g_new(int, 1); *sdl = SDLK_UP;
-	int* button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_UP;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = SDLK_DOWN;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_DOWN;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = SDLK_LEFT;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_LEFT;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = SDLK_RIGHT;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_RIGHT;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = SDLK_RETURN;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_START;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = SDLK_SPACE;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_SELECT;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = SDLK_r;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_A;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = SDLK_e;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_B;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-	
-	sdl = g_new(int, 1); *sdl = SDLK_i;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_L;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-	
-	sdl = g_new(int, 1); *sdl = SDLK_o;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_R;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-	
-	sdl = g_new(int, 1); *sdl = SDLK_ESCAPE;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_SPECIAL_ESCAPE;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	return mapping;
+	return meh_input_create_mapping(SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, SDLK_RETURN,
+									SDLK_SPACE, SDLK_r, SDLK_e, SDLK_i, SDLK_o, SDLK_ESCAPE);
 }
 
 /*
  * meh_input_create_default_gamepad_config create an input config
  * from the SDL_Event of the gamepad mapped to the internal
  * mehstation button configuration.
- * TODO use meh_input_create_mapping
  * It is based on a basic USB gamepad. Can be used as a fallback.
  */
 static GHashTable* meh_input_create_default_gamepad_mapping() {
-	GHashTable* mapping = g_hash_table_new(g_int_hash, g_int_equal);
-
-	int* sdl = g_new(int, 1); *sdl = SDLK_UP;
-	int* button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_UP;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = SDLK_DOWN;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_DOWN;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = SDLK_LEFT;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_LEFT;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = SDLK_RIGHT;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_RIGHT;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = 9;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_START;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = 8;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_SELECT;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = 1;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_A;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = 2;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_B;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = 4;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_L;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = 5;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_R;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	sdl = g_new(int, 1); *sdl = 0;
-	button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_SPECIAL_ESCAPE;
-	g_hash_table_insert(mapping, sdl, button_mapping);
-
-	return mapping;
+	return meh_input_create_mapping(SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, 9,
+									8, 1, 2, 4, 5, 0);
 }
