@@ -287,6 +287,61 @@ void meh_app_send_message(App* app, Message* message) {
 	}
 }
 
+void meh_app_start_executable(App* app, Platform* platform, Executable* executable) {
+	g_assert(platform != NULL);
+	g_assert(executable != NULL);
+
+	/* prepare the exec call */
+	gchar** command_parts = g_strsplit(platform->command, " ", -1);
+
+	/* replace the flags */
+	int i = 0;
+	while (1) {
+		if (command_parts[i] == NULL) {
+			break;
+		}
+		/* FIXME Sure that there's not utf8 problems there ? */
+		if (g_strcmp0(command_parts[i], "\%exec\%") == 0) {
+			/* remove the placeholder */
+			g_free(command_parts[i]);
+			/* replace by the value */
+			command_parts[i] = g_strdup( executable->filepath );
+		}
+		i++;
+	}
+
+	const gchar* working_dir = "/usr/bin"; /* FIXME what about executable not in /usr/bin */
+	int exit_status = 0;
+	GError* error = NULL;
+	g_spawn_sync(working_dir,
+				 command_parts,
+				 NULL,
+				 G_SPAWN_DEFAULT,
+				 NULL,
+				 NULL,
+				 NULL,
+				 NULL,
+				 &exit_status,
+				 &error);
+
+	if (error != NULL) {
+		g_critical("can't start the platform '%s' with the executable '%s' with command '%s'.", platform->name, executable->display_name, platform->command);
+		g_critical("%s", error->message);
+		g_error_free(error);
+	}
+
+	/* release used memory */
+	g_strfreev(command_parts);
+
+	/* when launching something, we may have missed some
+	 * input events, reset everything in case of. */
+	meh_input_manager_reset_buttons_state(app->input_manager);
+	/* FIXME When returning from the other app, if the user presses the same
+	 * FIXME key as the one used to start the system, SDL will considered it
+	 * FIXME as a repeatition. We should maybe generate a fake KEYUP event ?*/
+	SDL_RaiseWindow(app->window->sdl_window);
+}
+
 /*
  * Display some system information on the standart output.
  * Unused.

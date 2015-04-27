@@ -5,6 +5,7 @@
 #include "system/input.h"
 #include "system/message.h"
 #include "system/settings.h"
+#include "system/db/models.h"
 #include "view/text.h"
 #include "view/screen.h"
 #include "view/window.h"
@@ -42,3 +43,4 @@ void meh_app_main_loop_update(App* app);
 void meh_app_main_loop_render(App* app);
 void meh_app_send_message(App* app, Message* message);
 gboolean meh_app_open_or_create_db(App*  app);
+void meh_app_start_executable(App* app, Platform* platform, Executable* executable);
