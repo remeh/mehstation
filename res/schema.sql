@@ -12,13 +12,13 @@ CREATE TABLE "mehstation" (
 CREATE TABLE "executable_resource" (
 	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
 	`executable_id`	INTEGER NOT NULL,
-	`type`	TEXT NOT NULL,
-	`filepath`	TEXT NOT NULL
+	`type`	TEXT DEFAULT '',
+	`filepath`	TEXT DEFAULT ''
 );
 CREATE TABLE "executable" (
 	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-	`display_name`	TEXT NOT NULL,
-	`filepath`	TEXT NOT NULL,
+	`display_name`	TEXT DEFAULT '',
+	`filepath`	TEXT DEFAULT '',
 	`platform_id`	INTEGER NOT NULL,
 	`description`	TEXT,
 	`genres`	TEXT,

@@ -585,6 +585,9 @@ static void meh_screen_exec_list_start_executable(App* app, Screen* screen) {
 
 	/* delegate the launch of the executable to the app */
 	meh_app_start_executable(app, data->platform, executable);
+
+	/* end the transitions when coming back from the executable */
+	meh_transitions_end(screen->transitions);
 }
 
 /*
