@@ -46,7 +46,11 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 		return 1;
 	}
 
+
 	g_message("SDL init OK.");
+
+	/* disable the screensaver. */
+	SDL_DisableScreenSaver();
 
 	meh_settings_print_system_infos();
 
