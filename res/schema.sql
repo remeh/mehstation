@@ -1,7 +1,7 @@
 CREATE TABLE "platform"  (
 	`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
 	`name`	TEXT NOT NULL,
-	`command`	TEXT NOT NULL,
+	`command`	TEXT,
     `icon`  TEXT,
     `background` TEXT
 );
