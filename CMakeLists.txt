@@ -29,8 +29,13 @@ SET(
         src/view/screen/settings.c
         src/view/screen/starting.c
         src/view/screen/platform_list.c
-        src/sqlite3.c
 )
+
+IF(WIN32)
+  SET(
+    src/ext/sqlite3.c
+  )
+ENDIF()
 
 ADD_EXECUTABLE(
     ${PROJECT_NAME}
