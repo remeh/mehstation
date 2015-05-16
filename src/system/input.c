@@ -82,7 +82,7 @@ InputManager* meh_input_manager_new(DB* db, Settings settings) {
  * meh_input_has_something_plugged returns true if at least one device 
  * has been mapped */
 gboolean meh_input_manager_has_something_plugged(InputManager* input_manager) {
-	for (int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
 		InputState* state = g_queue_peek_nth(input_manager->input_states, i);
 		if (state->mapping != NULL) {
 			return TRUE;
@@ -97,7 +97,7 @@ gboolean meh_input_manager_has_something_plugged(InputManager* input_manager) {
 void meh_input_manager_assign_mapping(DB* db, InputManager* input_manager) {
 	g_assert(input_manager != NULL);	
 
-	for (int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
 		InputState* state =  g_queue_peek_nth(input_manager->input_states, i);
 
 		/* first, free the mapping if any */
@@ -132,7 +132,7 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 	g_assert(input_manager != NULL);
 
 	/* close all gamepads */
-	for (int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
 		Gamepad* gamepad = g_queue_peek_nth(input_manager->gamepads, i);
 
 		SDL_JoystickClose(gamepad->joystick);
@@ -142,7 +142,7 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 	g_queue_free(input_manager->gamepads);
 
 	/* release each input state */
-	for (int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
 		InputState* state = g_queue_peek_nth(input_manager->input_states, i);
 		if (state->mapping != NULL) {
 			meh_model_mapping_destroy(state->mapping);
@@ -165,7 +165,7 @@ Gamepad* meh_input_manager_gamepad_by_guid(InputManager* input_manager, gchar* g
 	g_assert(input_manager != NULL);
 	g_assert(guid != NULL);
 
-	for (int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
 		Gamepad* gamepad = g_queue_peek_nth(input_manager->gamepads, i);
 
 		if (g_strcmp0(gamepad->guid, guid) == 0) {
@@ -192,7 +192,7 @@ static void meh_input_manager_reset_button_state(InputManager* input_manager, in
 	g_assert(button > -1);
 	g_assert(button < MEH_INPUT_END);
 
-	for (int j = 0; j < g_queue_get_length(input_manager->input_states); j++) {
+	for (unsigned int j = 0; j < g_queue_get_length(input_manager->input_states); j++) {
 		InputState* input_state = g_queue_peek_nth(input_manager->input_states, j);
 		input_state->buttons_state[button] = MEH_INPUT_NOT_PRESSED;
 		input_state->buttons_next_message[button] = MEH_INPUT_NOT_PRESSED;
@@ -212,7 +212,7 @@ static InputState* meh_input_manager_get_input_state(InputManager* input_manager
 	if (sdl_event->type == SDL_JOYBUTTONDOWN || sdl_event->type == SDL_JOYBUTTONUP ||
 			sdl_event->type == SDL_JOYAXISMOTION) {
 		/* looks which gamepad has done the event */
-		for (int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
+		for (unsigned int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
 			Gamepad* gamepad = g_queue_peek_nth(input_manager->gamepads, i);
 
 			SDL_JoystickID gamepad_event_id;
@@ -238,7 +238,7 @@ static InputState* meh_input_manager_get_input_state(InputManager* input_manager
 
 	InputState* found = NULL;
 	/* yes it is, now, find its input state */
-	for (int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(input_manager->input_states); i++) {
 		InputState* input_state = g_queue_peek_nth(input_manager->input_states, i);
 		if (g_strcmp0(guid, input_state->id) == 0) {
 			found = input_state;
@@ -247,7 +247,6 @@ static InputState* meh_input_manager_get_input_state(InputManager* input_manager
 	}
 
 	g_assert(found != NULL);
-
 	return found;
 }
 
@@ -358,7 +357,7 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 	GSList* list = NULL;
 	int i = 0;
 
-	for (int j = 0; j < g_queue_get_length(input_manager->input_states); j++) {
+	for (unsigned int j = 0; j < g_queue_get_length(input_manager->input_states); j++) {
 		InputState* input_state = g_queue_peek_nth(input_manager->input_states, j);
 
 		for (i = 0; i < MEH_INPUT_END; i++) {
