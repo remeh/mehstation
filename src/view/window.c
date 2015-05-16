@@ -1,4 +1,6 @@
 #include <glib.h>
+#include <string.h>
+
 #include "view/window.h"
 #include "view/text.h"
 #include "system/consts.h"
@@ -34,7 +36,7 @@ Window* meh_window_create(guint width, guint height, gboolean fullscreen) {
 	}
 
 	/* Attach a renderer to the window. */
-    w->sdl_renderer = SDL_CreateRenderer(w->sdl_window, -1, NULL);
+	w->sdl_renderer = SDL_CreateRenderer(w->sdl_window, -1, SDL_RENDERER_SOFTWARE);
 	if (w->sdl_renderer == NULL) {
 		g_critical("Can't attach the renderer: %s", SDL_GetError());
 		return NULL;

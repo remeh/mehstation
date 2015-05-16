@@ -1,3 +1,4 @@
+#include <string.h>
 #include <glib-2.0/glib.h>
 
 #include "system/db/executable.h"
@@ -70,8 +71,7 @@ void meh_model_executable_destroy(Executable* executable) {
 }
 
 void meh_model_executables_destroy(GQueue* executables) {
-	int i = 0;
-	for (i = 0; i < g_queue_get_length(executables); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(executables); i++) {
 		Executable* executable = g_queue_peek_nth(executables, i);
 		meh_model_executable_destroy(executable);
 	}

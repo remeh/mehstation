@@ -37,8 +37,8 @@ typedef struct {
 	int w;
 	int h;
 
-	int start_timestamp;
-	int restart_timestamp;
+	unsigned int start_timestamp;
+	unsigned int restart_timestamp;
 	float off_x;
 	float off_y;
 

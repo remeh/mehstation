@@ -4,6 +4,7 @@
  * Copyright © 2015 Rémy Mathieu
  */
 #include <glib.h>
+#include <string.h>
 
 #include "system/app.h"
 #include "system/consts.h"
@@ -55,7 +56,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	data->platforms_icons = g_queue_new();
 
 	/* Load the data / icons / widgets of every platforms */
-	for (int i = 0; i < g_queue_get_length(data->platforms); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(data->platforms); i++) {
 		Platform* platform = g_queue_peek_nth(data->platforms, i);
 
 		/* load the platform icon */
@@ -111,14 +112,14 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	if (data != NULL) {
 		/* free platforms icons texture */
-		for (int i = 0; i < g_queue_get_length(data->platforms_icons); i++) {
+		for (unsigned int i = 0; i < g_queue_get_length(data->platforms_icons); i++) {
 			SDL_Texture* text = g_queue_peek_nth(data->platforms_icons, i);
 			SDL_DestroyTexture(text);
 		}
 		g_queue_free(data->platforms_icons);
 
 		/* free platforms widget */
-		for (int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
+		for (unsigned int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
 			WidgetImage* widget = g_queue_peek_nth(data->icons_widgets, i);
 			meh_widget_image_destroy(widget);
 		}
@@ -275,7 +276,7 @@ static void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	g_assert(platform != NULL);
 
 	/* animate icons and platform name */
-	for (int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
 		int y = 280;
 		if (i < data->selected_platform) {
 			y += (i - data->selected_platform) * 200;
@@ -349,7 +350,7 @@ int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 	}
 
 	/* icon */
-	for (int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
 		WidgetImage* widget = g_queue_peek_nth(data->icons_widgets, i);
 		meh_widget_image_render(app->window, widget);
 	}

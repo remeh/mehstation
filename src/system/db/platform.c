@@ -26,8 +26,7 @@ void meh_model_platform_destroy(Platform* platform) {
 }
 
 void meh_model_platforms_destroy(GQueue* platforms) {
-	int i = 0;
-	for (i = 0; i < g_queue_get_length(platforms); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(platforms); i++) {
 		Platform* platform = g_queue_peek_nth(platforms, i);
 		meh_model_platform_destroy(platform);
 	}

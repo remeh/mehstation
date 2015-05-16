@@ -32,7 +32,7 @@ Transition meh_transition_start(int transition_type, float start_value, float fi
 void meh_transitions_end(GQueue* transitions) {
 	g_assert(transitions != NULL);
 
-	for (int i = 0; i < g_queue_get_length(transitions); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(transitions); i++) {
 		Transition* transition = g_queue_peek_nth(transitions, i);
 		meh_transition_end(transition);
 	}
@@ -53,7 +53,7 @@ void meh_transition_end(Transition* transition) {
 void meh_transitions_update(GQueue* transitions) {
 	g_assert(transitions != NULL);
 
-	for (int i = 0; i < g_queue_get_length(transitions); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(transitions); i++) {
 		Transition* transition = g_queue_peek_nth(transitions, i);
 		meh_transition_update(transition);
 	}

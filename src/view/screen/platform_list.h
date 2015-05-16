@@ -12,7 +12,7 @@ struct App;
 
 typedef struct PlatformListData {
 	GQueue* platforms;
-	int selected_platform;
+	unsigned int selected_platform;
 
 	/*
 	 * Widgets

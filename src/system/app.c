@@ -68,7 +68,7 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	}
 
 	GQueue* platforms = meh_db_get_platforms(db);
-	for (int i = 0; i <  g_queue_get_length(platforms); i++) {
+	for (unsigned int i = 0; i <  g_queue_get_length(platforms); i++) {
 		Platform* platform = g_queue_peek_nth(platforms, i);
 		g_message("Platform %s found.", platform->name);
 	}
@@ -166,7 +166,7 @@ int meh_app_main_loop(App* app) {
 
 	/* application lifecycle */
 	int loop_count = 0;
-	int next_tick = SDL_GetTicks();
+	unsigned int next_tick = SDL_GetTicks();
 	int start_tick = SDL_GetTicks();
 
 	const int MAX_FRAMESKIP = app->settings.max_frameskip;
@@ -240,8 +240,7 @@ void meh_app_main_loop_event(App* app) {
 	/* Generate events from input */
 	GSList* list_messages = meh_input_manager_generate_messages(app->input_manager);
 
-	int i = 0;
-	for (i = 0; i < g_slist_length(list_messages); i++) {
+	for (unsigned int i = 0; i < g_slist_length(list_messages); i++) {
 		/* create the Message */
 		Message* message = g_slist_nth_data(list_messages, i);
 		/* send it to the current screen */

@@ -214,14 +214,13 @@ void meh_exec_list_destroy_data(Screen* screen) {
 
 		meh_widget_text_destroy(data->description_widget);
 
-		for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
+		for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 			meh_widget_text_destroy( g_queue_peek_nth( data->executable_widgets, i) );
 		}
 		g_queue_free(data->executable_widgets);
 
 		/* Free the executables id cache. */
-		int i = 0;
-		for (i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
+		for (unsigned int i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
 			g_free(g_queue_peek_nth(data->cache_executables_id, i));
 		}
 		g_queue_free(data->cache_executables_id);
@@ -244,9 +243,8 @@ static void meh_exec_list_destroy_resources(Screen* screen) {
 		return;
 	}
 
-	int i;
 	GList* keys = g_hash_table_get_keys(data->textures);
-	for (i = 0; i < g_list_length(keys); i++) {
+	for (unsigned int i = 0; i < g_list_length(keys); i++) {
 		int* key = g_list_nth_data(keys, i);
 		SDL_Texture* texture = g_hash_table_lookup(data->textures, key);
 		if (texture != NULL) {
@@ -339,8 +337,7 @@ static void meh_exec_list_delete_some_cache(Screen* screen) {
 			if (exec_to_clear_for != NULL && exec_to_clear_for->resources != NULL) {
 				g_debug("Cache cleaning of the resources of %s", exec_to_clear_for->display_name);
 				/* free the resources of this executable */
-				int i = 0;
-				for (i = 0; i < g_queue_get_length(exec_to_clear_for->resources); i++) {
+				for (unsigned int i = 0; i < g_queue_get_length(exec_to_clear_for->resources); i++) {
 					ExecutableResource* resource = g_queue_peek_nth(exec_to_clear_for->resources, i);
 					if (resource == NULL) {
 						continue;
@@ -430,9 +427,8 @@ static void meh_exec_list_select_resources(Screen* screen) {
 	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
 	data->screenshots_widget[0]->texture = data->screenshots_widget[1]->texture = data->screenshots_widget[2]->texture = NULL;
 
-	int i = 0;
 	int found_screenshots = 0;
-	for (i = 0; i < g_queue_get_length(executable->resources); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(executable->resources); i++) {
 		ExecutableResource* res = g_queue_peek_nth(executable->resources, i);
 		if (res != NULL) {
 			if (g_strcmp0(res->type, "cover") == 0) {
@@ -520,8 +516,7 @@ static void meh_exec_list_load_resources(App* app, Screen* screen) {
 
 	/* Loads the textures described in the executable resources
 	 * if it's not already in the cache */
-	int i = 0;
-	for (i = 0; i < g_queue_get_length(executable->resources); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(executable->resources); i++) {
 		ExecutableResource* resource = g_queue_peek_nth(executable->resources, i);
 		if (resource == NULL) {
 			continue;
@@ -554,7 +549,7 @@ static void meh_exec_list_load_resources(App* app, Screen* screen) {
 	 * We loosely test all the values because no set in glib
 	 * (we could use the hash table for that, but meh). - remy */
 	gboolean existing = FALSE;
-	for (i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
 		int* val = g_queue_peek_nth(data->cache_executables_id, i);
 		if (*val == data->selected_executable) {
 			existing = TRUE;
@@ -687,7 +682,7 @@ static void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_s
 
 	meh_widget_text_reset_move(data->description_widget);
 
-	for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 		meh_widget_text_reset_move(g_queue_peek_nth(data->executable_widgets, i));
 	}
 }
@@ -703,7 +698,7 @@ static void meh_exec_list_refresh_executables_widget(App* app, Screen* screen) {
 	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));
 
 	/* for every executable text widget */
-	for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 		WidgetText* text = g_queue_peek_nth(data->executable_widgets, i);
 		text->text = "";
 		
@@ -929,7 +924,7 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	}
 
 	/* Render all the executables names. */
-	for (int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
+	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 		meh_widget_text_render(app->window, g_queue_peek_nth(data->executable_widgets, i));
 	}
 
