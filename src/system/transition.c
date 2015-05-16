@@ -116,6 +116,3 @@ gboolean meh_transition_update(Transition* transition) {
 
 	return FALSE;
 }
-
-
-

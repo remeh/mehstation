@@ -97,7 +97,7 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 		return 1;
 	} 
 
-	meh_app_set_current_screen(app, starting_screen, TRUE);
+	meh_app_set_current_screen(app, starting_screen, FALSE);
 
 	return 0;
 }
@@ -148,7 +148,7 @@ void meh_app_set_current_screen(App* app, Screen* screen, gboolean end_transitio
 
 	g_message("Setting the current screen to : %s", screen->name);
 	if (app->current_screen != NULL && end_transitions) {
-		meh_transitions_end(app->current_screen->transitions); /* before leaving this screen, we must end all its transitions. */
+	  meh_transitions_end(app->current_screen->transitions); /* before leaving this screen, we must end all its transitions. */
 	}
 	app->current_screen = screen;
 }
@@ -320,7 +320,7 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	g_spawn_sync(working_dir,
 				 command_parts,
 				 NULL,
-				 G_SPAWN_DEFAULT,
+				 0,
 				 NULL,
 				 NULL,
 				 NULL,

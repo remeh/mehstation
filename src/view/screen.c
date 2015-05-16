@@ -54,10 +54,10 @@ void meh_screen_update_transitions(Screen* screen) {
 	g_assert(screen != NULL);
 
 	int length = g_queue_get_length(screen->transitions);
-	Transition* to_delete[length];
+    Transition** to_delete = g_new(Transition*, length);
 
 	for (int i = 0; i < length; i++) {
-		to_delete[i] = NULL;
+        to_delete[i] = NULL;
 		Transition* transition = g_queue_peek_nth(screen->transitions, i);
 		/* update the transition and if the transition is ended,
 		 * remove it from the queue */
@@ -70,7 +70,9 @@ void meh_screen_update_transitions(Screen* screen) {
 		if (to_delete[i] != NULL) {
 			g_queue_remove(screen->transitions, to_delete[i]);
 		}
-	}
+    }
+
+    g_free(to_delete);
 }
 
 /*
