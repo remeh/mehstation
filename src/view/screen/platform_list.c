@@ -210,7 +210,7 @@ static void meh_screen_platform_list_start_platform(App* app, Screen* screen) {
 
 	if (platform != NULL) {
 		/* create the child screen */
-		Screen* exec_list_screen = meh_screen_exec_list_new(app, platform->id);
+		Screen* exec_list_screen = meh_exec_list_new(app, platform->id);
 		exec_list_screen->parent_screen = screen;
 		Screen* fade_screen = meh_screen_fade_new(app, screen, exec_list_screen);
 		meh_app_set_current_screen(app, fade_screen, TRUE);

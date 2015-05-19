@@ -64,10 +64,10 @@ typedef struct ExecutableListData {
 	GQueue* executable_widgets;
 } ExecutableListData;
 
-Screen* meh_screen_exec_list_new(struct App* app, int platform_id);
-void meh_screen_exec_list_destroy_data();
-int meh_screen_exec_list_messages_handler(struct App* app, Screen* screen, Message* message);
-void meh_screen_exec_list_button_pressed(struct App* app, Screen* screen, int pressed_button);
-int meh_screen_exec_list_update(Screen* screen);;
-int meh_screen_exec_list_render(struct App* app, Screen* screen, gboolean flip);
-ExecutableListData* meh_screen_exec_list_get_data(Screen* screen);
+Screen* meh_exec_list_new(struct App* app, int platform_id);
+void meh_exec_list_destroy_data();
+int meh_exec_list_messages_handler(struct App* app, Screen* screen, Message* message);
+void meh_exec_list_button_pressed(struct App* app, Screen* screen, int pressed_button);
+int meh_exec_list_update(Screen* screen);;
+int meh_exec_list_render(struct App* app, Screen* screen, gboolean flip);
+ExecutableListData* meh_exec_list_get_data(Screen* screen);

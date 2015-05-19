@@ -27,24 +27,24 @@
 
 #define MEH_EXEC_LIST_SIZE (17) /* Maximum amount of executables displayed */
 
-static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data);
-static void meh_screen_exec_list_destroy_resources(Screen* screen);
-static void meh_screen_exec_list_load_resources(App* app, Screen* screen);
-static void meh_screen_exec_list_start_executable(App* app, Screen* screen);
-static void meh_screen_exec_list_select_resources(Screen* screen);
-static void meh_screen_exec_list_start_bg_anim(Screen* screen);
-static void meh_screen_exec_list_refresh_executables_widget(App* app, Screen* screen);
-static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* screen, int prev_selected_exec);
-static void meh_screen_exec_list_resolve_tex(Screen* screen);
+static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data);
+static void meh_exec_list_destroy_resources(Screen* screen);
+static void meh_exec_list_load_resources(App* app, Screen* screen);
+static void meh_exec_list_start_executable(App* app, Screen* screen);
+static void meh_exec_list_select_resources(Screen* screen);
+static void meh_exec_list_start_bg_anim(Screen* screen);
+static void meh_exec_list_refresh_executables_widget(App* app, Screen* screen);
+static void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected_exec);
+static void meh_exec_list_resolve_tex(Screen* screen);
 
-Screen* meh_screen_exec_list_new(App* app, int platform_id) {
+Screen* meh_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
 
 	Screen* screen = meh_screen_new(app->window);
 
 	screen->name = g_strdup("Executable list screen");
-	screen->messages_handler = &meh_screen_exec_list_messages_handler;
-	screen->destroy_data = &meh_screen_exec_list_destroy_data;
+	screen->messages_handler = &meh_exec_list_messages_handler;
+	screen->destroy_data = &meh_exec_list_destroy_data;
 
 	/*
 	 * Init the custom data.
@@ -71,7 +71,7 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	data->executable_widgets = g_queue_new();
 
 	/* create widgets */
-	meh_screen_exec_create_widgets(app, screen, data);
+	meh_exec_create_widgets(app, screen, data);
 
 	screen->data = data;
 
@@ -80,12 +80,12 @@ Screen* meh_screen_exec_list_new(App* app, int platform_id) {
 	 * then refresh all the text textures by faking
 	 * a cursor movement.
 	 */
-	meh_screen_exec_list_refresh_after_cursor_move(app, screen, -1);
+	meh_exec_list_after_cursor_move(app, screen, -1);
 
 	return screen;
 }
 
-static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data) {
+static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 	g_assert(data != NULL);
@@ -162,13 +162,13 @@ static void meh_screen_exec_create_widgets(App* app, Screen* screen, ExecutableL
 }
 
 /*
- * meh_screen_exec_list_start_bg_anim slighty moves the background to give
+ * meh_exec_list_start_bg_anim slighty moves the background to give
  * an impression of dynamic.
  */
-static void meh_screen_exec_list_start_bg_anim(Screen* screen) {
+static void meh_exec_list_start_bg_anim(Screen* screen) {
 	g_assert(screen != NULL);
 
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 	g_assert(data != NULL);
 
 	data->background_widget->x = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 10000);
@@ -177,12 +177,12 @@ static void meh_screen_exec_list_start_bg_anim(Screen* screen) {
 }
 
 /*
- * meh_screen_exec_list_destroy_data role is to delete the typed data of the screen
+ * meh_exec_list_destroy_data role is to delete the typed data of the screen
  */
-void meh_screen_exec_list_destroy_data(Screen* screen) {
+void meh_exec_list_destroy_data(Screen* screen) {
 	g_assert(screen != NULL);
 
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 	if (data != NULL) {
 		meh_model_platform_destroy(data->platform);
 		meh_model_executables_destroy(data->executables);
@@ -227,18 +227,18 @@ void meh_screen_exec_list_destroy_data(Screen* screen) {
 		g_queue_free(data->cache_executables_id);
 
 		/* We must free the textures cache */
-		meh_screen_exec_list_destroy_resources(screen);
+		meh_exec_list_destroy_resources(screen);
 	}
 }
 
 /*
- * meh_screen_exec_list_destroy_resources takes care of destroying the
+ * meh_exec_list_destroy_resources takes care of destroying the
  * resources.
  */
-static void meh_screen_exec_list_destroy_resources(Screen* screen) {
+static void meh_exec_list_destroy_resources(Screen* screen) {
 	g_assert(screen != NULL);
 
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	if (data == NULL || data->textures == NULL) {
 		return;
@@ -260,7 +260,7 @@ static void meh_screen_exec_list_destroy_resources(Screen* screen) {
 }
 
 /*
- * meh_screen_exec_list_is_in_delta checks whether the given index is in the delta
+ * meh_exec_list_is_in_delta checks whether the given index is in the delta
  * of the current selection.
  *
  * Ex:
@@ -275,7 +275,7 @@ static void meh_screen_exec_list_destroy_resources(Screen* screen) {
  * 8
  * 9
  */
-static gboolean meh_screen_exec_list_is_in_delta(ExecutableListData* data, int idx) {
+static gboolean meh_exec_list_is_in_delta(ExecutableListData* data, int idx) {
 	int top_limit = idx - MEH_EXEC_LIST_DELTA;
 	int bottom_limit = idx + MEH_EXEC_LIST_DELTA;
 
@@ -312,13 +312,13 @@ static gboolean meh_screen_exec_list_is_in_delta(ExecutableListData* data, int i
 }
 
 /*
- * meh_screen_exec_list_delete_some_cache looks for which cache we could
+ * meh_exec_list_delete_some_cache looks for which cache we could
  * free without impacting the user experience.
  */
-static void meh_screen_exec_list_delete_some_cache(Screen* screen) {
+static void meh_exec_list_delete_some_cache(Screen* screen) {
 	g_assert(screen != NULL);	
 
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 	if (data == NULL) {
 		return;
 	}
@@ -333,7 +333,7 @@ static void meh_screen_exec_list_delete_some_cache(Screen* screen) {
 	while (g_queue_get_length(data->cache_executables_id) > MEH_EXEC_LIST_MAX_CACHE && watchdog > 0) {
 		int* idx = g_queue_pop_head(data->cache_executables_id);
 		if (*idx != current_executable->id &&
-			!meh_screen_exec_list_is_in_delta(data, *idx)) { /* do not free the resources of the current selection */
+			!meh_exec_list_is_in_delta(data, *idx)) { /* do not free the resources of the current selection */
 			/* executable for which we want to free the resources */
 			Executable* exec_to_clear_for = g_queue_peek_nth(data->executables, *idx);
 			if (exec_to_clear_for != NULL && exec_to_clear_for->resources != NULL) {
@@ -369,13 +369,13 @@ static void meh_screen_exec_list_delete_some_cache(Screen* screen) {
 }
 
 /*
- * meh_screen_exec_list_select_resources uses the resources of the currently selected
+ * meh_exec_list_select_resources uses the resources of the currently selected
  * executable to select a background and a cover.
  */
-static void meh_screen_exec_list_select_resources(Screen* screen) {
+static void meh_exec_list_select_resources(Screen* screen) {
 	g_assert(screen != NULL);
 
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 	if (data == NULL) {
 		return;
 	}
@@ -450,15 +450,15 @@ static void meh_screen_exec_list_select_resources(Screen* screen) {
 }
 
 /*
- * meh_screen_exec_list_get_data returns the data of the executable_list screen
+ * meh_exec_list_get_data returns the data of the executable_list screen
  */
-ExecutableListData* meh_screen_exec_list_get_data(Screen* screen) {
+ExecutableListData* meh_exec_list_get_data(Screen* screen) {
 	ExecutableListData* data = (ExecutableListData*) screen->data;
 	g_assert(data != NULL);
 	return data;
 }
 
-int meh_screen_exec_list_messages_handler(App* app, Screen* screen, Message* message) {
+int meh_exec_list_messages_handler(App* app, Screen* screen, Message* message) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
@@ -471,21 +471,21 @@ int meh_screen_exec_list_messages_handler(App* app, Screen* screen, Message* mes
 		case MEH_MSG_BUTTON_PRESSED:
 			{
 				InputMessageData* data = (InputMessageData*)message->data;
-				meh_screen_exec_list_button_pressed(app, screen, data->button);
+				meh_exec_list_button_pressed(app, screen, data->button);
 			}
 			break;
 		case MEH_MSG_UPDATE:
 			{
-				meh_screen_exec_list_update(screen);
+				meh_exec_list_update(screen);
 			}
 			break;
 		case MEH_MSG_RENDER:
 			{
 				if (message->data == NULL) {
-					meh_screen_exec_list_render(app, screen, TRUE);
+					meh_exec_list_render(app, screen, TRUE);
 				} else {
 					gboolean* flip = (gboolean*)message->data;
-					meh_screen_exec_list_render(app, screen, *flip);
+					meh_exec_list_render(app, screen, *flip);
 				}
 			}
 			break;
@@ -495,14 +495,14 @@ int meh_screen_exec_list_messages_handler(App* app, Screen* screen, Message* mes
 }
 
 /*
- * meh_screen_exec_list_load_resources loads the resources of the currently
+ * meh_exec_list_load_resources loads the resources of the currently
  * selected game.
  */
-static void meh_screen_exec_list_load_resources(App* app, Screen* screen) {
+static void meh_exec_list_load_resources(App* app, Screen* screen) {
 	g_assert(app != NULL);	
 	g_assert(screen != NULL);
 
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	if (data->executables == NULL || data->executables_length == 0) {
 		return;
@@ -570,10 +570,10 @@ static void meh_screen_exec_list_load_resources(App* app, Screen* screen) {
 } 
 
 /*
- * meh_screen_exec_list_start_executable launches the currently selected executable.
+ * meh_exec_list_start_executable launches the currently selected executable.
  */
-static void meh_screen_exec_list_start_executable(App* app, Screen* screen) {
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+static void meh_exec_list_start_executable(App* app, Screen* screen) {
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	/* get the executable selected */
 	Executable* executable = g_queue_peek_nth(data->executables, data->selected_executable);
@@ -591,16 +591,16 @@ static void meh_screen_exec_list_start_executable(App* app, Screen* screen) {
 }
 
 /*
- * meh_screen_exec_list_refresh_after_cursor_move refreshes the screen information
+ * meh_exec_list_after_cursor_move refreshes the screen information
  * after a jump in the executable list.
  */
-static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* screen, int prev_selected_exec) {
-	meh_screen_exec_list_select_resources(screen);
-	meh_screen_exec_list_load_resources(app, screen);
-	meh_screen_exec_list_delete_some_cache(screen);
-	meh_screen_exec_list_resolve_tex(screen);
+static void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected_exec) {
+	meh_exec_list_select_resources(screen);
+	meh_exec_list_load_resources(app, screen);
+	meh_exec_list_delete_some_cache(screen);
+	meh_exec_list_resolve_tex(screen);
 
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	/*
 	 * move the selection cursor
@@ -672,14 +672,14 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 		/* The two cases of First -> last */
 	    (relative_new == MEH_EXEC_LIST_SIZE-1 && relative_old == 0) ||
 		(data->selected_executable == data->executables_length-1))	{
-		meh_screen_exec_list_refresh_executables_widget(app, screen);
+		meh_exec_list_refresh_executables_widget(app, screen);
 	}
 
 	/*
 	 * anim the bg
 	 */
 
-	meh_screen_exec_list_start_bg_anim(screen);
+	meh_exec_list_start_bg_anim(screen);
 
 	/*
 	 * reset the move of the texts
@@ -693,11 +693,11 @@ static void meh_screen_exec_list_refresh_after_cursor_move(App* app, Screen* scr
 }
 
 /*
- * meh_screen_exec_list_refresh_executables_widget re-creates all the texture
+ * meh_exec_list_refresh_executables_widget re-creates all the texture
  * in the text widgets for the executables.
  */
-static void meh_screen_exec_list_refresh_executables_widget(App* app, Screen* screen) {
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+static void meh_exec_list_refresh_executables_widget(App* app, Screen* screen) {
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 	g_assert(data != NULL);
 
 	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));
@@ -721,7 +721,7 @@ static void meh_screen_exec_list_refresh_executables_widget(App* app, Screen* sc
 	}
 }
 
-static void meh_screen_exec_list_start_settings(App* app, Screen* screen) {
+static void meh_exec_list_start_settings(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
@@ -735,14 +735,14 @@ static void meh_screen_exec_list_start_settings(App* app, Screen* screen) {
 }
 
 /*
- * meh_screen_exec_list_button_pressed is called when we received a button pressed
+ * meh_exec_list_button_pressed is called when we received a button pressed
  * message.
  */
-void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) {
+void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 	g_assert(data != NULL);
 
 	int prev_selected_exec = data->selected_executable;
@@ -764,11 +764,11 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			break;
 		case MEH_INPUT_BUTTON_START:
 			/* settings screen */
-			meh_screen_exec_list_start_settings(app, screen);
+			meh_exec_list_start_settings(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_A:
 			/* launch the game */
-			meh_screen_exec_list_start_executable(app, screen);
+			meh_exec_list_start_executable(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_UP:
 			if (data->selected_executable == 0) {
@@ -776,7 +776,7 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			} else {
 				data->selected_executable -= 1;
 			}
-			meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
+			meh_exec_list_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 			if (data->selected_executable == data->executables_length-1) {
@@ -784,7 +784,7 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 			} else {
 				data->selected_executable += 1;
 			}
-			meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
+			meh_exec_list_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 		case MEH_INPUT_BUTTON_L:
 			{
@@ -793,7 +793,7 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 				if (data->selected_executable < 0) {
 					data->selected_executable = data->executables_length-1;
 				}
-				meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
+				meh_exec_list_after_cursor_move(app, screen, prev_selected_exec);
 			}
 			break;
 		case MEH_INPUT_BUTTON_R:
@@ -803,19 +803,19 @@ void meh_screen_exec_list_button_pressed(App* app, Screen* screen, int pressed_b
 				if (data->selected_executable > data->executables_length) {
 					data->selected_executable = 0;
 				}
-				meh_screen_exec_list_refresh_after_cursor_move(app, screen, prev_selected_exec);
+				meh_exec_list_after_cursor_move(app, screen, prev_selected_exec);
 			}
 			break;
 	}
 }
 
 /*
- * meh_screen_exec_list_update updates the executable list.
+ * meh_exec_list_update updates the executable list.
  */
-int meh_screen_exec_list_update(Screen* screen) {
+int meh_exec_list_update(Screen* screen) {
 	g_assert(screen != NULL);
 
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 	g_assert(data != NULL);
 
 	/* updates all the transition in the screen */
@@ -841,13 +841,13 @@ int meh_screen_exec_list_update(Screen* screen) {
 }
 
 /*
- * meh_screen_exec_list_resolve_tex resolves all the tex index
+ * meh_exec_list_resolve_tex resolves all the tex index
  * to real textures for object referencing them.
  */
-static void meh_screen_exec_list_resolve_tex(Screen* screen) {
+static void meh_exec_list_resolve_tex(Screen* screen) {
 	g_assert(screen != NULL);
 
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 	g_assert(data != NULL);
 
 	if (data->background > -1) {
@@ -864,16 +864,16 @@ static void meh_screen_exec_list_resolve_tex(Screen* screen) {
 }
 
 /*
- * meh_screen_exec_list_render renders the executable list view.
+ * meh_exec_list_render renders the executable list view.
  */
-int meh_screen_exec_list_render(App* app, Screen* screen, gboolean flip) {
+int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
 	SDL_Color black = { 0, 0, 0 };
 	meh_window_clear(app->window, black);
 	
-	ExecutableListData* data = meh_screen_exec_list_get_data(screen);
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 	g_assert(data != NULL);
 
 	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
