@@ -1,6 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-SET(CMAKE_SYSTEM_NAME Generic)
+IF(MINGW_BUILD)
+  SET(CMAKE_SYSTEM_NAME Generic)
+ENDIF()
 
 PROJECT(mehstation)
 
@@ -69,7 +71,7 @@ IF(MINGW_BUILD)
   SET (CMAKE_C_COMPILER             "/usr/bin/i686-w64-mingw32-gcc")
   SET (CMAKE_C_FLAGS                "-Wall -std=c11")
   SET (CMAKE_C_FLAGS_DEBUG          "-g")
-ELSEIF(UNIX)
+ELSE(UNIX)
   # Use Clang
   SET (CMAKE_C_COMPILER             "/usr/bin/clang")
   SET (CMAKE_C_FLAGS                "-Wall -std=c11")
