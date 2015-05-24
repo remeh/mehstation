@@ -1,5 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+SET(CMAKE_SYSTEM_NAME Generic)
+
 PROJECT(mehstation)
 
 SET(
@@ -31,25 +33,22 @@ SET(
         src/view/screen/platform_list.c
 )
 
-IF(WIN32)
-  SET(
-    src/ext/sqlite3.c
-  )
-ENDIF()
-
 ADD_EXECUTABLE(
     ${PROJECT_NAME}
     ${MEHSTATION_SOURCES}
 )
 
-IF(UNIX) # Use pkg-config only on unix systems.
-  INCLUDE(FindPkgConfig)
-  PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
-  PKG_SEARCH_MODULE(SDL2_ttf REQUIRED SDL2_ttf)
-  PKG_SEARCH_MODULE(SDL2_image REQUIRED SDL2_image)
-  PKG_SEARCH_MODULE(sqlite3 REQUIRED sqlite3)
-  PKG_CHECK_MODULES(GLIB REQUIRED glib-2.0>=2.0.0)
+INCLUDE(FindPkgConfig)
+IF(MINGW_BUILD)
+  SET (PKG_CONFIG_EXECUTABLE i686-w64-mingw32-pkg-config)
 ENDIF()
+
+
+PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
+PKG_SEARCH_MODULE(SDL2_ttf REQUIRED SDL2_ttf)
+PKG_SEARCH_MODULE(SDL2_image REQUIRED SDL2_image)
+PKG_SEARCH_MODULE(sqlite3 REQUIRED sqlite3)
+PKG_CHECK_MODULES(GLIB REQUIRED glib-2.0>=2.0.0)
 
 include_directories(
     ${SDL2_INCLUDE_DIRS}
@@ -59,19 +58,18 @@ include_directories(
     ${sqlite3_INCLUDE_DIRS}
 )
 
-IF(UNIX)
-  include_directories(
-    ${mehstation_BINARY_DIR}/src
-  )
-ELSEIF(WIN32)
-  include_directories(
-    ${mehstation_BINARY_DIR}\\src
-  )
-ENDIF()
+include_directories(
+${mehstation_BINARY_DIR}/src
+)
 
 LINK_DIRECTORIES(${mehstation_BINARY_DIR}/src)
 
-IF(UNIX)
+IF(MINGW_BUILD)
+  # Use Clang
+  SET (CMAKE_C_COMPILER             "/usr/bin/i686-w64-mingw32-gcc")
+  SET (CMAKE_C_FLAGS                "-Wall -std=c11")
+  SET (CMAKE_C_FLAGS_DEBUG          "-g")
+ELSEIF(UNIX)
   # Use Clang
   SET (CMAKE_C_COMPILER             "/usr/bin/clang")
   SET (CMAKE_C_FLAGS                "-Wall -std=c11")
