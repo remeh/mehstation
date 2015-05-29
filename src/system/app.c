@@ -74,11 +74,13 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	}
 	meh_model_platforms_destroy(platforms);
 
+
 	/* Open the main window */
-	Window* window = meh_window_create(settings.width, settings.height, settings.fullscreen);
+	Window* window = meh_window_create(settings.width, settings.height, settings.fullscreen, app->flags.force_software);
 	app->window = window;
 
 	/* Opens some font. */
+
 	Font* font = meh_font_open("res/fonts/OpenSans-Regular.ttf", meh_window_convert_width(window, 18));
 	app->small_font = font;
 	font = meh_font_open("res/fonts/OpenSans-Bold.ttf", meh_window_convert_width(window, 22));

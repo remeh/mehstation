@@ -17,11 +17,13 @@ Flags meh_flags_parse(int argc, char* argv[]) {
 
 	/* default values */
 	f.configure_mapping = FALSE;
+	f.force_software = FALSE;
 
 	/* defining the flags */
 	GOptionEntry flags[] =
 	{
 		{ "mapping", 'm', 0, G_OPTION_ARG_NONE, &f.configure_mapping, "Go through the mapping screen when starting.", NULL },
+		{ "software", 's', 0, G_OPTION_ARG_NONE, &f.force_software, "Force software renderer.", NULL },
 		{ NULL }
 	};
 

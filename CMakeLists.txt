@@ -81,11 +81,11 @@ ENDIF()
 # sources
 TARGET_LINK_LIBRARIES(
     ${PROJECT_NAME}
+    ${GLIB_LIBRARIES}
+    ${sqlite3_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${SDL2_ttf_LIBRARIES}
     ${SDL2_image_LIBRARIES}
-    ${GLIB_LIBRARIES}
-    ${sqlite3_LIBRARIES}
 )
 
 # -DSDL2_ttf_LIBRARIES=C:\Code\Libs\SDL2_ttf\lib\x86\SDL2_ttf.lib -DSDL2_image_LIBRARIES=C:\Code\Libs\SDL2_image\lib\x86\SDL2_image.lib -DSDL2_LIBRARIES=C:\Code\Libs\SDL2\SDL\lib\win32\SDL2main.lib;C:\Code\Libs\SDL2\SDL\lib\win32\SDL2.lib -DGLIB_LIBRARIES=C:\Code\Libs\glib\lib\libgio-2.0.dll.a;C:\Code\Libs\glib\lib\libglib-2.0.dll.a; -Dmehstation_BINARY_DIR=C:\\Code\\Projects\\mehstation -Dsqlite3_INCLUDE_DIRS=C:\Code\Libs\sqlite3 -DGLIB_INCLUDE_DIRS=C:\Code\Libs\glib\include;C:\Code\Libs\glib\include\glib-2.0\;C:\Code\Libs\glib\lib\glib-2.0\include -DSDL2_INCLUDE_DIRS=C:\Code\Libs\SDL2\SDL\include;C:\Code\Libs\SDL2\SDL\include\SDL2 -DSDL2_image_INCLUDE_DIRS=C:\Code\Libs\SDL2_image\include -DSDL2_ttf_INCLUDE_DIRS=C:\Code\Libs\SDL2_ttf\include

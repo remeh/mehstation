@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <glib.h>
 #include <string.h>
 
@@ -5,10 +6,12 @@
 #include "view/text.h"
 #include "system/consts.h"
 
+static gboolean meh_window_has_accelerated(void);
+
 /*
  * meh_create_window deals with the creation of the opengl window.
  */
-Window* meh_window_create(guint width, guint height, gboolean fullscreen) {
+Window* meh_window_create(guint width, guint height, gboolean fullscreen, gboolean force_software) {
 	Window* w = g_new(Window, 1);
 
 	w->width = width;
@@ -35,10 +38,19 @@ Window* meh_window_create(guint width, guint height, gboolean fullscreen) {
 		return NULL;
 	}
 
+
+	/* Looks whether or any driver support acceleration */
+
 	/* Attach a renderer to the window. */
-	w->sdl_renderer = SDL_CreateRenderer(w->sdl_window, -1, 0);
+	if (meh_window_has_accelerated() && !force_software) {
+		w->sdl_renderer = SDL_CreateRenderer(w->sdl_window, -1, SDL_RENDERER_ACCELERATED);
+	} else {
+		g_message("No hardware acceleration. Trying to fallback on the software renderer.");
+		w->sdl_renderer = SDL_CreateRenderer(w->sdl_window, -1, SDL_RENDERER_SOFTWARE);
+	}
+
 	if (w->sdl_renderer == NULL) {
-		g_critical("Can't attach the renderer: %s", SDL_GetError());
+		g_message("Can't create any renderer: %s", SDL_GetError());
 		return NULL;
 	}
 
@@ -48,6 +60,21 @@ Window* meh_window_create(guint width, guint height, gboolean fullscreen) {
 
 	g_message("Window %d:%d %s created.", w->width, w->height, (w->fullscreen == TRUE ? "fullscreen" : "windowed"));
 	return w;
+}
+
+/*
+ * meh_window_has_accelerated returns if any accelerated renderer
+ * support hardware acceleration.
+ */
+gboolean meh_window_has_accelerated(void) {
+	for (int i = 0; i < SDL_GetNumRenderDrivers(); i++) {
+		SDL_RendererInfo info;
+		SDL_GetRenderDriverInfo(i, &info);
+		if (info.flags & SDL_RENDERER_ACCELERATED) {
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 /*

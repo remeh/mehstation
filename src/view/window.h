@@ -16,7 +16,7 @@ typedef struct {
 	SDL_Renderer* sdl_renderer;
 } Window;
 
-Window* meh_window_create(guint width, guint height, gboolean fullscreen);
+Window* meh_window_create(guint width, guint height, gboolean fullscreen, gboolean force_software);
 void meh_window_destroy(Window* window);
 void meh_window_clear(Window* window, SDL_Color color);
 void meh_window_render(Window* window);
