@@ -297,6 +297,7 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	g_assert(executable != NULL);
 
 	/* prepare the exec call */
+	/* FIXME path with spaces ? */
 	gchar** command_parts = g_strsplit(platform->command, " ", -1);
 
 	/* replace the flags */
@@ -305,23 +306,22 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 		if (command_parts[i] == NULL) {
 			break;
 		}
-		/* FIXME Sure that there's not utf8 problems there ? */
+		/* FIXME Sure that there's no utf8 problems there ? */
 		if (g_strcmp0(command_parts[i], "\%exec\%") == 0) {
 			/* remove the placeholder */
 			g_free(command_parts[i]);
 			/* replace by the value */
-			command_parts[i] = g_strdup( executable->filepath );
+			command_parts[i] = g_strdup(executable->filepath);
 		}
 		i++;
 	}
 
-	const gchar* working_dir = "/usr/bin"; /* FIXME what about executable not in /usr/bin */
 	int exit_status = 0;
 	GError* error = NULL;
-	g_spawn_sync(working_dir,
+	g_spawn_sync(NULL,
 				 command_parts,
 				 NULL,
-				 0,
+				 G_SPAWN_DEFAULT,
 				 NULL,
 				 NULL,
 				 NULL,
