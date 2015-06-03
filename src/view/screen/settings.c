@@ -26,9 +26,9 @@ Screen* meh_screen_settings_new(App* app) {
 	SettingsData* data = g_new(SettingsData, 1);
 
 	SDL_Color white = { 255, 255, 255, 255 };
-	data->title = meh_widget_text_new(app->big_font, "mehstation 1.0", 50, 50, 300, 50, white, FALSE);
-	data->title_settings = meh_widget_text_new(app->big_font, "- settings", MEH_FAKE_WIDTH, 50, 180, 50, white, FALSE);
-	data->title_settings->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 330, 750);
+	data->title = meh_widget_text_new(app->big_font, app->settings.name, 50, 50, 300, 50, white, FALSE);
+	data->title_settings = meh_widget_text_new(app->big_font, "Settings", MEH_FAKE_WIDTH, 90, 180, 50, white, FALSE);
+	data->title_settings->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 70, 750);
 	meh_screen_add_text_transitions(screen, data->title_settings);
 
 	screen->data = data;

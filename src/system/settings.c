@@ -33,6 +33,7 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 		g_error_free(error);
 	}
 
+	settings->name = meh_settings_read_string(keyfile, "mehstation", "name", "mehstation 1.0");
 	settings->width = meh_settings_read_int(keyfile, "mehstation", "width", 640);
 	settings->height = meh_settings_read_int(keyfile, "mehstation", "height", 480);
 	settings->fullscreen = meh_settings_read_bool(keyfile, "mehstation", "fullscreen", FALSE);
@@ -45,6 +46,18 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 	settings->fade_duration = meh_settings_read_int(keyfile, "render", "fade_duration", 300);
 
 	return TRUE;
+}
+
+gchar* meh_settings_read_string(GKeyFile* keyfile, const gchar* group_name, const gchar* key, gchar* default_value) {
+	g_assert(keyfile != NULL);
+
+	GError* error = NULL;
+	gchar* value = g_key_file_get_string(keyfile, group_name, key, &error);
+	if (error != NULL) {
+		return default_value;
+	}
+
+	return value;
 }
 
 int meh_settings_read_int(GKeyFile* keyfile, const gchar* group_name, const gchar* key, int default_value) {
