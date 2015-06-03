@@ -11,6 +11,9 @@
 #include "view/window.h"
 #include "view/screen.h"
 
+/*
+ * TODO shadow are not supported since some changes, should be rewrote.
+ */
 WidgetText* meh_widget_text_new(const Font* font, const char* text, int x, int y, int w, int h, SDL_Color color, gboolean shadow) {
 	WidgetText* t = g_new(WidgetText, 1);
 

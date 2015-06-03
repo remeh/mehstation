@@ -301,7 +301,8 @@ static void meh_screen_platform_change_platform(App* app, Screen* screen) {
 
 	/* executables count */
 	int count_exec = meh_db_count_platform_executables(app->db, platform);
-	data->executables_count->text = g_strdup_printf("%d executables", count_exec);
+	g_free(data->executables_count->text);
+	data->executables_count->text = g_strdup_printf("%d executable%s", count_exec, count_exec > 1 ? "s": "");
 	meh_widget_text_reload(app->window, data->executables_count);
 	data->executables_count->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 325, 550);
 	meh_screen_add_text_transitions(screen, data->executables_count);
