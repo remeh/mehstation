@@ -292,6 +292,11 @@ void meh_app_send_message(App* app, Message* message) {
 	}
 }
 
+/*
+ * meh_app_start_executable starts the given platform's executable.
+ * FIXME the algorithm to replace the flags could be better
+ * (and not using a queue)
+ */
 void meh_app_start_executable(App* app, Platform* platform, Executable* executable) {
 	g_assert(platform != NULL);
 	g_assert(executable != NULL);
@@ -299,27 +304,43 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	/* prepare the exec call */
 	/* FIXME path with spaces ? */
 	gchar** command_parts = g_strsplit(platform->command, " ", -1);
+	GQueue* commands = g_queue_new();
 
-	/* replace the flags */
+	/* build a queue with all the args and replace in the 
+	 * same time the %exec% and %extra% flags */
 	int i = 0;
-	while (1) {
-		if (command_parts[i] == NULL) {
-			break;
-		}
-		/* FIXME Sure that there's no utf8 problems there ? */
+	while (command_parts[i] != NULL) {
 		if (g_strcmp0(command_parts[i], "\%exec\%") == 0) {
-			/* remove the placeholder */
-			g_free(command_parts[i]);
 			/* replace by the value */
-			command_parts[i] = g_strdup(executable->filepath);
+			g_queue_push_tail(commands, g_strdup(executable->filepath));
+		} else if (g_strcmp0(command_parts[i], "\%extra\%") == 0) {
+			if (executable->extra_parameter != NULL && strlen(executable->extra_parameter) > 0) {
+				/* replace by the value */
+				g_queue_push_tail(commands, g_strdup(executable->extra_parameter));
+			}
+		} else {
+			g_queue_push_tail(commands, g_strdup(command_parts[i]));
 		}
 		i++;
 	}
 
+	/* release used memory */
+	g_strfreev(command_parts);
+
+	/* rebuild an array of strings free the queue
+	 * NOTE that we don't release the memory of the strings
+	 * because they are reused in the array */
+	gchar** parts = g_new(gchar*, g_queue_get_length(commands)+1);
+	for (int i = 0; i < g_queue_get_length(commands); i++) {
+		parts[i] = g_queue_peek_nth(commands, i);
+	}
+	parts[g_queue_get_length(commands)] = NULL;
+	g_queue_free(commands);
+
 	int exit_status = 0;
 	GError* error = NULL;
 	g_spawn_sync(NULL,
-				 command_parts,
+				 parts,
 				 NULL,
 				 G_SPAWN_DEFAULT,
 				 NULL,
@@ -334,9 +355,6 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 		g_critical("%s", error->message);
 		g_error_free(error);
 	}
-
-	/* release used memory */
-	g_strfreev(command_parts);
 
 	/* when launching something, we may have missed some
 	 * input events, reset everything in case of. */
