@@ -26,7 +26,8 @@ CREATE TABLE "executable" (
 	`developer`	TEXT,
 	`release_date`	TEXT,
 	`players`	TEXT,
-	`rating`	TEXT
+	`rating`	TEXT,
+    `extra_parameter`   TEXT
 );
 CREATE TABLE "mapping" (
     `id` TEXT NOT NULL,

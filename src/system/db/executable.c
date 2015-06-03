@@ -4,34 +4,36 @@
 #include "system/db/executable.h"
 #include "system/db/executable_resource.h"
 
-static gchar* meh_copy_string(const gchar* str, const gchar* fallback);
-static gchar* meh_copy_string(const gchar* str, const gchar* fallback);
+static gchar* meh_string_copy(const gchar* str, const gchar* fallback);
 
 Executable* meh_model_executable_new(int id, const gchar* display_name, const gchar* filepath,
 		const gchar* description, const gchar* genres, const gchar* publisher,
-		const gchar* developer, const gchar* release_date, const gchar* rating, const gchar* players) {
+		const gchar* developer, const gchar* release_date, const gchar* rating, const gchar* players,
+		const gchar* extra_parameter) {
 	Executable* executable = g_new(Executable, 1);
 
 	executable->id = id;
 	executable->display_name = g_strdup(display_name);
 	executable->filepath = g_strdup(filepath);
 
-	executable->description = meh_copy_string(description, "No description.");
-	executable->genres = meh_copy_string(genres, "Unknown");
-	executable->publisher = meh_copy_string(publisher, "Unknown");
-	executable->developer = meh_copy_string(developer, "Unknown");
-	executable->release_date = meh_copy_string(release_date, "Unknown");
+	executable->description = meh_string_copy(description, "No description.");
+	executable->genres = meh_string_copy(genres, "Unknown");
+	executable->publisher = meh_string_copy(publisher, "Unknown");
+	executable->developer = meh_string_copy(developer, "Unknown");
+	executable->release_date = meh_string_copy(release_date, "Unknown");
+
+	executable->extra_parameter = meh_string_copy(extra_parameter, "");
 
 	if (g_strcmp0(rating, "0.0") == 0) {
 		executable->rating = g_strdup("No rating");
 	} else {
-		executable->rating = meh_copy_string(rating, "No rating");
+		executable->rating = meh_string_copy(rating, "No rating");
 	}
 
 	if (g_strcmp0(players, "0")  == 0) {
 		executable->players = g_strdup("Unknown");
 	} else {
-		executable->players = meh_copy_string(players, "Unknown");
+		executable->players = meh_string_copy(players, "Unknown");
 	}
 
 	executable->resources = g_queue_new();
@@ -40,9 +42,9 @@ Executable* meh_model_executable_new(int id, const gchar* display_name, const gc
 }
 
 /*
- * meh_copy_string copies the string or fallback to the given value.
+ * meh_string_copy copies the string or fallback to the given value.
  */
-static gchar* meh_copy_string(const gchar* str, const gchar* fallback) {
+static gchar* meh_string_copy(const gchar* str, const gchar* fallback) {
 	if (str == NULL || strlen(str) == 0) {
 		return g_strdup(fallback);
 	}
@@ -66,6 +68,7 @@ void meh_model_executable_destroy(Executable* executable) {
 	g_free(executable->developer);
 	g_free(executable->release_date);
 	g_free(executable->rating);
+	g_free(executable->extra_parameter);
 
 	g_free(executable);
 }
