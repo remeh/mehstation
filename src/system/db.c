@@ -177,7 +177,36 @@ GQueue* meh_db_get_platforms(DB* db) {
 }
 
 /*
- * meh_db_get_mapping looks for the given mapping in the database.
+ * meh_db_count_platform_executables returns the number of executables
+ * configured for the given platform.
+ */
+int meh_db_count_platform_executables(DB* db, const Platform* platform) {
+	g_assert(db != NULL);
+	g_assert(platform != NULL);
+
+	sqlite3_stmt* statement = NULL;
+	const char* sql = "SELECT count(\"id\") FROM executables WHERE platform_id = ?1";
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	if (statement == NULL || return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		return 0;
+	}
+
+	sqlite3_bind_int(statement, 1, platform->id);
+
+	/* can't find this mapping. */
+	if (sqlite3_step(statement) != SQLITE_ROW) {
+		return 0;
+	}
+
+	int count = (int)sqlite3_column_int(statement, 0);
+
+	sqlite3_finalize(statement);
+	return count;
+}
+
+/*
+ * meh_db_count_mapping looks for the given mapping in the database.
  */
 int meh_db_count_mapping(DB* db) {
 	g_assert(db != NULL);
