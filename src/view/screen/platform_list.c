@@ -92,9 +92,12 @@ Screen* meh_screen_platform_list_new(App* app) {
 	data->hover = meh_widget_rect_new(0, 260, MEH_FAKE_WIDTH, 200, black, TRUE);
 
 	/* misc */
-	data->platform_name = meh_widget_text_new(app->big_font, "", 320, 340, 500, 100, white, FALSE);
+	data->platform_name = meh_widget_text_new(app->big_font, "", 320, 315, 500, 100, white, FALSE);
 	data->platform_name->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
 	meh_screen_add_text_transitions(screen, data->platform_name);
+	data->executables_count = meh_widget_text_new(app->small_font, "", 325, 365, 500, 100, white, FALSE);
+	data->executables_count->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 360, 300);
+	meh_screen_add_text_transitions(screen, data->executables_count);
 
 	screen->data = data;
 
@@ -288,11 +291,20 @@ static void meh_screen_platform_change_platform(App* app, Screen* screen) {
 		image->y = meh_transition_start(MEH_TRANSITION_CUBIC, image->y.value, y, 200);
 		meh_screen_add_image_transitions(screen, image);
 
-		data->platform_name->text = platform->name;
-		meh_widget_text_reload(app->window, data->platform_name);
-		data->platform_name->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
-		meh_screen_add_text_transitions(screen, data->platform_name);
 	}
+
+	/* platform name */
+	data->platform_name->text = platform->name;
+	meh_widget_text_reload(app->window, data->platform_name);
+	data->platform_name->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
+	meh_screen_add_text_transitions(screen, data->platform_name);
+
+	/* executables count */
+	int count_exec = meh_db_count_platform_executables(app->db, platform);
+	data->executables_count->text = g_strdup_printf("%d executables", count_exec);
+	meh_widget_text_reload(app->window, data->executables_count);
+	data->executables_count->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 325, 550);
+	meh_screen_add_text_transitions(screen, data->executables_count);
 
 	/* background image */
 	if (platform->background != NULL) {
@@ -344,6 +356,7 @@ int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 
 	meh_widget_text_render(app->window, data->title);
 	meh_widget_text_render(app->window, data->platform_name);
+	meh_widget_text_render(app->window, data->executables_count);
 	
 	if (platform_count == 0) {
 		meh_widget_text_render(app->window, data->no_platforms_widget);

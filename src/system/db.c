@@ -185,7 +185,7 @@ int meh_db_count_platform_executables(DB* db, const Platform* platform) {
 	g_assert(platform != NULL);
 
 	sqlite3_stmt* statement = NULL;
-	const char* sql = "SELECT count(\"id\") FROM executables WHERE platform_id = ?1";
+	const char* sql = "SELECT count(\"id\") FROM executable WHERE platform_id = ?1";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
