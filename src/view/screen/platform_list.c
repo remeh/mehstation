@@ -83,7 +83,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 		g_queue_push_tail(data->platforms_icons, p_texture);
 
 		/* create the platform widget */
-		WidgetImage* platform_widget = meh_widget_image_new(p_texture, 100, 280 + (i*200), 150, 150);
+		WidgetImage* platform_widget = meh_widget_image_new(p_texture, 100, 285 + (i*200), 150, 150);
 		g_queue_push_tail(data->icons_widgets, platform_widget);
 	}
 
@@ -278,9 +278,9 @@ static void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
 	g_assert(platform != NULL);
 
-	/* animate icons and platform name */
+	/* animate icons */
 	for (unsigned int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
-		int y = 280;
+		int y = 285;
 		if (i < data->selected_platform) {
 			y += (i - data->selected_platform) * 200;
 		} else if (i > data->selected_platform) {
