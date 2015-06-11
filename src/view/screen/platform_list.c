@@ -44,7 +44,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	SDL_Color white = { 255, 255, 255, 255 };
 	SDL_Color black = { 0, 0, 0, 210 };
 	SDL_Color transparent_white = { 255, 255, 255, 35 };
-	data->title = meh_widget_text_new(app->big_font, app->settings.name, 50, 50, 300, 50, white, FALSE);
+	data->title = meh_widget_text_new(app->big_font, app->settings.name, 50, 50, 1230, 50, white, FALSE);
 	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 50, 1000);
 	meh_screen_add_text_transitions(screen, data->title);
 
