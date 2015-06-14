@@ -73,7 +73,7 @@ IF(MINGW_BUILD)
   SET (CMAKE_C_FLAGS_DEBUG          "-g")
 ELSE(UNIX)
   # Use Clang
-  SET (CMAKE_C_COMPILER             "/usr/bin/clang")
+  SET (CMAKE_C_COMPILER             "/home/remy/docs/apps/infer-linux64-v0.1.0/infer/infer/lib/capture/clang")
   SET (CMAKE_C_FLAGS                "-Wall -std=c11")
   SET (CMAKE_C_FLAGS_DEBUG          "-g")
 ENDIF()

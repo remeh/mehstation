@@ -239,7 +239,7 @@ static void meh_exec_list_destroy_resources(Screen* screen) {
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
-	if (data == NULL || data->textures == NULL) {
+	if (data->textures == NULL) {
 		return;
 	}
 
@@ -317,9 +317,6 @@ static void meh_exec_list_delete_some_cache(Screen* screen) {
 	g_assert(screen != NULL);	
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);
-	if (data == NULL) {
-		return;
-	}
 
 	/* Get the current executable */
 	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
@@ -373,9 +370,6 @@ static void meh_exec_list_select_resources(Screen* screen) {
 	g_assert(screen != NULL);
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);
-	if (data == NULL) {
-		return;
-	}
 
 	Executable* executable = g_queue_peek_nth(data->executables, data->selected_executable);
 	if (executable == NULL || executable->resources == NULL) {
@@ -693,7 +687,6 @@ static void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_s
  */
 static void meh_exec_list_refresh_executables_widget(App* app, Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
-	g_assert(data != NULL);
 
 	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));
 
@@ -738,7 +731,6 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 	g_assert(screen != NULL);
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);
-	g_assert(data != NULL);
 
 	int prev_selected_exec = data->selected_executable;
 
@@ -759,7 +751,8 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 			break;
 		case MEH_INPUT_BUTTON_START:
 			/* settings screen */
-			meh_exec_list_start_settings(app, screen);
+			// FIXME De-activated the settings for now:
+			//meh_exec_list_start_settings(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_A:
 			/* launch the game */
@@ -811,7 +804,6 @@ int meh_exec_list_update(Screen* screen) {
 	g_assert(screen != NULL);
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);
-	g_assert(data != NULL);
 
 	/* updates all the transition in the screen */
 	meh_screen_update_transitions(screen);
@@ -843,7 +835,6 @@ static void meh_exec_list_resolve_tex(Screen* screen) {
 	g_assert(screen != NULL);
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);
-	g_assert(data != NULL);
 
 	if (data->background > -1) {
 		data->background_widget->texture = g_hash_table_lookup(data->textures, &(data->background));
@@ -869,7 +860,6 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	meh_window_clear(app->window, black);
 	
 	ExecutableListData* data = meh_exec_list_get_data(screen);
-	g_assert(data != NULL);
 
 	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
 

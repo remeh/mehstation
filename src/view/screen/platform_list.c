@@ -238,7 +238,8 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			app->mainloop.running = FALSE;
 			break;
 		case MEH_INPUT_BUTTON_START:
-			meh_screen_platform_list_start_settings(app, screen);
+			// FIXME De-activated for now
+			//meh_screen_platform_list_start_settings(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_A:
 			meh_screen_platform_list_start_platform(app, screen);
