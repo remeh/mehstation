@@ -223,6 +223,14 @@ void meh_app_main_loop_event(App* app) {
 	SDL_Event* event = &(app->mainloop.event);
 	while (SDL_PollEvent(event)) {
 		switch (event->type) {
+			case SDL_JOYDEVICEADDED:
+				meh_input_manager_destroy(app->input_manager);
+				app->input_manager = meh_input_manager_new(app->db, app->settings);
+				break;
+			case SDL_JOYDEVICEREMOVED:
+				meh_input_manager_destroy(app->input_manager);
+				app->input_manager = meh_input_manager_new(app->db, app->settings);
+				break;
 			case SDL_KEYUP:
 			case SDL_KEYDOWN:
 				meh_input_manager_read_event(app->input_manager, event);
