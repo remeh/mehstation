@@ -67,13 +67,12 @@ ${mehstation_BINARY_DIR}/src
 LINK_DIRECTORIES(${mehstation_BINARY_DIR}/src)
 
 IF(MINGW_BUILD)
-  # Use Clang
   SET (CMAKE_C_COMPILER             "/usr/bin/i686-w64-mingw32-gcc")
   SET (CMAKE_C_FLAGS                "-Wall -std=c11")
   SET (CMAKE_C_FLAGS_DEBUG          "-g")
 ELSE(UNIX)
   # Use Clang
-  SET (CMAKE_C_COMPILER             "/home/remy/docs/apps/infer-linux64-v0.1.0/infer/infer/lib/capture/clang")
+  SET (CMAKE_C_COMPILER             "clang")
   SET (CMAKE_C_FLAGS                "-Wall -std=c11")
   SET (CMAKE_C_FLAGS_DEBUG          "-g")
 ENDIF()
