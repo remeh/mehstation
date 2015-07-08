@@ -85,6 +85,14 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 	return screen;
 }
 
+static void meh_exec_list_metadata_init(App* app, WidgetText** label, WidgetText** value, gchar* title,
+													int title_x, int title_y, int title_w, int title_h,
+													int value_x, int value_y, int value_w, int value_h) {
+	SDL_Color white = { 255, 255, 255, 255 };
+	*label = meh_widget_text_new(app->small_bold_font, title, title_x, title_y, title_w, title_h, white, TRUE);
+	*value = meh_widget_text_new(app->small_font, NULL, value_x, value_y, value_w, value_h, white, TRUE);
+}
+
 static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
@@ -125,28 +133,40 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	 */
 
 	/* Genres */
-	data->genres_l_widget = meh_widget_text_new(app->small_bold_font, "Genres", 580, 558, 100, 30, white, TRUE);
-	data->genres_widget = meh_widget_text_new(app->small_font, NULL, 710, 560, 150, 30, white, TRUE);
+	meh_exec_list_metadata_init(app, &data->genres_l_widget, &data->genres_widget,
+									"Genres",
+									580, 558, 100, 30,
+									710, 560, 150, 30);
 
 	/* Players */
-	data->players_l_widget = meh_widget_text_new(app->small_bold_font, "Players", 870, 558, 150, 30, white, TRUE);
-	data->players_widget = meh_widget_text_new(app->small_font, NULL, 1030, 560, 200, 30, white, TRUE);
+	meh_exec_list_metadata_init(app, &data->players_l_widget, &data->players_widget,
+									"Players",
+									870, 558, 150, 30,
+									1030, 560, 200, 30);
 
 	/* Publisher */
-	data->publisher_l_widget = meh_widget_text_new(app->small_bold_font, "Publisher", 580, 588, 120, 30, white, TRUE);
-	data->publisher_widget = meh_widget_text_new(app->small_font, NULL, 710, 590, 150, 30, white, TRUE);
+	meh_exec_list_metadata_init(app, &data->publisher_l_widget, &data->publisher_widget,
+									"Publisher",
+									580, 588, 120, 30,
+									710, 590, 150, 30);
 
 	/* Developer */
-	data->developer_l_widget = meh_widget_text_new(app->small_bold_font, "Developer", 870, 588, 150, 30, white, TRUE);
-	data->developer_widget = meh_widget_text_new(app->small_font, NULL, 1030, 590, 200, 30, white, TRUE);
+	meh_exec_list_metadata_init(app, &data->developer_l_widget, &data->developer_widget,
+									"Developer",
+									870, 588, 150, 30,
+									1030, 590, 200, 30);
 
 	/* Rating */
-	data->rating_l_widget = meh_widget_text_new(app->small_bold_font, "Rating", 580, 618, 100, 30, white, TRUE);
-	data->rating_widget = meh_widget_text_new(app->small_font, NULL, 710, 620, 150, 30, white, TRUE);
+	meh_exec_list_metadata_init(app, &data->rating_l_widget, &data->rating_widget,
+									"Rating",
+									580, 618, 100, 30,
+									710, 620, 150, 30);
 
 	/* Release date */
-	data->release_date_l_widget = meh_widget_text_new(app->small_bold_font, "Release date", 870, 618, 150, 30, white, TRUE);
-	data->release_date_widget = meh_widget_text_new(app->small_font, NULL, 1030, 620, 200, 30, white, TRUE);
+	meh_exec_list_metadata_init(app, &data->release_date_l_widget, &data->release_date_widget,
+									 "Release date",
+									 870, 618, 150, 30,
+									 1030, 620, 200, 30);
 
 	/* Cover */
 	data->cover_widget = meh_widget_image_new(NULL, 1030, 140, 200, 300);
