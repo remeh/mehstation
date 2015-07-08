@@ -86,18 +86,16 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 }
 
 static void meh_exec_list_metadata_init(App* app, Screen* screen,
-										WidgetText** label, WidgetText** value, gchar* title,
+										WidgetText** label, WidgetText** value, gchar* title, int delay,
 										int title_x, int title_y, int title_w, int title_h,
 										int value_x, int value_y, int value_w, int value_h) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
-	int rand_value = g_rand_int_range(g_rand_new(), 0, 200);
-
 	SDL_Color white = { 255, 255, 255, 255 };
 	*label = meh_widget_text_new(app->small_bold_font, title, title_x, title_y, title_w, title_h, white, TRUE);
 	*value = meh_widget_text_new(app->small_font, NULL, value_x, value_y, value_w, value_h, white, TRUE);
-	(*value)->x = meh_transition_start(MEH_TRANSITION_CUBIC, value_x+MEH_FAKE_WIDTH, value_x, 300+rand_value);
+	(*value)->x = meh_transition_start(MEH_TRANSITION_CUBIC, value_x+MEH_FAKE_WIDTH, value_x, 300+delay);
 	meh_screen_add_text_transitions(screen, (*value));
 }
 
@@ -143,42 +141,42 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	/* Genres */
 	meh_exec_list_metadata_init(app, screen,
 								&data->genres_l_widget, &data->genres_widget,
-								"Genres",
+								"Genres", 0,
 								580, 558, 100, 30,
 								710, 560, 150, 30);
 
 	/* Players */
 	meh_exec_list_metadata_init(app, screen,
 								&data->players_l_widget, &data->players_widget,
-								"Players",
+								"Players", 0,
 								870, 558, 150, 30,
 								1030, 560, 200, 30);
 
 	/* Publisher */
 	meh_exec_list_metadata_init(app, screen,
 								&data->publisher_l_widget, &data->publisher_widget,
-								"Publisher",
+								"Publisher", 150,
 								580, 588, 120, 30,
 								710, 590, 150, 30);
 
 	/* Developer */
 	meh_exec_list_metadata_init(app, screen,
 								&data->developer_l_widget, &data->developer_widget,
-								"Developer",
+								"Developer", 150,
 								870, 588, 150, 30,
 								1030, 590, 200, 30);
 
 	/* Rating */
 	meh_exec_list_metadata_init(app, screen,
 								&data->rating_l_widget, &data->rating_widget,
-								"Rating",
+								"Rating", 300,
 								580, 618, 100, 30,
 								710, 620, 150, 30);
 
 	/* Release date */
 	meh_exec_list_metadata_init(app, screen,
 								&data->release_date_l_widget, &data->release_date_widget,
-								 "Release date",
+								 "Release date", 300,
 								 870, 618, 150, 30,
 								 1030, 620, 200, 30);
 
