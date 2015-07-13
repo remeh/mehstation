@@ -230,8 +230,8 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		meh_widget_rect_destroy(data->selection_widget);
 		meh_widget_rect_destroy(data->background_hover_widget);
 		meh_widget_rect_destroy(data->list_background_widget);
-		meh_widget_image_destroy(data->logo_widget);
 		meh_widget_image_destroy(data->cover_widget);
+		meh_widget_image_destroy(data->logo_widget);
 		for (int i = 0; i < 3; i++) {
 			meh_widget_image_destroy(data->screenshots_widget[i]);
 		}
@@ -938,16 +938,19 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	meh_widget_rect_render(app->window, data->selection_widget);
 
 	/* cover */
-	meh_widget_image_render(app->window, data->cover_widget);
+	if (data->cover != -1) {
+		meh_widget_image_render(app->window, data->cover_widget);
+	}
 
+	/* logo */
+	if (data->logo != -1) {
+		meh_widget_image_render(app->window, data->logo_widget);
+	}
 
 	/* render the screenshots */
 	for (int i = 0; i < 3; i++) {
 		meh_widget_image_render(app->window, data->screenshots_widget[i]);
 	}
-
-	/* logo */
-	meh_widget_image_render(app->window, data->logo_widget);
 
 	/*
 	 * extra info
