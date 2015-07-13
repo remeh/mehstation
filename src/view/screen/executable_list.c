@@ -66,6 +66,7 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 	data->textures = NULL;
 	data->background = -1;
 	data->cover = -1;
+	data->logo = -1;
 	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
 
 	data->executable_widgets = g_queue_new();
@@ -183,6 +184,9 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	/* Cover */
 	data->cover_widget = meh_widget_image_new(NULL, 1030, 140, 200, 300);
 
+	/* Logo */
+	data->logo_widget = meh_widget_image_new(NULL, 580, 135, 450, 150);
+
 	/* Screenshots */
 	for (int i = 0; i < 3; i++) {
 		data->screenshots_widget[i] = meh_widget_image_new(NULL, 580 + (230*i), 460, 190, 80);
@@ -203,6 +207,7 @@ static void meh_exec_list_start_bg_anim(Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 	g_assert(data != NULL);
 
+	// TODO(remy): add some random direction here.
 	data->background_widget->x = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 10000);
 	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 10000);
 	meh_screen_add_image_transitions(screen, data->background_widget);
@@ -225,6 +230,7 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		meh_widget_rect_destroy(data->selection_widget);
 		meh_widget_rect_destroy(data->background_hover_widget);
 		meh_widget_rect_destroy(data->list_background_widget);
+		meh_widget_image_destroy(data->logo_widget);
 		meh_widget_image_destroy(data->cover_widget);
 		for (int i = 0; i < 3; i++) {
 			meh_widget_image_destroy(data->screenshots_widget[i]);
@@ -409,7 +415,7 @@ static void meh_exec_list_select_resources(Screen* screen) {
 	}
 
 	/*
-	 * Select a random resource if any and tries to not take a cover if possible.
+	 * Select a random resource if any and tries to not take a cover nor a logo if possible.
 	 */
 	int length = g_queue_get_length(executable->resources);
 	if (length == 0) {
@@ -426,12 +432,12 @@ static void meh_exec_list_select_resources(Screen* screen) {
 			return;
 		}
 
-		if (g_strcmp0(resource->type, "cover") != 0) {
-			/* We found something that's not a cover, perfect. */
+		if (g_strcmp0(resource->type, "cover") != 0 && g_strcmp0(resource->type, "logo") != 0) {
+			/* We found something that's not a cover nor a logo, perfect. */
 			break;
 		} else {
 			if (g_queue_get_length(executable->resources) == 1) {
-				/* We only found a cover, but we have only one resource, so we can also stop here. */
+				/* We only found a cover or a logo, but we have only one resource, so we can also stop here. */
 				break;
 			}
 		}
@@ -450,6 +456,7 @@ static void meh_exec_list_select_resources(Screen* screen) {
 
 	/* start by re-init the screenshots */
 	data->cover = -1;
+	data->logo = -1;
 	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
 	data->screenshots_widget[0]->texture = data->screenshots_widget[1]->texture = data->screenshots_widget[2]->texture = NULL;
 
@@ -460,6 +467,9 @@ static void meh_exec_list_select_resources(Screen* screen) {
 			if (g_strcmp0(res->type, "cover") == 0) {
 				data->cover = res->id;
 				g_debug("Selected cover: %d", res->id);
+			} else if (g_strcmp0(res->type, "logo") == 0) {
+				data->logo = res->id;
+				g_debug("Selected logo: %d", res->id);
 			} else if ((g_strcmp0(res->type, "screenshot") == 0 ||  /* TODO Select random ones */
 					   g_strcmp0(res->type, "fanart") == 0) &&
 					   found_screenshots < 3) {
@@ -550,7 +560,7 @@ static void meh_exec_list_load_resources(App* app, Screen* screen) {
 
 		/* Load only the needed resources. */
 		int rid = resource->id;
-		if (rid != data->background && rid != data->cover &&
+		if (rid != data->background && rid != data->cover && rid != data->logo &&
 			rid != data->screenshots[0] && rid != data->screenshots[1] &&
 			rid != data->screenshots[2]) {
 			continue;
@@ -637,6 +647,17 @@ static void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_s
 	 * and change the size of the description / cover in function
 	 */
 
+	// TODO(remy): handle logo position/display here
+
+	if (data->logo == -1) {
+		/* no logo, use the full height for the description */
+		data->description_widget->y.value = 135;
+		data->description_widget->h = 300;
+	} else {
+		data->description_widget->y.value = 285;
+		data->description_widget->h = 150;
+	}
+
 	if (data->cover == -1 || data->cover_widget->texture == NULL) {
 		/* no cover, use the full width for the description */
 		data->description_widget->w = 650;
@@ -650,12 +671,14 @@ static void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_s
 			data->cover_widget->x.value = 930;
 			data->cover_widget->w.value = 300;
 			data->cover_widget->h.value = 200;
+			data->logo_widget->w.value = 340;
 			data->description_widget->w = 340;
 		} else {
 			/* portrait */
 			data->cover_widget->x.value = 1030;
 			data->cover_widget->w.value = 200;
 			data->cover_widget->h.value = 300;
+			data->logo_widget->w.value = 440;
 			data->description_widget->w = 440;
 		}
 	}
@@ -849,12 +872,12 @@ int meh_exec_list_update(Screen* screen) {
 
 	meh_widget_text_update(screen, data->description_widget);
 
-	meh_widget_text_update(screen ,data->genres_widget);
-	meh_widget_text_update(screen ,data->rating_widget);
-	meh_widget_text_update(screen ,data->publisher_widget);
-	meh_widget_text_update(screen ,data->release_date_widget);
-	meh_widget_text_update(screen ,data->developer_widget);
-	meh_widget_text_update(screen ,data->players_widget);
+	meh_widget_text_update(screen, data->genres_widget);
+	meh_widget_text_update(screen, data->rating_widget);
+	meh_widget_text_update(screen, data->publisher_widget);
+	meh_widget_text_update(screen, data->release_date_widget);
+	meh_widget_text_update(screen, data->developer_widget);
+	meh_widget_text_update(screen, data->players_widget);
 
 	return 0;
 }
@@ -873,6 +896,9 @@ static void meh_exec_list_resolve_tex(Screen* screen) {
 	}
 	if (data->cover > -1) {
 		data->cover_widget->texture = g_hash_table_lookup(data->textures, &(data->cover));
+	}
+	if (data->logo > -1) {
+		data->logo_widget->texture = g_hash_table_lookup(data->textures, &(data->logo));
 	}
 	for (int i = 0; i < 3; i++) {
 		if (data->screenshots[i] > -1) {
@@ -914,10 +940,14 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	/* cover */
 	meh_widget_image_render(app->window, data->cover_widget);
 
+
 	/* render the screenshots */
 	for (int i = 0; i < 3; i++) {
 		meh_widget_image_render(app->window, data->screenshots_widget[i]);
 	}
+
+	/* logo */
+	meh_widget_image_render(app->window, data->logo_widget);
 
 	/*
 	 * extra info

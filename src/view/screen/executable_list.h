@@ -26,6 +26,7 @@ typedef struct ExecutableListData {
 									 The first loaded is the first in the queue. */
 	int background; /* Index of the background in the textures cache */
 	int cover; /* Index of the cover in the textures cache. */
+	int logo; /* Index of the logo in the textures cache. */
 	int screenshots[3]; /* Index of the first screenshot in the texture cache. */
 
 	/*
@@ -38,6 +39,7 @@ typedef struct ExecutableListData {
 	WidgetText* header_text_widget;
 
 	WidgetImage* cover_widget;
+	WidgetImage* logo_widget;
 	WidgetImage* background_widget;
 	WidgetImage* screenshots_widget[3];
 
