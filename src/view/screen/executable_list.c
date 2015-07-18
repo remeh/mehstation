@@ -647,8 +647,6 @@ static void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_s
 	 * and change the size of the description / cover in function
 	 */
 
-	// TODO(remy): handle logo position/display here
-
 	if (data->logo == -1) {
 		/* no logo, use the full height for the description */
 		data->description_widget->y.value = 135;
