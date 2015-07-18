@@ -654,8 +654,11 @@ static void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_s
 		data->description_widget->y.value = 135;
 		data->description_widget->h = 300;
 	} else {
+		/* we have a logo, reduce the descrpition size and animate the logo */
 		data->description_widget->y.value = 285;
 		data->description_widget->h = 150;
+		data->logo_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 135, 200);
+		meh_screen_add_image_transitions(screen, data->logo_widget);
 	}
 
 	if (data->cover == -1 || data->cover_widget->texture == NULL) {
