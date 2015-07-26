@@ -29,6 +29,7 @@ SET(
         src/view/widget_text.c
         src/view/screen/executable_list.c
         src/view/screen/fade.c
+        src/view/screen/launch.c
         src/view/screen/mapping.c
         src/view/screen/settings.c
         src/view/screen/starting.c
