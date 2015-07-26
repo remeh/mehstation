@@ -10,8 +10,6 @@
 #include "view/widget_rect.h"
 #include "view/screen/fade.h"
 
-static void meh_screen_fade_send_msg(App* app, Screen* screen, int msg_type, void* data);
-
 Screen* meh_screen_fade_new(App* app, Screen* src_screen, Screen* dst_screen) {
 	g_assert(app != NULL);
 
@@ -72,10 +70,10 @@ int meh_screen_fade_update(struct App* app, Screen* screen) {
 	/* update the src and dst screen */
 	switch (data->state) {
 		case MEH_FADE_STATE_IN:
-			meh_screen_fade_send_msg(app, data->src_screen, MEH_MSG_UPDATE, NULL);
+			meh_message_send(app, data->src_screen, MEH_MSG_UPDATE, NULL);
 			break;
 		case MEH_FADE_STATE_OUT:
-			meh_screen_fade_send_msg(app, data->dst_screen, MEH_MSG_UPDATE, NULL);
+			meh_message_send(app, data->dst_screen, MEH_MSG_UPDATE, NULL);
 			break;
 	}
 
@@ -101,17 +99,6 @@ int meh_screen_fade_update(struct App* app, Screen* screen) {
 	}
 
 	return 0;
-}
-
-/*
- * meh_screen_fade_send_msg sends a message to the given screen.
- */
-static void meh_screen_fade_send_msg(App* app, Screen* screen, int msg_type, void* data) {
-	g_assert(screen != NULL);
-
-	Message* message = meh_message_new(msg_type, data);
-	screen->messages_handler(app, screen, message);
-	meh_message_destroy(message);
 }
 
 int meh_screen_fade_messages_handler(struct App* app, Screen* screen, Message* message) {
@@ -147,11 +134,11 @@ void meh_screen_fade_render(struct App* app, Screen* screen) {
 	switch (data->state) {
 		case MEH_FADE_STATE_IN:
 			/* render the dest screen behind the fade widget */
-			meh_screen_fade_send_msg(app, data->src_screen, MEH_MSG_RENDER, flip);
+			meh_message_send(app, data->src_screen, MEH_MSG_RENDER, flip);
 			break;
 		case MEH_FADE_STATE_OUT:
 			/* render the dest screen behind the fade widget */
-			meh_screen_fade_send_msg(app, data->dst_screen, MEH_MSG_RENDER, flip);
+			meh_message_send(app, data->dst_screen, MEH_MSG_RENDER, flip);
 			break;
 	}
 
