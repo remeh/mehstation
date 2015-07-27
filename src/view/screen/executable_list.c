@@ -416,6 +416,16 @@ static void meh_exec_list_select_resources(Screen* screen) {
 	}
 
 	/*
+	 * Start by re-init the screenshots and others indexes
+	 */
+
+	data->cover = -1;
+	data->logo = -1;
+	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
+	data->cover_widget->texture = data->logo_widget->texture = NULL;
+	data->screenshots_widget[0]->texture = data->screenshots_widget[1]->texture = data->screenshots_widget[2]->texture = NULL;
+
+	/*
 	 * Select a random resource if any and tries to not take a cover nor a logo if possible.
 	 */
 	int length = g_queue_get_length(executable->resources);
@@ -454,12 +464,6 @@ static void meh_exec_list_select_resources(Screen* screen) {
 	/*
 	 * Select a cover and some screenshots.
 	 */
-
-	/* start by re-init the screenshots */
-	data->cover = -1;
-	data->logo = -1;
-	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
-	data->screenshots_widget[0]->texture = data->screenshots_widget[1]->texture = data->screenshots_widget[2]->texture = NULL;
 
 	int found_screenshots = 0;
 	for (unsigned int i = 0; i < g_queue_get_length(executable->resources); i++) {
