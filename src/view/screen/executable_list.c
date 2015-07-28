@@ -21,7 +21,7 @@
 #include "view/screen/fade.h"
 #include "view/screen/executable_list.h"
 #include "view/screen/launch.h"
-#include "view/screen/settings.h"
+#include "view/screen/popup.h"
 
 #define MEH_EXEC_LIST_MAX_CACHE (7)
 #define MEH_EXEC_LIST_DELTA (3) /* Don't delete the cache of the object around the cursor */
@@ -767,16 +767,14 @@ static void meh_exec_list_refresh_executables_widget(App* app, Screen* screen) {
 	}
 }
 
-static void meh_exec_list_start_settings(App* app, Screen* screen) {
+static void meh_exec_list_open_popup(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
 	/* create the child screen */
-	Screen* settings_screen = meh_screen_settings_new(app);
-	settings_screen->parent_screen = screen;
-	Screen* fade_screen = meh_screen_fade_new(app, screen, settings_screen);
-	meh_app_set_current_screen(app, fade_screen, TRUE);
-	/* NOTE we don't free the memory of the current screen, the fade screen
+	Screen* popup_screen = meh_screen_popup_new(app, screen, 400, 200, "LALALA");
+	meh_app_set_current_screen(app, popup_screen, TRUE);
+	/* NOTE we don't free the memory of the current screen, the popup screen
 	 * will go back to it later. */
 }
 
@@ -808,9 +806,8 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 			}
 			break;
 		case MEH_INPUT_BUTTON_START:
-			/* settings screen */
-			// FIXME De-activated the settings for now:
-			//meh_exec_list_start_settings(app, screen);
+			/* start the popup */
+			meh_exec_list_open_popup(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_A:
 			/* launch the game */
