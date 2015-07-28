@@ -32,14 +32,17 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height
 	data->y = MEH_FAKE_HEIGHT/2 - height/2;
 	data->width = width;
 	data->height = height;
+	data->quitting = FALSE;
 
 	/* Popup background */
 
 	SDL_Color white = { 255, 255, 255 };
 	SDL_Color black = { 0, 0, 0, 240 };
-	SDL_Color gray = { 30, 30, 30, 240 };
+	SDL_Color gray = { 15, 15, 15, 220 };
 
 	data->background_widget = meh_widget_rect_new(data->x, data->y, width, height, black, TRUE); 
+	data->background_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -height, data->background_widget->y.value, 200);
+	meh_screen_add_rect_transitions(screen, data->background_widget);
 	screen->data = data;
 
 	black.a = 100;
@@ -86,6 +89,13 @@ int meh_screen_popup_update(struct App* app, Screen* screen) {
 	/* update the src screen */
 	meh_message_send(app, data->src_screen, MEH_MSG_UPDATE, NULL);
 
+
+	/* quit the screen at the end of the exit animation. */
+	if (data->quitting && data->background_widget->y.ended) {
+		meh_app_set_current_screen(app, data->src_screen, TRUE);
+		meh_screen_destroy(screen);
+	}
+
 	return 0;
 }
 
@@ -103,8 +113,9 @@ void meh_popup_button_pressed(App* app, Screen* screen, int pressed_button) {
 		/* quit the popup */
 		case MEH_INPUT_BUTTON_B:
 		case MEH_INPUT_SPECIAL_ESCAPE:
-			meh_app_set_current_screen(app, data->src_screen, TRUE);
-			meh_screen_destroy(screen);
+			data->background_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, data->background_widget->y.value, MEH_FAKE_HEIGHT, 200);
+			meh_screen_add_rect_transitions(screen, data->background_widget);
+			data->quitting = TRUE;
 			break;
 	}
 }
@@ -152,12 +163,13 @@ void meh_screen_popup_render(struct App* app, Screen* screen) {
 	/* render the popup screen */
 
 	meh_widget_rect_render(app->window, data->hover_widget);
-
 	meh_widget_rect_render(app->window, data->background_widget);
 
-	meh_widget_rect_render(app->window, data->title_bg_widget);
-
-	meh_widget_text_render(app->window, data->title_widget);
+	if (data->background_widget->y.ended) {
+		/* title */
+		meh_widget_rect_render(app->window, data->title_bg_widget);
+		meh_widget_text_render(app->window, data->title_widget);
+	}
 
 	meh_window_render(app->window);
 }

@@ -31,6 +31,8 @@ typedef struct {
 	int height;
 	int width;
 
+	gboolean quitting;
+
 } PopupData;
 
 Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height, gchar* title);
