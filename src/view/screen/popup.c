@@ -10,6 +10,8 @@
 #include "view/widget_rect.h"
 #include "view/screen/popup.h"
 
+static void meh_popup_button_pressed(App* app, Screen* screen, int pressed_button);
+
 Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height, gchar* title)  {
 	g_assert(app != NULL);
 	g_assert(src_screen != NULL);
@@ -35,6 +37,8 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height
 
 	SDL_Color white = { 255, 255, 255 };
 	SDL_Color black = { 0, 0, 0, 240 };
+	SDL_Color gray = { 30, 30, 30, 240 };
+
 	data->background_widget = meh_widget_rect_new(data->x, data->y, width, height, black, TRUE); 
 	screen->data = data;
 
@@ -43,7 +47,8 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height
 	screen->data = data;
 
 	/* Title */
-	data->title_widget = meh_widget_text_new(app->big_font, title, data->x+10, data->y+5, width-10, 40, white, TRUE);
+	data->title_widget = meh_widget_text_new(app->small_bold_font, title, data->x+10, data->y+5, width-10, 40, white, TRUE);
+	data->title_bg_widget = meh_widget_rect_new(data->x, data->y, width, 45, gray, TRUE); 
 
 	return screen;
 }
@@ -57,6 +62,7 @@ void meh_screen_popup_destroy_data(Screen* screen) {
 	meh_widget_rect_destroy(data->background_widget);
 	meh_widget_rect_destroy(data->hover_widget);
 	meh_widget_text_destroy(data->title_widget);
+	meh_widget_rect_destroy(data->title_bg_widget);
 	screen->data = NULL;
 }
 
@@ -76,12 +82,31 @@ int meh_screen_popup_update(struct App* app, Screen* screen) {
 	meh_screen_update_transitions(screen);
 
 	PopupData* data = meh_screen_popup_get_data(screen);
-	g_assert(data != NULL);
 
 	/* update the src screen */
 	meh_message_send(app, data->src_screen, MEH_MSG_UPDATE, NULL);
 
 	return 0;
+}
+
+/*
+ * meh_popup_button_pressed is called when we received a button pressed
+ * message.
+ */
+void meh_popup_button_pressed(App* app, Screen* screen, int pressed_button) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
+
+	PopupData* data = meh_screen_popup_get_data(screen);
+
+	switch (pressed_button) {
+		/* quit the popup */
+		case MEH_INPUT_BUTTON_B:
+		case MEH_INPUT_SPECIAL_ESCAPE:
+			meh_app_set_current_screen(app, data->src_screen, TRUE);
+			meh_screen_destroy(screen);
+			break;
+	}
 }
 
 int meh_screen_popup_messages_handler(struct App* app, Screen* screen, Message* message) {
@@ -93,6 +118,12 @@ int meh_screen_popup_messages_handler(struct App* app, Screen* screen, Message* 
 	}
 
 	switch (message->id) {
+		case MEH_MSG_BUTTON_PRESSED:
+			{
+				InputMessageData* data = (InputMessageData*)message->data;
+				meh_popup_button_pressed(app, screen, data->button);
+			}
+			break;
 		case MEH_MSG_UPDATE:
 			{
 				meh_screen_popup_update(app, screen);
@@ -123,6 +154,8 @@ void meh_screen_popup_render(struct App* app, Screen* screen) {
 	meh_widget_rect_render(app->window, data->hover_widget);
 
 	meh_widget_rect_render(app->window, data->background_widget);
+
+	meh_widget_rect_render(app->window, data->title_bg_widget);
 
 	meh_widget_text_render(app->window, data->title_widget);
 

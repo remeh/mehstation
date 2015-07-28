@@ -23,6 +23,7 @@ typedef struct {
 	WidgetRect* hover_widget;
 
 	WidgetText* title_widget;
+	WidgetRect* title_bg_widget;
 
 	int x;
 	int y;
