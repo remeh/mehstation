@@ -41,7 +41,7 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height
 	SDL_Color gray = { 15, 15, 15, 220 };
 
 	data->background_widget = meh_widget_rect_new(data->x, data->y, width, height, black, TRUE); 
-	data->background_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -height, data->background_widget->y.value, 200);
+	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -height, data->background_widget->y.value, 150);
 	meh_screen_add_rect_transitions(screen, data->background_widget);
 	screen->data = data;
 
@@ -51,7 +51,7 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height
 
 	/* Title */
 	data->title_widget = meh_widget_text_new(app->small_bold_font, title, data->x+10, data->y+5, width-10, 40, white, TRUE);
-	data->title_bg_widget = meh_widget_rect_new(data->x, data->y, width, 45, gray, TRUE); 
+	data->title_bg_widget = meh_widget_rect_new(data->x+3, data->y+3, width-6, 39, gray, TRUE);
 
 	return screen;
 }
@@ -113,7 +113,7 @@ void meh_popup_button_pressed(App* app, Screen* screen, int pressed_button) {
 		/* quit the popup */
 		case MEH_INPUT_BUTTON_B:
 		case MEH_INPUT_SPECIAL_ESCAPE:
-			data->background_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, data->background_widget->y.value, MEH_FAKE_HEIGHT, 200);
+			data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, data->background_widget->y.value, MEH_FAKE_HEIGHT, 150);
 			meh_screen_add_rect_transitions(screen, data->background_widget);
 			data->quitting = TRUE;
 			break;
