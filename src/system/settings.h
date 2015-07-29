@@ -15,6 +15,7 @@ typedef struct {
 	guint max_update_per_second;
 	guint max_frameskip;
 	guint fade_duration;
+	gboolean zoom_logo;
 } Settings;
 
 gboolean meh_settings_read(Settings *settings, const gchar *filename);

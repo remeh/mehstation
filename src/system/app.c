@@ -54,8 +54,10 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 
 	meh_settings_print_system_infos();
 
-	/* Read the settings */
+	/* Init and read the settings */
 	Settings settings;
+	settings.fullscreen = FALSE;
+	settings.zoom_logo = FALSE;
 	meh_settings_read(&settings, "mehstation.conf");
 	app->settings = settings;
 
