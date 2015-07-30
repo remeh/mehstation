@@ -16,12 +16,16 @@ typedef struct Executable {
 	gchar* rating;
 	gchar* extra_parameter;
 
+	gboolean favorite;
+	GDateTime* last_played;
+
 	GQueue* resources;
 } Executable;
 
 Executable* meh_model_executable_new(int id, const gchar* display_name, const gchar* filepath,
 		const gchar* description, const gchar* genres, const gchar* publisher,
 		const gchar* developer, const gchar* release_date, const gchar* rating,
-		const gchar* players, const gchar* extra_parameter);
+		const gchar* players, const gchar* extra_parameter,
+		gboolean favorite, GDateTime* last_played);
 void meh_model_executable_destroy(Executable* executable);
 void meh_model_executables_destroy(GQueue* executables);
