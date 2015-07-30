@@ -29,7 +29,6 @@ static void meh_exec_list_load_resources(App* app, Screen* screen);
 static void meh_exec_list_start_executable(App* app, Screen* screen);
 static void meh_exec_list_select_resources(Screen* screen);
 static void meh_exec_list_start_bg_anim(Screen* screen);
-static void meh_exec_list_refresh_executables_widget(App* app, Screen* screen);
 static void meh_exec_list_resolve_tex(Screen* screen);
 
 Screen* meh_exec_list_new(App* app, int platform_id) {
@@ -741,7 +740,7 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
  * meh_exec_list_refresh_executables_widget re-creates all the texture
  * in the text widgets for the executables.
  */
-static void meh_exec_list_refresh_executables_widget(App* app, Screen* screen) {
+void meh_exec_list_refresh_executables_widget(App* app, Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));

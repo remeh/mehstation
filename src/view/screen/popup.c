@@ -18,6 +18,7 @@ static void meh_screen_popup_close(Screen* screen);
 Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executable)  {
 	g_assert(app != NULL);
 	g_assert(src_screen != NULL);
+	g_assert(executable != NULL);
 
 	Screen* screen = meh_screen_new(app->window);
 
@@ -166,32 +167,51 @@ static void meh_screen_popup_favorite_toggle(App* app, Screen* screen) {
 		data->executable->favorite = new_value;
 	}
 
-	/* re-creates the whole executable list */
-	/* FIXME(remy): a bit harsh... */
+	/* re-position the executable in the executables list */
 
-	int platform_id = exec_list_data->platform->id;
-	int exec_id = data->executable->id;
 	int prev_selected = exec_list_data->selected_executable;
 
-	/* recopy the needed pointers and allocate a new exec list */
-	Screen* new_exec_list = meh_exec_list_new(app, platform_id);
-	new_exec_list->parent_screen = data->src_screen->parent_screen;
-	meh_screen_destroy(data->src_screen);
-	data->src_screen = new_exec_list;
-
-	/* look for the new cursor position */
-	/* refresh the popup info */
-	exec_list_data = meh_exec_list_get_data(data->src_screen);
 	unsigned int i = 0;
+
+	/* retrieves the one which will move in the list */
+	Executable* to_move = g_queue_pop_nth(exec_list_data->executables, exec_list_data->selected_executable);
+
 	for (i = 0; i < g_queue_get_length(exec_list_data->executables); i++) {
 		Executable* ex = g_queue_peek_nth(exec_list_data->executables, i);
-		if (ex->id == exec_id) {
-			data->executable = ex;
-			break;
+		/* if favorite, ensure to stay in the favorite zone */
+		if (new_value == TRUE) {
+			if (ex->favorite == FALSE)  {
+				break;
+			}
+		}
+		if (g_strcmp0(ex->display_name, data->executable->display_name) > 0) {
+			if (new_value == TRUE && ex->favorite == TRUE) {
+				break;
+			}
+			else if (new_value == FALSE && ex->favorite == FALSE) {
+				break;
+			}
 		}
 	}
 
+	GList* after = g_queue_peek_nth_link(exec_list_data->executables, i);
+
+	if ((new_value == TRUE || g_queue_get_length(exec_list_data->executables) <= 1)) {
+		g_queue_insert_before(exec_list_data->executables, after, to_move);
+	} else {
+		g_queue_insert_before(exec_list_data->executables, after, to_move);
+	}
+
+	/* notify the screen of the new selected executable */
+
 	exec_list_data->selected_executable = i;
+
+	/* redraw the executables list texts */
+
+	meh_exec_list_refresh_executables_widget(app, data->src_screen);
+
+	/* move and redraw the selection */
+
 	meh_exec_list_after_cursor_move(app, data->src_screen, prev_selected);
 
 	/* finally close the popup */

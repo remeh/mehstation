@@ -311,6 +311,12 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	g_assert(platform != NULL);
 	g_assert(executable != NULL);
 
+	if (platform->command == NULL || executable->filepath == NULL ||
+		strlen(platform->command) == 0 || strlen(executable->filepath) == 0) {
+		g_critical("Platform command or executable filepath empty.");
+		return;
+	}
+
 	/* prepare the exec call */
 	/* FIXME path with spaces ? */
 	gchar** command_parts = g_strsplit(platform->command, " ", -1);
