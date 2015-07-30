@@ -28,11 +28,17 @@ typedef struct {
 	WidgetText* title_widget;
 	WidgetRect* title_bg_widget;
 
+	WidgetText* favorite_widget;
+
+	WidgetRect* selection_widget;
+
 	int x;
 	int y;
 
 	int height;
 	int width;
+
+	int action;
 
 	gboolean quitting;
 

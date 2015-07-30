@@ -15,6 +15,11 @@
 /* cross-reference */
 struct App;
 
+#define MEH_EXEC_LIST_MAX_CACHE (7)
+#define MEH_EXEC_LIST_DELTA (3) /* Don't delete the cache of the object around the cursor */
+
+#define MEH_EXEC_LIST_SIZE (17) /* Maximum amount of executables displayed */
+
 typedef struct ExecutableListData {
 	Platform* platform;
 	GQueue* executables; /* List of Executable*, must be freed. */
@@ -73,3 +78,4 @@ void meh_exec_list_button_pressed(struct App* app, Screen* screen, int pressed_b
 int meh_exec_list_update(Screen* screen);;
 int meh_exec_list_render(struct App* app, Screen* screen, gboolean flip);
 ExecutableListData* meh_exec_list_get_data(Screen* screen);
+void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected_exec);

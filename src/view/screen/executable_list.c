@@ -23,11 +23,6 @@
 #include "view/screen/launch.h"
 #include "view/screen/popup.h"
 
-#define MEH_EXEC_LIST_MAX_CACHE (7)
-#define MEH_EXEC_LIST_DELTA (3) /* Don't delete the cache of the object around the cursor */
-
-#define MEH_EXEC_LIST_SIZE (17) /* Maximum amount of executables displayed */
-
 static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data);
 static void meh_exec_list_destroy_resources(Screen* screen);
 static void meh_exec_list_load_resources(App* app, Screen* screen);
@@ -35,7 +30,6 @@ static void meh_exec_list_start_executable(App* app, Screen* screen);
 static void meh_exec_list_select_resources(Screen* screen);
 static void meh_exec_list_start_bg_anim(Screen* screen);
 static void meh_exec_list_refresh_executables_widget(App* app, Screen* screen);
-static void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected_exec);
 static void meh_exec_list_resolve_tex(Screen* screen);
 
 Screen* meh_exec_list_new(App* app, int platform_id) {
@@ -631,7 +625,7 @@ static void meh_exec_list_start_executable(App* app, Screen* screen) {
  * meh_exec_list_after_cursor_move refreshes the screen information
  * after a jump in the executable list.
  */
-static void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected_exec) {
+void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected_exec) {
 	meh_exec_list_select_resources(screen);
 	meh_exec_list_load_resources(app, screen);
 	meh_exec_list_delete_some_cache(screen);
