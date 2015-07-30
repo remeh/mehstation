@@ -54,8 +54,10 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 
 	meh_settings_print_system_infos();
 
-	/* Read the settings */
+	/* Init and read the settings */
 	Settings settings;
+	settings.fullscreen = FALSE;
+	settings.zoom_logo = FALSE;
 	meh_settings_read(&settings, "mehstation.conf");
 	app->settings = settings;
 
@@ -308,6 +310,12 @@ void meh_app_send_message(App* app, Message* message) {
 void meh_app_start_executable(App* app, Platform* platform, Executable* executable) {
 	g_assert(platform != NULL);
 	g_assert(executable != NULL);
+
+	if (platform->command == NULL || executable->filepath == NULL ||
+		strlen(platform->command) == 0 || strlen(executable->filepath) == 0) {
+		g_critical("Platform command or executable filepath empty.");
+		return;
+	}
 
 	/* prepare the exec call */
 	/* FIXME path with spaces ? */

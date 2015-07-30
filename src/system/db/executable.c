@@ -9,7 +9,7 @@ static gchar* meh_string_copy(const gchar* str, const gchar* fallback);
 Executable* meh_model_executable_new(int id, const gchar* display_name, const gchar* filepath,
 		const gchar* description, const gchar* genres, const gchar* publisher,
 		const gchar* developer, const gchar* release_date, const gchar* rating, const gchar* players,
-		const gchar* extra_parameter) {
+		const gchar* extra_parameter, gboolean favorite, GDateTime* last_played) {
 	Executable* executable = g_new(Executable, 1);
 
 	executable->id = id;
@@ -23,6 +23,8 @@ Executable* meh_model_executable_new(int id, const gchar* display_name, const gc
 	executable->release_date = meh_string_copy(release_date, "Unknown");
 
 	executable->extra_parameter = meh_string_copy(extra_parameter, "");
+	executable->favorite = favorite;
+	executable->last_played = last_played;
 
 	if (g_strcmp0(rating, "0.0") == 0) {
 		executable->rating = g_strdup("No rating");
@@ -69,6 +71,8 @@ void meh_model_executable_destroy(Executable* executable) {
 	g_free(executable->release_date);
 	g_free(executable->rating);
 	g_free(executable->extra_parameter);
+
+	g_date_time_unref(executable->last_played);
 
 	g_free(executable);
 }

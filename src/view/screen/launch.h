@@ -17,6 +17,9 @@ typedef struct {
 	Executable* executable;
 	Platform* platform;
 	
+	/* will we do a zoom on the logo ? */
+	gboolean zoom_logo;
+
 	/* Widgets */
 	WidgetRect* fade_widget;
 

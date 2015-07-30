@@ -27,7 +27,9 @@ CREATE TABLE "executable" (
 	`release_date`	TEXT,
 	`players`	TEXT,
 	`rating`	TEXT,
-    `extra_parameter`   TEXT
+    `extra_parameter`   TEXT,
+    `favorite` INTEGER DEFAULT 0,
+    `last_played` INTEGER DEFAULT 0
 );
 CREATE TABLE "mapping" (
     `id` TEXT NOT NULL,

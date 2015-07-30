@@ -392,7 +392,7 @@ GQueue* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
 	GQueue* executables = g_queue_new();
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\",\"extra_parameter\"  FROM executable WHERE platform_id = ?1 ORDER BY display_name";
+	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\",\"extra_parameter\", \"favorite\", \"last_played\"  FROM executable WHERE platform_id = ?1 ORDER BY favorite DESC, display_name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
@@ -417,10 +417,13 @@ GQueue* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
 		const char* rating = (const char*)sqlite3_column_text(statement, 8);
 		const char* players = (const char*)sqlite3_column_text(statement, 9);
 		const char* extra_parameter = (const char*)sqlite3_column_text(statement, 10);
+		gboolean favorite = sqlite3_column_int(statement, 11) > 0 ? TRUE : FALSE;
+		GDateTime* last_played = g_date_time_new_from_unix_local(sqlite3_column_int(statement, 12));
 
 		/* build the object */
 		Executable* executable = meh_model_executable_new(id, display_name, filepath, description,
-				genres, publisher, developer, release_date, rating, players, extra_parameter);
+				genres, publisher, developer, release_date, rating, players, extra_parameter,
+				favorite, last_played);
 
 		if (executable != NULL) {
 			/* do we get the resources of this executable ? */
@@ -436,6 +439,30 @@ GQueue* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
 	sqlite3_finalize(statement);
 
 	return executables;
+}
+
+gboolean meh_db_set_executable_favorite(DB* db, const Executable* executable, gboolean favorite) {
+	g_assert(db != NULL);
+	g_assert(executable != NULL);
+
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "UPDATE executable SET favorite = ?1 WHERE id = ?2";
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+
+	if (return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		return FALSE;
+	}
+
+	sqlite3_bind_int(statement, 1, favorite == TRUE ? 1 : 0);
+	sqlite3_bind_int(statement, 2, executable->id);
+
+	if (sqlite3_step(statement) == SQLITE_DONE) {
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 /*

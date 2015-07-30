@@ -13,6 +13,9 @@
 Screen* meh_screen_launch_new(App* app, Screen* src_screen, Platform* platform, Executable* executable,
 															WidgetImage* src_widget) {
 	g_assert(app != NULL);
+	g_assert(src_screen != NULL);
+	g_assert(platform != NULL);
+	g_assert(executable != NULL);
 
 	Screen* screen = meh_screen_new(app->window);
 
@@ -26,9 +29,11 @@ Screen* meh_screen_launch_new(App* app, Screen* src_screen, Platform* platform, 
 	LaunchData* data = g_new(LaunchData, 1);
 
 	data->src_screen = src_screen;
+	data->image_widget = NULL;
 	data->executable = executable;
 	data->platform = platform;
 	data->src_widget = src_widget;
+	data->zoom_logo = FALSE;
 
 	/* fading rect */
 	SDL_Color black = { 0, 0, 0 ,0 };
@@ -36,20 +41,24 @@ Screen* meh_screen_launch_new(App* app, Screen* src_screen, Platform* platform, 
 	data->fade_widget->a = meh_transition_start(MEH_TRANSITION_LINEAR, 1, 254, app->settings.fade_duration*4);
 	meh_screen_add_rect_transitions(screen, data->fade_widget);
 
-	/* cover image */
-	data->image_widget = meh_widget_image_new(
+	if (app->settings.zoom_logo && src_widget != NULL) {
+		/* cover image */
+		data->image_widget = meh_widget_image_new(
 									src_widget->texture,
 									src_widget->x.value,
 									src_widget->y.value,
 									src_widget->h.value,
 									src_widget->w.value);
 
-	/* starts the cover transitions */
-	data->image_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, src_widget->x.value, -(MEH_FAKE_WIDTH), app->settings.fade_duration*4);
-	data->image_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, src_widget->y.value, -(MEH_FAKE_HEIGHT), app->settings.fade_duration*4);
-	data->image_widget->w = meh_transition_start(MEH_TRANSITION_CUBIC, src_widget->w.value, MEH_FAKE_WIDTH*3, app->settings.fade_duration*4);
-	data->image_widget->h = meh_transition_start(MEH_TRANSITION_CUBIC, src_widget->h.value, MEH_FAKE_HEIGHT*3, app->settings.fade_duration*4);
-	meh_screen_add_image_transitions(screen, data->image_widget);
+		/* starts the cover transitions */
+		data->image_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, src_widget->x.value, -(MEH_FAKE_WIDTH), app->settings.fade_duration*4);
+		data->image_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, src_widget->y.value, -(MEH_FAKE_HEIGHT), app->settings.fade_duration*4);
+		data->image_widget->w = meh_transition_start(MEH_TRANSITION_CUBIC, src_widget->w.value, MEH_FAKE_WIDTH*3, app->settings.fade_duration*4);
+		data->image_widget->h = meh_transition_start(MEH_TRANSITION_CUBIC, src_widget->h.value, MEH_FAKE_HEIGHT*3, app->settings.fade_duration*4);
+		meh_screen_add_image_transitions(screen, data->image_widget);
+
+		data->zoom_logo = TRUE;
+	}
 
 	screen->data = data;
 
@@ -63,8 +72,10 @@ Screen* meh_screen_launch_new(App* app, Screen* src_screen, Platform* platform, 
 void meh_screen_launch_destroy_data(Screen* screen) {
 	LaunchData* data = meh_screen_launch_get_data(screen);
 	meh_widget_rect_destroy(data->fade_widget);
-	/* we delete the cover widget we own, but not the one from the exec list */
-	meh_widget_image_destroy(data->image_widget);
+	if (data->zoom_logo) {
+		/* we delete the image widget we own, but not the one from the exec list */
+		meh_widget_image_destroy(data->image_widget);
+	}
 	screen->data = NULL;
 }
 
@@ -132,8 +143,10 @@ void meh_screen_launch_render(struct App* app, Screen* screen) {
 	/* render the dest screen behind the fade widget */
 	meh_message_send(app, data->src_screen, MEH_MSG_RENDER, flip);
 
-	/* render the cover */
-	meh_widget_image_render(app->window, data->image_widget);
+	if (data->zoom_logo == TRUE) {
+		/* render the cover */
+		meh_widget_image_render(app->window, data->image_widget);
+	}
 
 	/* render the fade widget */
 	meh_widget_rect_render(app->window, data->fade_widget);
