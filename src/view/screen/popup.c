@@ -173,8 +173,11 @@ static void meh_screen_popup_favorite_toggle(App* app, Screen* screen) {
 	int exec_id = data->executable->id;
 	int prev_selected = exec_list_data->selected_executable;
 
+	/* recopy the needed pointers and allocate a new exec list */
+	Screen* new_exec_list = meh_exec_list_new(app, platform_id);
+	new_exec_list->parent_screen = data->src_screen->parent_screen;
 	meh_screen_destroy(data->src_screen);
-	data->src_screen = meh_exec_list_new(app, platform_id);
+	data->src_screen = new_exec_list;
 
 	/* look for the new cursor position */
 	/* refresh the popup info */
@@ -187,8 +190,6 @@ static void meh_screen_popup_favorite_toggle(App* app, Screen* screen) {
 			break;
 		}
 	}
-
-	g_message("New %d", exec_list_data->selected_executable);
 
 	exec_list_data->selected_executable = i;
 	meh_exec_list_after_cursor_move(app, data->src_screen, prev_selected);
