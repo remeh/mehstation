@@ -12,7 +12,7 @@
 
 static void meh_popup_button_pressed(App* app, Screen* screen, int pressed_button);
 
-Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height, gchar* title)  {
+Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executable)  {
 	g_assert(app != NULL);
 	g_assert(src_screen != NULL);
 
@@ -28,10 +28,10 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height
 	PopupData* data = g_new(PopupData, 1);
 
 	data->src_screen = src_screen;
-	data->x = MEH_FAKE_WIDTH/2 - width/2;
-	data->y = MEH_FAKE_HEIGHT/2 - height/2;
-	data->width = width;
-	data->height = height;
+	data->width = 400;
+	data->height = 200;
+	data->x = MEH_FAKE_WIDTH/2 - data->width/2;
+	data->y = MEH_FAKE_HEIGHT/2 - data->height/2;
 	data->quitting = FALSE;
 
 	/* Popup background */
@@ -40,8 +40,8 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height
 	SDL_Color black = { 0, 0, 0, 240 };
 	SDL_Color gray = { 15, 15, 15, 220 };
 
-	data->background_widget = meh_widget_rect_new(data->x, data->y, width, height, black, TRUE); 
-	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -height, data->background_widget->y.value, 150);
+	data->background_widget = meh_widget_rect_new(data->x, data->y, data->width, data->height, black, TRUE); 
+	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -data->height, data->background_widget->y.value, 150);
 	meh_screen_add_rect_transitions(screen, data->background_widget);
 	screen->data = data;
 
@@ -50,8 +50,8 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, int width, int height
 	screen->data = data;
 
 	/* Title */
-	data->title_widget = meh_widget_text_new(app->small_bold_font, title, data->x+10, data->y+5, width-10, 40, white, TRUE);
-	data->title_bg_widget = meh_widget_rect_new(data->x+3, data->y+3, width-6, 39, gray, TRUE);
+	data->title_widget = meh_widget_text_new(app->small_bold_font, "OPTIONS", data->x+10, data->y+5, data->width-10, 40, white, TRUE);
+	data->title_bg_widget = meh_widget_rect_new(data->x, data->y, data->width, 45, gray, TRUE);
 
 	return screen;
 }
