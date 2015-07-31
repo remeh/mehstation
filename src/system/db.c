@@ -392,7 +392,7 @@ GQueue* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
 	GQueue* executables = g_queue_new();
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\",\"extra_parameter\", \"favorite\", \"last_played\"  FROM executable WHERE platform_id = ?1 ORDER BY favorite DESC, display_name";
+	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\",\"extra_parameter\", \"favorite\", \"last_played\"  FROM executable WHERE platform_id = ?1 ORDER BY favorite DESC, upper(\"display_name\")";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));

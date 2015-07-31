@@ -177,20 +177,32 @@ static void meh_screen_popup_favorite_toggle(App* app, Screen* screen) {
 	Executable* to_move = g_queue_pop_nth(exec_list_data->executables, exec_list_data->selected_executable);
 
 	for (i = 0; i < g_queue_get_length(exec_list_data->executables); i++) {
+		gboolean exit = FALSE;
 		Executable* ex = g_queue_peek_nth(exec_list_data->executables, i);
 		/* if favorite, ensure to stay in the favorite zone */
 		if (new_value == TRUE) {
 			if (ex->favorite == FALSE)  {
-				break;
+				exit = TRUE;
 			}
 		}
-		if (g_strcmp0(ex->display_name, data->executable->display_name) > 0) {
+
+		gchar* first = g_utf8_strup(ex->display_name, g_utf8_strlen(ex->display_name, -1));
+		gchar* second = g_utf8_strup(data->executable->display_name, g_utf8_strlen(ex->display_name, -1));
+
+		if (g_utf8_collate(first, second) > 0) {
 			if (new_value == TRUE && ex->favorite == TRUE) {
-				break;
+				exit = TRUE;
 			}
 			else if (new_value == FALSE && ex->favorite == FALSE) {
-				break;
+				exit = TRUE;
 			}
+		}
+
+		g_free(first);
+		g_free(second);
+
+		if (exit) {
+			break;
 		}
 	}
 
