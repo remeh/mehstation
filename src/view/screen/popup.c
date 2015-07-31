@@ -145,6 +145,7 @@ void meh_screen_popup_button_pressed(App* app, Screen* screen, int pressed_butto
 					break;
 			}
 		/* quit the popup */
+		case MEH_INPUT_BUTTON_START:
 		case MEH_INPUT_BUTTON_B:
 		case MEH_INPUT_SPECIAL_ESCAPE:
 			meh_screen_popup_close(screen);
@@ -175,6 +176,8 @@ static void meh_screen_popup_favorite_toggle(App* app, Screen* screen) {
 
 	/* retrieves the one which will move in the list */
 	Executable* to_move = g_queue_pop_nth(exec_list_data->executables, exec_list_data->selected_executable);
+
+	/* find the good position for the moved executable */
 
 	for (i = 0; i < g_queue_get_length(exec_list_data->executables); i++) {
 		gboolean exit = FALSE;
@@ -208,11 +211,9 @@ static void meh_screen_popup_favorite_toggle(App* app, Screen* screen) {
 
 	GList* after = g_queue_peek_nth_link(exec_list_data->executables, i);
 
-	if ((new_value == TRUE || g_queue_get_length(exec_list_data->executables) <= 1)) {
-		g_queue_insert_before(exec_list_data->executables, after, to_move);
-	} else {
-		g_queue_insert_before(exec_list_data->executables, after, to_move);
-	}
+	/* re-add it to the good position */
+
+	g_queue_insert_before(exec_list_data->executables, after, to_move);
 
 	/* notify the screen of the new selected executable */
 
