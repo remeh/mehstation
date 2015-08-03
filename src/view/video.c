@@ -1,22 +1,47 @@
 #include <libavformat/avformat.h>
+
 #include "view/video.h"
 
 static int meh_video_ffmpeg_open(Video* video);
 
-Video* meh_video_new(gchar* filename) {
+Video* meh_video_new(Window* window, gchar* filename) {
+	g_assert(window != NULL);
+	g_assert(filename != NULL);
+
+	if (strlen(filename) == 0) {
+		return NULL;
+	}
+
 	Video* video = g_new(Video, 1);
 
+	video->texture = NULL;
 	video->fc = NULL;
 	video->codec_ctx = NULL;
 	video->stream_codec_ctx = NULL;
 	video->codec = NULL;
 	video->stream_id = -1;
+	video->frame = NULL;
 
 	/* ensure the data by copying the filename */
 	video->filename = g_strdup(filename);
 
 	/* open the video */
 	if (meh_video_ffmpeg_open(video) != 0) {
+		meh_video_destroy(video);
+		return NULL;
+	}
+
+	/* create the texture */
+	video->texture = SDL_CreateTexture(
+				window->sdl_renderer,
+				SDL_PIXELFORMAT_YV12,
+				SDL_TEXTUREACCESS_STREAMING,
+				video->codec_ctx->width,
+				video->codec_ctx->height
+			);
+
+	if (video->texture == NULL) {
+		g_critical("Can't create the internal texture for the video '%s'", filename);
 		meh_video_destroy(video);
 		return NULL;
 	}
@@ -63,7 +88,7 @@ int meh_video_ffmpeg_open(Video* video) {
 		return 4;
 	}
 
-	/* creates our own context for the reading */
+	/* create our own context for the reading */
 
 	video->codec_ctx = avcodec_alloc_context3(video->codec);
 	if (avcodec_copy_context(video->codec_ctx, video->stream_codec_ctx)) {
@@ -78,7 +103,45 @@ int meh_video_ffmpeg_open(Video* video) {
 		return 6;
 	}
 
+	/* allocate the frame */
+	video->frame = av_frame_alloc();
+	if (video->frame == NULL) {
+		g_critical("Can't allocate a frame for the file '%s'", video->filename);
+		return 7;
+	}
+
 	return 0;
+}
+
+void meh_video_update(Video* video) {
+	AVPacket packet;
+	int frame_finished = 0;
+
+	while (av_read_frame(video->fc, &packet) >= 0) {
+		/* ensure we're dealing with the good stream */
+		if (packet.stream_index == video->stream_id) {
+			/* decode the video frame */
+			avcodec_decode_video2(video->codec_ctx, video->frame, &frame_finished, &packet);
+			if (frame_finished) {
+				/* apply the read data onto the SDL texture */
+				SDL_UpdateYUVTexture(
+						video->texture,
+						NULL,
+						video->frame->data[0],
+						video->frame->linesize[0],
+						video->frame->data[1],
+						video->frame->linesize[1],
+						video->frame->data[2],
+						video->frame->linesize[2]
+					);
+
+				av_free_packet(&packet);
+				break;
+			}
+		}
+
+		av_free_packet(&packet);
+	}
 }
 
 void meh_video_destroy(Video* video) {
@@ -91,7 +154,15 @@ void meh_video_destroy(Video* video) {
 		avcodec_close(video->codec_ctx);
 	}
 	if (video->stream_codec_ctx != NULL) {
-		avcodec_close(video->codec_ctx);
+		avcodec_close(video->stream_codec_ctx);
+	}
+
+	if (video->texture != NULL) {
+		SDL_DestroyTexture(video->texture);
+	}
+
+	if (video->frame != NULL) {
+		av_free(video->frame);
 	}
 
 	g_free(video->filename);

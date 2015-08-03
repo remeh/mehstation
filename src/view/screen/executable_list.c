@@ -189,6 +189,9 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	/* Description */
 	data->description_widget = meh_widget_text_new(app->small_font, NULL, 580, 135, 450, 300, white, FALSE);
 	data->description_widget->multi = TRUE;
+
+	// TODO(remy): to remove
+	data->video = meh_widget_video_new(app->window, "/var/tmp/video.mp4", 0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT);
 }
 
 /*
@@ -259,6 +262,9 @@ void meh_exec_list_destroy_data(Screen* screen) {
 
 		/* We must free the textures cache */
 		meh_exec_list_destroy_resources(screen);
+
+		// TODO(remy): remove
+		meh_widget_video_destroy(data->video);
 	}
 }
 
@@ -390,8 +396,6 @@ static void meh_exec_list_delete_some_cache(Screen* screen) {
 		}
 		watchdog--;
 	}
-
-	g_debug("%d", g_queue_get_length(data->cache_executables_id));
 }
 
 /*
@@ -616,6 +620,10 @@ static void meh_exec_list_start_executable(App* app, Screen* screen) {
 	Screen* launch_screen = meh_screen_launch_new(app, screen, data->platform, executable, data->logo_widget);
 	meh_app_set_current_screen(app, launch_screen, TRUE);
 
+	// TODO(remy): here we could clean resources to free some more ram.
+
+	meh_exec_list_delete_some_cache(screen);
+
 	/* end the transitions for when we're coming back */
 	meh_transitions_end(screen->transitions);
 }
@@ -805,7 +813,7 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 				 * screen for the transition */
 				Screen* fade_screen = meh_screen_fade_new(app, screen, screen->parent_screen);
 				meh_app_set_current_screen(app, fade_screen, TRUE);
-				/* NOTE we don't free the memory of the starting screen, the fade screen
+				/* NOTE we don't free the memory of the exec list screen, the fade screen
 				 * will do it. */
 			}
 			break;
@@ -865,9 +873,11 @@ int meh_exec_list_update(Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	/* updates all the transition in the screen */
+
 	meh_screen_update_transitions(screen);
 
 	/* updates the text of the selected game */
+
 	int selected = data->selected_executable % (MEH_EXEC_LIST_SIZE);
 	WidgetText* t = g_queue_peek_nth(data->executable_widgets, selected);
 	if (t != NULL) {
@@ -882,6 +892,8 @@ int meh_exec_list_update(Screen* screen) {
 	meh_widget_text_update(screen, data->release_date_widget);
 	meh_widget_text_update(screen, data->developer_widget);
 	meh_widget_text_update(screen, data->players_widget);
+
+	meh_widget_video_update(data->video);
 
 	return 0;
 }
@@ -927,6 +939,8 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 
 	/* background */
 	meh_widget_image_render(app->window, data->background_widget);
+
+	meh_widget_video_render(app->window, data->video);
 
 	/* background hover */
 	meh_widget_rect_render(app->window, data->background_hover_widget);

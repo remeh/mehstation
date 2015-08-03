@@ -1,6 +1,6 @@
-#include "SDL2/SDL.h"
-#include "SDL2/SDL_image.h"
-#include "glib-2.0/glib.h"
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <glib-2.0/glib.h>
 
 #include "view/image.h"
 

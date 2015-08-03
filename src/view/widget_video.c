@@ -12,7 +12,7 @@
  * meh_widget_video_new allocates a new widget video.
  * and prepares its internal texture.
  */
-WidgetVideo* meh_widget_video_new(float x, float y, float w, float h) {
+WidgetVideo* meh_widget_video_new(Window* window, gchar* filename, float x, float y, float w, float h) {
 	WidgetImage* i = g_new(WidgetImage, 1);
 
 	i->x = meh_transition_start(MEH_TRANSITION_NONE, x, x, 0);
@@ -25,10 +25,17 @@ WidgetVideo* meh_widget_video_new(float x, float y, float w, float h) {
 	i->h = meh_transition_start(MEH_TRANSITION_NONE, h, h, 0);
 	meh_transition_end(&i->h);
 
-	// TODO(remy): prepare the internal texture.
-
 	WidgetVideo* v = g_new(WidgetVideo, 1);
 	v->w_image = i;
+
+	v->video = meh_video_new(window, filename);
+	if (v->video == NULL) {
+		g_critical("Can't create the WidgetVideo for the video '%s'", filename);
+	}
+
+	/* assign the video texture to the
+	 * internal WidgetImage texture */
+	v->w_image->texture = v->video->texture;
 
 	return v;
 }
@@ -36,14 +43,18 @@ WidgetVideo* meh_widget_video_new(float x, float y, float w, float h) {
 /*
  * meh_widget_video_destroy frees the resource of the given widget.
  */
-void meh_widget_video_destroy(WidgetVideo* video) {
-	// TODO(remy): free the resources of the texture
-	video->w_image->texture = NULL;
-	meh_widget_image_destroy(video->w_image);
-	g_free(video);
+void meh_widget_video_destroy(WidgetVideo* w_video) {
+	if (w_video->video != NULL) {
+		meh_video_destroy(w_video->video);
+	}
+	w_video->w_image->texture = NULL;
+	meh_widget_image_destroy(w_video->w_image);
+	g_free(w_video);
 }
 
-// TODO(remy): create update method.
+void meh_widget_video_update(const WidgetVideo* w_video) {
+	meh_video_update(w_video->video);
+}
 
 /*
  * meh_widget_video_render renders the given video onto the given window.
@@ -52,18 +63,6 @@ void meh_widget_video_render(Window* window, const WidgetVideo* video) {
 	g_assert(video != NULL);
 	g_assert(window != NULL);
 
-	if (video->w_image->texture == NULL) {
-		return;
-	}
-
-	// Convert the normalized position to the window position.
-	SDL_Rect rect = {
-		meh_window_convert_width(window, video->w_image->x.value),
-		meh_window_convert_height(window, video->w_image->y.value),
-		meh_window_convert_width(window, video->w_image->w.value),
-		meh_window_convert_height(window, video->w_image->h.value)
-	};
-
-	meh_window_render_texture(window, video->w_image->texture, NULL, &rect);
+	meh_widget_image_render(window, video->w_image);
 }
 

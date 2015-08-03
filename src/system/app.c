@@ -3,10 +3,14 @@
  *
  * Copyright © 2015 Rémy Mathieu
  */
+
 #include <SDL2/SDL_image.h>
 #include <glib.h>
+#include <libavcodec/avcodec.h>
+#include <libavformat/avformat.h>
 
 #include "view/image.h"
+#include "view/video.h"
 #include "view/screen.h"
 #include "view/screen/starting.h"
 #include "system/app.h"
@@ -46,8 +50,12 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 		return 1;
 	}
 
-
 	g_message("SDL init OK.");
+
+	/* ffmpeg */
+
+	g_debug("Registering the ffmpeg codecs.");
+	av_register_all();
 
 	/* disable the screensaver. */
 	SDL_DisableScreenSaver();

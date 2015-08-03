@@ -6,6 +6,7 @@
 #include "system/transition.h"
 #include "view/screen.h"
 #include "view/widget_text.h"
+#include "view/widget_video.h"
 
 /* cross-reference */
 struct App;

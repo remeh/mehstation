@@ -3,7 +3,7 @@
 
 `mehstation` is a multi-launcher frontend fully driven by a gamepad/keyboard.
 
-You configure your platforms (Steam, Native, Emulators, ...) and the executables to launch on these platforms (Steam AppId, binary, ROMs, ...) and you'll have an interface usable to launch everything using a gamepad controller or a keyboard.
+You configure your platforms (Native, Emulators, ...) and the executables to launch on these platforms (binary, ROMs, ...) and you'll have an interface usable to launch everything using a gamepad controller or a keyboard.
 
 ## Video
 
@@ -33,7 +33,7 @@ Please create an issue if you have a problem compiling mehstation.
 
 ## Configuration
 
-To configure your mehstation, you can edit by yourself the created `database.db` file but the easiest solution is to use the dedicated tool [mehstation-config](https://github.com/remeh/mehstation-config).
+To configure your mehstation, you can edit by yourself the created `database.db` SQLite file but the easiest solution is to use the dedicated tool [mehstation-config](https://github.com/remeh/mehstation-config).
 
 ## Developer infos
 

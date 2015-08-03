@@ -10,8 +10,13 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
+#include "view/window.h"
+
 typedef struct Video {
 	gchar* filename;
+
+	/* texture used to render the video. */
+	SDL_Texture* texture;
 
 	/* ffmpeg part */
 
@@ -25,7 +30,10 @@ typedef struct Video {
 	AVCodecContext* codec_ctx;
 
 	AVCodec* codec;
+
+	AVFrame* frame;
 } Video;
 
-Video* meh_video_new(gchar* filename);
+Video* meh_video_new(Window* window, gchar* filename);
+void meh_video_update(Video* video);
 void meh_video_destroy(Video* video);

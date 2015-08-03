@@ -12,15 +12,19 @@
 #include <glib.h>
 
 #include "view/image.h"
+#include "view/video.h"
 #include "view/window.h"
 #include "view/widget_image.h"
 #include "system/transition.h"
 
 typedef struct {
 	WidgetImage* w_image;
+
+	Video* video;
 } WidgetVideo;
 
-WidgetVideo* meh_widget_video_new(float x, float y, float w, float h);
+WidgetVideo* meh_widget_video_new(Window* window, gchar* filename, float x, float y, float w, float h);
+void meh_widget_video_update(const WidgetVideo* video);
 void meh_widget_video_destroy(WidgetVideo* video);
 void meh_widget_video_render(Window* window, const WidgetVideo* video);
 
