@@ -13,19 +13,11 @@
  * and prepares its internal texture.
  */
 WidgetVideo* meh_widget_video_new(Window* window, gchar* filename, float x, float y, float w, float h) {
-	WidgetImage* i = g_new(WidgetImage, 1);
-
-	i->x = meh_transition_start(MEH_TRANSITION_NONE, x, x, 0);
-	meh_transition_end(&i->x);
-	i->y = meh_transition_start(MEH_TRANSITION_NONE, y, y, 0);
-	meh_transition_end(&i->y);
-
-	i->w = meh_transition_start(MEH_TRANSITION_NONE, w, w, 0);
-	meh_transition_end(&i->w);
-	i->h = meh_transition_start(MEH_TRANSITION_NONE, h, h, 0);
-	meh_transition_end(&i->h);
+	/* create the embedded image widget */
+	WidgetImage* i = meh_widget_image_new(NULL, x, y, w, h);
 
 	WidgetVideo* v = g_new(WidgetVideo, 1);
+
 	v->w_image = i;
 
 	v->video = meh_video_new(window, filename);
