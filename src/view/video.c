@@ -27,7 +27,6 @@ Video* meh_video_new(Window* window, gchar* filename) {
 
 	/* open the video */
 	if (meh_video_ffmpeg_open(video) != 0) {
-		g_critical("!!!!!!!!!");
 		meh_video_destroy(video);
 		return NULL;
 	}

@@ -733,7 +733,7 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 		meh_exec_list_video_destroy(data->exec_list_video);
 		data->exec_list_video = NULL;
 	}
-	data->exec_list_video = meh_exec_list_video_new(app->window, current_executable);
+	data->exec_list_video = meh_exec_list_video_new(app->window, screen, current_executable);
 
 	/*
 	 * anim the bg
