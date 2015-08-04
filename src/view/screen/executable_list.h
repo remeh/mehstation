@@ -11,7 +11,7 @@
 #include "system/message.h"
 #include "view/screen.h"
 #include "view/widget_rect.h"
-#include "view/widget_video.h"
+#include "view/screen/exec_list_video.h"
 
 /* cross-reference */
 struct App;
@@ -69,8 +69,7 @@ typedef struct ExecutableListData {
 
 	WidgetText* description_widget;
 
-	// TODO(remy): remove
-	WidgetVideo* video;
+	ExecListVideo* exec_list_video;
 
 	GQueue* executable_widgets;
 } ExecutableListData;

@@ -27,6 +27,7 @@ Video* meh_video_new(Window* window, gchar* filename) {
 
 	/* open the video */
 	if (meh_video_ffmpeg_open(video) != 0) {
+		g_critical("!!!!!!!!!");
 		meh_video_destroy(video);
 		return NULL;
 	}
@@ -81,7 +82,6 @@ int meh_video_ffmpeg_open(Video* video) {
 	video->stream_codec_ctx = video->fc->streams[video->stream_id]->codec;
 
 	/* find the decoder */
-
 	video->codec = avcodec_find_decoder(video->stream_codec_ctx->codec_id);
 	if (video->codec == NULL) {
 		g_critical("Unsupported codec for the file '%s'", video->filename);
@@ -114,6 +114,9 @@ int meh_video_ffmpeg_open(Video* video) {
 }
 
 void meh_video_update(Video* video) {
+	g_assert(video != NULL);
+	g_assert(video->texture != NULL);
+
 	AVPacket packet;
 	int frame_finished = 0;
 
@@ -147,8 +150,8 @@ void meh_video_update(Video* video) {
 void meh_video_destroy(Video* video) {
 	g_assert(video != NULL);
 
-	if (video->fc != NULL) {
-		avformat_close_input(&(video->fc));
+	if (video->frame != NULL) {
+		av_free(video->frame);
 	}
 	if (video->codec_ctx != NULL) {
 		avcodec_close(video->codec_ctx);
@@ -156,13 +159,12 @@ void meh_video_destroy(Video* video) {
 	if (video->stream_codec_ctx != NULL) {
 		avcodec_close(video->stream_codec_ctx);
 	}
+	if (video->fc != NULL) {
+		avformat_close_input(&(video->fc));
+	}
 
 	if (video->texture != NULL) {
 		SDL_DestroyTexture(video->texture);
-	}
-
-	if (video->frame != NULL) {
-		av_free(video->frame);
 	}
 
 	g_free(video->filename);

@@ -24,7 +24,8 @@ typedef struct {
 } WidgetVideo;
 
 WidgetVideo* meh_widget_video_new(Window* window, gchar* filename, float x, float y, float w, float h);
-void meh_widget_video_update(const WidgetVideo* video);
+void meh_widget_video_set(Window* window, WidgetVideo* w_video, gchar* filename);
+void meh_widget_video_update(WidgetVideo* video);
 void meh_widget_video_destroy(WidgetVideo* video);
-void meh_widget_video_render(Window* window, const WidgetVideo* video);
+void meh_widget_video_render(Window* window, WidgetVideo* video);
 

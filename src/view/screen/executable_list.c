@@ -65,6 +65,8 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 
 	data->executable_widgets = g_queue_new();
 
+	data->exec_list_video = NULL;
+
 	/* create widgets */
 	meh_exec_create_widgets(app, screen, data);
 
@@ -189,9 +191,6 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	/* Description */
 	data->description_widget = meh_widget_text_new(app->small_font, NULL, 580, 135, 450, 300, white, FALSE);
 	data->description_widget->multi = TRUE;
-
-	// TODO(remy): to remove
-	data->video = meh_widget_video_new(app->window, "/var/tmp/video.mp4", 0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT);
 }
 
 /*
@@ -260,11 +259,12 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		}
 		g_queue_free(data->cache_executables_id);
 
-		/* We must free the textures cache */
-		meh_exec_list_destroy_resources(screen);
+		/* destroy the video overlay */
+		meh_exec_list_video_destroy(data->exec_list_video);
+		data->exec_list_video = NULL;
 
-		// TODO(remy): remove
-		meh_widget_video_destroy(data->video);
+		/* we must free the textures cache */
+		meh_exec_list_destroy_resources(screen);
 	}
 }
 
@@ -727,6 +727,14 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 		meh_exec_list_refresh_executables_widget(app, screen);
 	}
 
+	/* re-creates the video widget overlay */
+	
+	if (data->exec_list_video != NULL) {
+		meh_exec_list_video_destroy(data->exec_list_video);
+		data->exec_list_video = NULL;
+	}
+	data->exec_list_video = meh_exec_list_video_new(app->window, current_executable);
+
 	/*
 	 * anim the bg
 	 */
@@ -893,7 +901,7 @@ int meh_exec_list_update(Screen* screen) {
 	meh_widget_text_update(screen, data->developer_widget);
 	meh_widget_text_update(screen, data->players_widget);
 
-	meh_widget_video_update(data->video);
+	meh_exec_list_video_update(screen, data->exec_list_video);
 
 	return 0;
 }
@@ -939,8 +947,6 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 
 	/* background */
 	meh_widget_image_render(app->window, data->background_widget);
-
-	meh_widget_video_render(app->window, data->video);
 
 	/* background hover */
 	meh_widget_rect_render(app->window, data->background_hover_widget);
@@ -996,10 +1002,14 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 		meh_widget_text_render(app->window, data->description_widget);
 	}
 
-	/* Render all the executables names. */
+	/* render all the executables names. */
 	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 		meh_widget_text_render(app->window, g_queue_peek_nth(data->executable_widgets, i));
 	}
+
+	/* video overlay */
+
+	meh_exec_list_video_render(app->window, data->exec_list_video);
 
 	if (flip == TRUE) {
 		meh_window_render(app->window);

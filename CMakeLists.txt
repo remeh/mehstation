@@ -30,6 +30,7 @@ SET(
         src/view/widget_text.c
         src/view/widget_video.c
         src/view/screen/executable_list.c
+        src/view/screen/exec_list_video.c
         src/view/screen/fade.c
         src/view/screen/launch.c
         src/view/screen/mapping.c
@@ -82,8 +83,8 @@ IF(MINGW_BUILD)
   SET (CMAKE_C_FLAGS_DEBUG          "-g")
 ELSE(UNIX)
   # Use Clang
-  SET (CMAKE_C_COMPILER             "clang")
-  SET (CMAKE_C_FLAGS                "-Wall -std=c11")
+  #SET (CMAKE_C_COMPILER             "clang")
+  SET (CMAKE_C_FLAGS                "-g -Wall -std=c11")
   SET (CMAKE_C_FLAGS_DEBUG          "-g")
 ENDIF()
 
