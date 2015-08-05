@@ -52,7 +52,7 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executabl
 	meh_screen_add_rect_transitions(screen, data->background_widget);
 	screen->data = data;
 
-	black.a = 100;
+	black.a = 150;
 	data->hover_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, black, TRUE); 
 	screen->data = data;
 

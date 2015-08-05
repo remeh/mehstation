@@ -16,6 +16,9 @@ typedef struct ExecListVideo {
 	Executable* executable;
 	WidgetVideo* video_widget;
 	WidgetRect* bg_widget;
+
+	Uint32 start_after;
+	gboolean animation_started;
 } ExecListVideo;
 
 ExecListVideo* meh_exec_list_video_new(Window* window, Screen* screen, Executable* executable);
