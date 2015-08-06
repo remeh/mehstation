@@ -15,7 +15,6 @@ typedef struct ExecListVideo {
 	/* do not free this executable memory */
 	Executable* executable;
 	WidgetVideo* video_widget;
-	WidgetRect* bg_widget;
 
 	Uint32 start_after;
 	gboolean animation_started;

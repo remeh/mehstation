@@ -7,7 +7,7 @@
 #define EXEC_LIST_VIDEO_HEIGHT 240
 
 // FIXME(remy): there is a memory bug (!!) if this delay is really slow.
-#define EXEC_LIST_VIDEO_DELAY 800
+#define EXEC_LIST_VIDEO_DELAY 1
 
 static gchar* find_video_filename(Executable* executable);
 
@@ -23,12 +23,9 @@ ExecListVideo* meh_exec_list_video_new(Window* window, Screen* screen, Executabl
 
 	/* filename provided, create the widget video */
 	if (filename != NULL && strlen(filename) > 0) {
-		exec_list_video->video_widget = meh_widget_video_new(window, filename, -600, (MEH_FAKE_HEIGHT/2) - (EXEC_LIST_VIDEO_HEIGHT/2), EXEC_LIST_VIDEO_WIDTH, EXEC_LIST_VIDEO_HEIGHT);
+		exec_list_video->video_widget = meh_widget_video_new(window, filename, -600, 350, EXEC_LIST_VIDEO_WIDTH, EXEC_LIST_VIDEO_HEIGHT);
 	}
 
-	SDL_Color black = { 0, 0, 0, 230 };
-
-	exec_list_video->bg_widget = meh_widget_rect_new(100, -MEH_FAKE_HEIGHT, 400, MEH_FAKE_HEIGHT, black, TRUE);
 	exec_list_video->executable = executable;
 
 	return exec_list_video;
@@ -42,8 +39,6 @@ void meh_exec_list_video_destroy(ExecListVideo* exec_list_video) {
 	if (exec_list_video->video_widget != NULL) {
 		meh_widget_video_destroy(exec_list_video->video_widget);
 	}
-
-	meh_widget_rect_destroy(exec_list_video->bg_widget);
 
 	g_free(exec_list_video);
 }
@@ -62,14 +57,12 @@ void meh_exec_list_video_update(Screen* screen, ExecListVideo* exec_list_video) 
 
 	if (SDL_GetTicks() > exec_list_video->start_after) {
 		if (!exec_list_video->animation_started) {
-			exec_list_video->bg_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, exec_list_video->bg_widget->y.value, 0, 500);
-			meh_screen_add_rect_transitions(screen, exec_list_video->bg_widget);
 
 			exec_list_video->video_widget->w_image->x = meh_transition_start(
 								MEH_TRANSITION_CUBIC,
 								exec_list_video->video_widget->w_image->x.value,
-								138, 
-								500
+								580, 
+								300
 							);
 			meh_screen_add_image_transitions(screen, exec_list_video->video_widget->w_image);
 			exec_list_video->animation_started = TRUE;
@@ -88,7 +81,6 @@ void meh_exec_list_video_render(Window* window, ExecListVideo* exec_list_video) 
 
 	/* do not render if nothing is on the screen */
 	if (SDL_GetTicks() > exec_list_video->start_after) {
-		meh_widget_rect_render(window, exec_list_video->bg_widget);
 		meh_widget_video_render(window, exec_list_video->video_widget);
 	}
 
