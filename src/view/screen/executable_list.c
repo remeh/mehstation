@@ -446,8 +446,9 @@ static void meh_exec_list_select_resources(Screen* screen) {
 			return;
 		}
 
-		if (g_strcmp0(resource->type, "cover") != 0 && g_strcmp0(resource->type, "logo") != 0) {
-			/* We found something that's not a cover nor a logo, perfect. */
+		if (g_strcmp0(resource->type, "video") != 0 &&
+				g_strcmp0(resource->type, "cover") != 0 && g_strcmp0(resource->type, "logo") != 0) {
+			/* We found something that's not a cover, nor a video and nor a logo, perfect. */
 			break;
 		} else {
 			if (g_queue_get_length(executable->resources) == 1) {
@@ -563,6 +564,11 @@ static void meh_exec_list_load_resources(App* app, Screen* screen) {
 	for (unsigned int i = 0; i < g_queue_get_length(executable->resources); i++) {
 		ExecutableResource* resource = g_queue_peek_nth(executable->resources, i);
 		if (resource == NULL) {
+			continue;
+		}
+
+		/* ensure that it's an image */
+		if (g_strcmp0(resource->type, "video") == 0) {
 			continue;
 		}
 

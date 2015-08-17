@@ -88,5 +88,18 @@ void meh_exec_list_video_render(Window* window, ExecListVideo* exec_list_video) 
 }
 
 static gchar* find_video_filename(Executable* executable) {
-	return "/var/tmp/video.mp4";
+	if (executable == NULL) {
+		return "";
+	}
+
+	for (unsigned int i = 0; i < g_queue_get_length(executable->resources); i++) {
+		ExecutableResource* res = g_queue_peek_nth(executable->resources, i);
+		if (res != NULL) {
+			if (g_strcmp0(res->type, "video") == 0) {
+				return res->filepath;
+			}
+		}
+	}
+
+	return "";
 }

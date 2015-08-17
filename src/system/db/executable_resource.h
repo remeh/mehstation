@@ -6,6 +6,7 @@
 #define MEH_EXEC_RES_COVER "cover"
 #define MEH_EXEC_RES_FANART "fanart" 
 #define MEH_EXEC_RES_SCREENSHOT "screenshot" 
+#define MEH_EXEC_RES_VIDEO "video"
 
 struct App;
 
