@@ -111,7 +111,7 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 
 	/* List background */
-	data->list_bg_widget = meh_widget_rect_new(0, 115, 420, 575, gray, TRUE);
+	data->list_bg_widget = meh_widget_rect_new(0, 115, 420, 565, gray, TRUE);
 
 	/* Exec background */
 	data->exec_bg_widget = meh_widget_rect_new(430, 0, 830, MEH_FAKE_HEIGHT, gray, TRUE);
@@ -123,9 +123,11 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	data->bg_hover_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, white_transparent, TRUE); 
 
 	/* Header */
-	data->header_text_widget = meh_widget_text_new(app->big_font, data->platform->name, 20, 10, 1000, 40, white, TRUE);
+	data->header_text_widget = meh_widget_text_new(app->big_font, data->platform->name, 20, 55, 400, 40, white, TRUE);
 	data->header_text_widget->uppercase = TRUE;
-	data->header_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, 70, gray, TRUE);
+	data->header_text_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 20, 300);
+	meh_screen_add_text_transitions(screen, data->header_text_widget);
+	data->header_widget = meh_widget_rect_new(0, 45, 420, 70, gray, TRUE);
 
 	/* Executables */
 	for (int i = 0; i < MEH_EXEC_LIST_SIZE; i++) {
@@ -142,57 +144,57 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	meh_exec_list_metadata_init(app, screen,
 								&data->genres_l_widget, &data->genres_widget,
 								"Genres", 0,
-								970, 396, 80, 30,
-								1120, 400, 100, 30);
+								870, 396, 80, 30,
+								1070, 400, 150, 30);
 
 	/* Players */
 	meh_exec_list_metadata_init(app, screen,
 								&data->players_l_widget, &data->players_widget,
 								"Players", 0,
-								970, 426, 80, 30,
-								1120, 430, 100, 30);
+								870, 426, 80, 30,
+								1070, 430, 150, 30);
 
 	/* Publisher */
 	meh_exec_list_metadata_init(app, screen,
 								&data->publisher_l_widget, &data->publisher_widget,
 								"Publisher", 150,
-								970, 456, 120, 30,
-								1120, 460, 150, 30);
+								870, 456, 120, 30,
+								1070, 460, 150, 30);
 
 	/* Developer */
 	meh_exec_list_metadata_init(app, screen,
 								&data->developer_l_widget, &data->developer_widget,
 								"Developer", 150,
-								970, 488, 150, 30,
-								1120, 490, 200, 30);
+								870, 488, 150, 30,
+								1070, 490, 150, 30);
 
 	/* Rating */
 	meh_exec_list_metadata_init(app, screen,
 								&data->rating_l_widget, &data->rating_widget,
 								"Rating", 300,
-								970, 518, 100, 30,
-								1120, 520, 150, 30);
+								870, 518, 100, 30,
+								1070, 520, 150, 30);
 
 	/* Release date */
 	meh_exec_list_metadata_init(app, screen,
 								&data->release_date_l_widget, &data->release_date_widget,
 								 "Release date", 300,
-								 970, 548, 150, 30,
-								 1120, 550, 200, 30);
+								 870, 548, 150, 30,
+								 1070, 550, 150, 30);
 
 	/* Cover */
 	data->cover_widget = meh_widget_image_new(NULL, 1030, 60, 200, 300);
 
 	/* Logo */
-	data->logo_widget = meh_widget_image_new(NULL, 530, 60, 450, 150);
+	data->logo_widget = meh_widget_image_new(NULL, 530, 60, 350, 100);
 
 	/* Screenshots */
 	for (int i = 0; i < 3; i++) {
-		data->screenshots_widget[i] = meh_widget_image_new(NULL, 540 + (230*i), 620, 190, 80);
+		data->screenshots_widget[i] = meh_widget_image_new(NULL, 500 + (265*i), 620, 190, 80);
 	}
 
 	/* Description */
-	data->description_widget = meh_widget_text_new(app->small_font, NULL, 530, 220, 450, 300, white, FALSE);
+	data->description_widget = meh_widget_text_new(app->small_font, NULL, 500, 180, 450, 280, white, FALSE);
 	data->description_widget->multi = TRUE;
 }
 
@@ -660,11 +662,11 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 
 	if (data->logo == -1) {
 		/* no logo, use the full height for the description */
-		data->description_widget->y.value = 60;
-		data->description_widget->h = 300;
+		data->description_widget->y.value = 50;
+		data->description_widget->h = 280;
 	} else {
 		/* we have a logo, reduce the descrpition size and animate the logo */
-		data->description_widget->y.value = 225;
+		data->description_widget->y.value = 180;
 		data->description_widget->h = 150;
 		data->logo_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 60, 200);
 		meh_screen_add_image_transitions(screen, data->logo_widget);

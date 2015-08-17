@@ -61,7 +61,7 @@ void meh_exec_list_video_update(Screen* screen, ExecListVideo* exec_list_video) 
 			exec_list_video->video_widget->w_image->x = meh_transition_start(
 								MEH_TRANSITION_CUBIC,
 								exec_list_video->video_widget->w_image->x.value,
-								580, 
+								500, 
 								300
 							);
 			meh_screen_add_image_transitions(screen, exec_list_video->video_widget->w_image);
