@@ -507,7 +507,6 @@ int meh_exec_list_messages_handler(App* app, Screen* screen, Message* message) {
 		return 0;
 	}
 
-
 	switch (message->id) {
 		case MEH_MSG_BUTTON_PRESSED:
 			{
@@ -652,6 +651,10 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
+	/* stops every transitions */
+	meh_transitions_end(screen->transitions);
+	meh_screen_update_transitions(screen);
+
 	/*
 	 * move the selection cursor
 	 */
@@ -746,6 +749,37 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 		data->exec_list_video = NULL;
 	}
 	data->exec_list_video = meh_exec_list_video_new(app->window, screen, current_executable);
+
+	/* if no video, we'll put the metadata instead. */
+	if (!meh_exec_list_video_has_video(data->exec_list_video)) {
+		data->genres_l_widget->x = data->players_l_widget->x =
+		data->publisher_l_widget->x = data->developer_l_widget->x =
+		data->rating_l_widget->x = data->release_date_l_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, data->genres_l_widget->x.value, 500, 200);
+		data->genres_widget->x = data->players_widget->x =
+		data->publisher_widget->x = data->developer_widget->x =
+		data->rating_widget->x = data->release_date_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, data->genres_widget->x.value, 800, 200);
+	} else {
+		data->genres_l_widget->x = data->players_l_widget->x =
+		data->publisher_l_widget->x = data->developer_l_widget->x =
+		data->rating_l_widget->x = data->release_date_l_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, data->genres_l_widget->x.value, 870, 200);
+		data->genres_widget->x = data->players_widget->x =
+		data->publisher_widget->x = data->developer_widget->x =
+		data->rating_widget->x = data->release_date_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, data->genres_widget->x.value, 1070, 200);
+	}
+
+	/* starts the transition of the metadata */
+	meh_screen_add_text_transitions(screen, data->genres_widget);
+	meh_screen_add_text_transitions(screen, data->genres_l_widget);
+	meh_screen_add_text_transitions(screen, data->players_widget);
+	meh_screen_add_text_transitions(screen, data->players_l_widget);
+	meh_screen_add_text_transitions(screen, data->publisher_widget);
+	meh_screen_add_text_transitions(screen, data->publisher_l_widget);
+	meh_screen_add_text_transitions(screen, data->developer_widget);
+	meh_screen_add_text_transitions(screen, data->developer_l_widget);
+	meh_screen_add_text_transitions(screen, data->rating_widget);
+	meh_screen_add_text_transitions(screen, data->rating_l_widget);
+	meh_screen_add_text_transitions(screen, data->release_date_widget);
+	meh_screen_add_text_transitions(screen, data->release_date_l_widget);
 
 	/*
 	 * anim the bg
@@ -893,7 +927,6 @@ int meh_exec_list_update(Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	/* updates all the transition in the screen */
-
 	meh_screen_update_transitions(screen);
 
 	/* updates the text of the selected game */

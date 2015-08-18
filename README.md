@@ -18,6 +18,7 @@ cmake
 glib
 SDL2, SDL2_ttf, SDL2_image
 SQLite3
+ffmpeg
 ```
 
 Manual:
@@ -37,7 +38,7 @@ To configure your mehstation, you can edit by yourself the created `database.db`
 
 ## Developer infos
 
-mehstation is developed in C with SDL2, glib and SQLite3. Please free to contribute and to send any pull requests.
+mehstation is developed in C with SDL2, glib, ffmpeg and SQLite3. Please free to contribute and to send any pull requests.
 
 ## License
 
