@@ -49,7 +49,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	meh_screen_add_text_transitions(screen, data->title);
 
 	/* No platforms text */
-	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured", 100, 100, 200, 40, white, FALSE);
+	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured", 150, 330, 500, 50, white, FALSE);
 
 	/* Platforms */
 	data->icons_widgets = g_queue_new();
@@ -275,6 +275,10 @@ static void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	g_assert(screen != NULL);
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
+
+	if (g_queue_get_length(data->platforms) == 0) {
+		return;
+	}
 
 	Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
 	g_assert(platform != NULL);
