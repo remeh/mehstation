@@ -109,6 +109,9 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 		return 1;
 	} 
 
+	/* Hides the mouse cursor */
+	SDL_ShowCursor(SDL_DISABLE);
+
 	meh_app_set_current_screen(app, starting_screen, FALSE);
 
 	return 0;
