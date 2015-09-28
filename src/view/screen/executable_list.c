@@ -456,10 +456,12 @@ static void meh_exec_list_select_resources(Screen* screen) {
 	}
 
 	/*
-	 * Select a cover and some screenshots.
+	 * Select a cover and logo.
+	 * Also, creates a list of indexes of screenshots/fanarts.
 	 */
 
-	int found_screenshots = 0;
+	GQueue* shots_and_fanarts = g_queue_new();
+
 	for (unsigned int i = 0; i < g_queue_get_length(executable->resources); i++) {
 		ExecutableResource* res = g_queue_peek_nth(executable->resources, i);
 		if (res != NULL) {
@@ -469,15 +471,29 @@ static void meh_exec_list_select_resources(Screen* screen) {
 			} else if (g_strcmp0(res->type, "logo") == 0) {
 				data->logo = res->id;
 				g_debug("Selected logo: %d", res->id);
-			} else if ((g_strcmp0(res->type, "screenshot") == 0 ||  /* TODO Select random ones */
-					   g_strcmp0(res->type, "fanart") == 0) &&
-					   found_screenshots < 3) {
-				data->screenshots[found_screenshots] = res->id;
-				g_debug("Selected %d screenshot/fanart: %d", found_screenshots, res->id);
-				found_screenshots++;
+			} else if (g_strcmp0(res->type, "screenshot") == 0 ||
+					   g_strcmp0(res->type, "fanart") == 0) {
+				int *value = g_new(int, 1);
+				*value = res->id;
+				g_queue_push_tail(shots_and_fanarts, value);
 			}
 		}
 	}
+
+	/* selects some screenshots or fanarts */
+	for (unsigned int i = 0; i < 3 && g_queue_get_length(shots_and_fanarts) > 0; i++) { /* 3 max or no more values in the queue */
+		int idx = g_random_int_range(0, g_queue_get_length(shots_and_fanarts));
+
+		int *value = g_queue_pop_nth(shots_and_fanarts, idx);
+		data->screenshots[i] = *value;
+		g_free(value);
+	}
+
+	/* empty the left values */
+	for (unsigned int i = 0; i < g_queue_get_length(shots_and_fanarts); i++) {
+		g_free(g_queue_peek_nth(shots_and_fanarts, i));
+	}
+	g_queue_free(shots_and_fanarts);
 }
 
 /*
