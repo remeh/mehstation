@@ -110,24 +110,17 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 130, 500);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 
-	/* List background */
-	data->list_bg_widget = meh_widget_rect_new(0, 115, 420, 565, gray, TRUE);
-
-	/* Exec background */
-	data->exec_bg_widget = meh_widget_rect_new(430, 0, 830, MEH_FAKE_HEIGHT, gray, TRUE);
-
 	/* Background */
 	data->background_widget = meh_widget_image_new(NULL, -50, -50, MEH_FAKE_WIDTH+50, MEH_FAKE_HEIGHT+50);
 
 	/* Background hover */
-	data->bg_hover_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, white_transparent, TRUE); 
+	data->bg_hover_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, gray, TRUE); 
 
 	/* Header */
 	data->header_text_widget = meh_widget_text_new(app->big_font, data->platform->name, 20, 55, 400, 40, white, TRUE);
 	data->header_text_widget->uppercase = TRUE;
 	data->header_text_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 20, 300);
 	meh_screen_add_text_transitions(screen, data->header_text_widget);
-	data->header_widget = meh_widget_rect_new(0, 45, 420, 70, gray, TRUE);
 
 	/* Executables */
 	for (int i = 0; i < MEH_EXEC_LIST_SIZE; i++) {
@@ -227,11 +220,8 @@ void meh_exec_list_destroy_data(Screen* screen) {
 
 		/* Destroy the widgets */
 		meh_widget_image_destroy(data->background_widget);
-		meh_widget_rect_destroy(data->header_widget);
 		meh_widget_rect_destroy(data->selection_widget);
 		meh_widget_rect_destroy(data->bg_hover_widget);
-		meh_widget_rect_destroy(data->list_bg_widget);
-		meh_widget_rect_destroy(data->exec_bg_widget);
 		meh_widget_image_destroy(data->cover_widget);
 		meh_widget_image_destroy(data->logo_widget);
 		for (int i = 0; i < 3; i++) {
@@ -997,12 +987,7 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	meh_widget_rect_render(app->window, data->bg_hover_widget);
 
 	/* header */
-	meh_widget_rect_render(app->window, data->header_widget);
 	meh_widget_text_render(app->window, data->header_text_widget);
-
-	/* list background */
-	meh_widget_rect_render(app->window, data->list_bg_widget);
-	meh_widget_rect_render(app->window, data->exec_bg_widget);
 
 	/* selection */
 	meh_widget_rect_render(app->window, data->selection_widget);
