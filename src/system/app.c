@@ -181,7 +181,7 @@ int meh_app_main_loop(App* app) {
 
 	/* application lifecycle */
 	int loop_count = 0;
-	unsigned int next_tick = SDL_GetTicks();
+	app->mainloop.next_tick = SDL_GetTicks();
 	int start_tick = SDL_GetTicks();
 
 	const int MAX_FRAMESKIP = app->settings.max_frameskip;
@@ -191,10 +191,10 @@ int meh_app_main_loop(App* app) {
 		loop_count = 0;
 		start_tick = SDL_GetTicks();
 
-		while(SDL_GetTicks() > next_tick && loop_count < MAX_FRAMESKIP) {
+		while(SDL_GetTicks() > app->mainloop.next_tick && loop_count < MAX_FRAMESKIP) {
 			meh_app_main_loop_event(app);
 			meh_app_main_loop_update(app);
-			next_tick += DELTA_TO_SKIP;
+			app->mainloop.next_tick += DELTA_TO_SKIP;
 			loop_count++;
 		}
 
@@ -205,7 +205,7 @@ int meh_app_main_loop(App* app) {
 		app->mainloop.framecount++;
 		if (now > app->mainloop.frame_next_s) {
 			app->mainloop.fps = app->mainloop.framecount;
-			g_message("%d fps", app->mainloop.fps);
+			g_debug("%d fps", app->mainloop.fps);
 			app->mainloop.frame_next_s = now + 1000;
 			app->mainloop.framecount = 0;
 		}
@@ -364,6 +364,8 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	parts[g_queue_get_length(commands)] = NULL;
 	g_queue_free(commands);
 
+	g_debug("Launching '%s' on '%s'", executable->display_name, platform->name);
+
 	int exit_status = 0;
 	GError* error = NULL;
 	g_spawn_sync(NULL,
@@ -383,6 +385,8 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 		g_error_free(error);
 	}
 
+	g_debug("End of execution of '%s'", executable->display_name);
+
 	/* when launching something, we may have missed some
 	 * input events, reset everything in case of. */
 	meh_input_manager_reset_buttons_state(app->input_manager);
@@ -390,6 +394,9 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	 * FIXME key as the one used to start the system, SDL will considered it
 	 * FIXME as a repeatition. We should maybe generate a fake KEYUP event ?*/
 	SDL_RaiseWindow(app->window->sdl_window);
+
+	/* reset the next_tick to avoid extra update/rendering frames. */
+	app->mainloop.next_tick = SDL_GetTicks();
 }
 
 /*

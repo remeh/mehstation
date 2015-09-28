@@ -17,6 +17,10 @@ typedef struct {
 	guint32 fps;
 	guint32 framecount;   /* how many frame during the current cycle */
 	guint32 frame_next_s; /* at which time we must compute the fps */
+
+	/* making it public to allow the system to change it after
+	 * having resumed mehstation when coming back from a platform */
+	unsigned int next_tick;
 } Mainloop;
 
 typedef struct App {
