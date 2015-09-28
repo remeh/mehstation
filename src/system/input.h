@@ -12,7 +12,7 @@
 #define MEH_INPUT_JUST_PRESSED 1
 #define MEH_INPUT_HOLD 2
 
-#define MEH_INPUT_MAX_AXIS (32767-50)
+#define MEH_INPUT_MAX_AXIS (32767-200)
 
 struct DB;
 

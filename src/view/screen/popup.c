@@ -42,19 +42,19 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executabl
 
 	/* Popup background */
 
-	SDL_Color white = { 255, 255, 255 };
+	SDL_Color white = { 255, 255, 255, 255 };
 	SDL_Color black = { 0, 0, 0, 240 };
-	SDL_Color gray = { 15, 15, 15, 220 };
-	SDL_Color light_gray = { 80, 80, 80, 220 };
+	SDL_Color gray = { 15, 15, 15, 120 };
+	SDL_Color light_gray = { 90, 90, 90, 220 };
+	SDL_Color very_light_gray = { 40, 40, 40, 220 };
 
-	data->background_widget = meh_widget_rect_new(data->x, data->y, data->width, data->height, black, TRUE); 
+	data->background_widget = meh_widget_rect_new(data->x, data->y, data->width, data->height, very_light_gray, TRUE);
 	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -data->height, data->background_widget->y.value, 150);
 	meh_screen_add_rect_transitions(screen, data->background_widget);
 	screen->data = data;
 
 	black.a = 150;
 	data->hover_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, black, TRUE); 
-	screen->data = data;
 
 	/* Title */
 	data->title_widget = meh_widget_text_new(app->small_bold_font, "OPTIONS", data->x+10, data->y+5, data->width-10, 40, white, TRUE);
@@ -79,6 +79,8 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executabl
 			30,
 			white,
 			TRUE);
+
+	screen->data = data;
 
 	return screen;
 }
