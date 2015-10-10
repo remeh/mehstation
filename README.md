@@ -9,6 +9,25 @@ You configure your platforms (Native, Emulators, ...) and the executables to lau
 
 [![mehstation youtube video](http://img.youtube.com/vi/g_kv_a5fako/0.jpg)](http://www.youtube.com/watch?v=g_kv_a5fako)
 
+## Features
+
+  * Clean and beautiful interface
+  * Display screenshots, play videos, show description of executables
+  * Multi-platform: Linux, Windows.
+  * Easy configuration with mehstation-config
+  * Automatic scraping of games resources
+  * Import configuration from EmulationStation
+  * Automatic detection and visual mapping of gamepads.
+
+## Configuration
+
+To configure your mehstation, the easiest solution is to use the dedicated tool shipped with mehstation called [mehstation-config](https://github.com/remeh/mehstation-config). The usage of this configuration tool is documented in the [mmehstation wiki](https://github.com/remeh/mehstation/wiki).
+
+## Developer infos
+
+mehstation is developed in C with SDL2, glib, ffmpeg and SQLite3.
+Please free to contribute and to send any pull requests.
+
 ## How to compile
 
 The dependencies are:
@@ -29,16 +48,8 @@ make -j
 ```
 
 The binary `mehstation ` will be created and ready to launch.
-
 Please create an issue if you have a problem compiling mehstation.
 
-## Configuration
-
-To configure your mehstation, you can edit by yourself the created `database.db` SQLite file but the easiest solution is to use the dedicated tool [mehstation-config](https://github.com/remeh/mehstation-config).
-
-## Developer infos
-
-mehstation is developed in C with SDL2, glib, ffmpeg and SQLite3. Please free to contribute and to send any pull requests.
 
 ## License
 
