@@ -170,7 +170,7 @@ SDL_Texture* meh_window_render_text_texture(Window* window, const Font* font, co
 	SDL_Texture* texture = meh_font_render_on_texture(window->sdl_renderer, font, rendered_text, color, max_width);
 
 	if (texture == NULL) {
-		g_critical("Can't render text on a texture.\n");
+		g_critical("Can't render text on a texture.");
 		return NULL;
 	}
 

@@ -13,7 +13,7 @@ SDL_Texture* meh_image_load_file(SDL_Renderer* renderer, const char* filename) {
 
 	SDL_Surface* surface = IMG_Load(filename);
 	if (surface == NULL) {
-		g_critical("Can't load the image '%s' : %s\n", filename, IMG_GetError());
+		g_critical("Can't load the image '%s' : %s", filename, IMG_GetError());
 		return NULL;
 	}
 	
@@ -21,7 +21,7 @@ SDL_Texture* meh_image_load_file(SDL_Renderer* renderer, const char* filename) {
 	SDL_FreeSurface(surface);
 
 	if (texture == NULL) {
-		g_critical("Unable to create a texture from the image '%s' : %s\n", filename, SDL_GetError());
+		g_critical("Unable to create a texture from the image '%s' : %s", filename, SDL_GetError());
 	}
 	
 	return texture;

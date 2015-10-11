@@ -33,7 +33,7 @@ Flags meh_flags_parse(int argc, char* argv[]) {
 	g_option_context_add_main_entries(context, flags, NULL);
 	if (!g_option_context_parse (context, &argc, &argv, &error))
 	{
-		g_critical("option parsing failed: %s\n", error->message);
+		g_critical("Options parsing failed: %s", error->message);
 	}
 
 	g_debug("flags read");

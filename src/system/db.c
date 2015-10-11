@@ -24,7 +24,7 @@ DB* meh_db_open_or_create(const char* filename) {
 	int return_code = sqlite3_open_v2(db->filename, &(db->sqlite), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL); 
 
 	if (return_code != SQLITE_OK) {
-		g_critical("Can't open the SQLite database with filename '%s', error: %s\n", filename, sqlite3_errstr(return_code));
+		g_critical("Can't open the SQLite database with filename '%s', error: %s", filename, sqlite3_errstr(return_code));
 		return NULL;
 	}
 
@@ -76,7 +76,7 @@ static gboolean meh_db_initialize(DB* db) {
 	g_file_get_contents(MEH_SCHEMA_FILE, &content, &length, &error);
 
 	if (error != NULL) {
-		g_critical("Error while reading the schema file : %s\n", error->message);
+		g_critical("Error while reading the schema file : %s", error->message);
 		g_error_free(error);
 		return FALSE;
 	}
@@ -145,12 +145,12 @@ GQueue* meh_db_get_platforms(DB* db) {
 	const char* sql = "SELECT \"id\", \"name\", \"command\", \"icon\", \"background\" FROM platform ORDER BY name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
-		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
 		return NULL;
 	}
 
 	if (statement == NULL) {
-		g_critical("Null statement returned on : %s\n", sql);
+		g_critical("Null statement returned on : %s", sql);
 		return NULL;
 	}
 
@@ -188,7 +188,7 @@ int meh_db_count_platform_executables(DB* db, const Platform* platform) {
 	const char* sql = "SELECT count(\"id\") FROM executable WHERE platform_id = ?1";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
-		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
 		return 0;
 	}
 
@@ -215,7 +215,7 @@ int meh_db_count_mapping(DB* db) {
 	const char* sql = "SELECT count(\"id\") FROM mapping";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
-		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
 		return 0;
 	}
 
@@ -246,7 +246,7 @@ void meh_db_delete_mapping(DB* db, gchar* id) {
 
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
-		g_critical("Can't execute the query :%s\nError :%s\n", sql, sqlite3_errstr(return_code));
+		g_critical("Can't execute the query :%s\nError :%s", sql, sqlite3_errstr(return_code));
 		return;
 	}
 
@@ -271,7 +271,7 @@ void meh_db_save_mapping(DB* db, Mapping* mapping) {
 
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
-		g_critical("Can't execute the query :%s\nError :%s\n", sql, sqlite3_errstr(return_code));
+		g_critical("Can't execute the query :%s\nError :%s", sql, sqlite3_errstr(return_code));
 		return;
 	}
 
@@ -307,7 +307,7 @@ Mapping* meh_db_get_mapping(DB* db, const gchar* id) {
 	const char* sql = "SELECT \"id\", \"up\", \"down\", \"left\", \"right\", \"start\", \"select\", \"a\", \"b\", \"l\", \"r\" FROM mapping WHERE \"id\" = ?1";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
-		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
 		return NULL;
 	}
 
@@ -351,14 +351,14 @@ Platform* meh_db_get_platform(DB* db, int platform_id) {
 	const char* sql = "SELECT \"id\", \"name\", \"command\", \"icon\", \"background\" FROM platform WHERE id = ?1 ORDER BY name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
-		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
 		return NULL;
 	}
 
 	sqlite3_bind_int(statement, 1, platform_id);
 
 	if (statement == NULL) {
-		g_critical("Null statement returned on : %s\n", sql);
+		g_critical("Null statement returned on : %s", sql);
 		return NULL;
 	}
 
@@ -395,7 +395,7 @@ GQueue* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
 	const char* sql = "SELECT \"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\",\"extra_parameter\", \"favorite\", \"last_played\"  FROM executable WHERE platform_id = ?1 ORDER BY favorite DESC, upper(\"display_name\")";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
-		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
 		return NULL;
 	}
 
@@ -451,7 +451,7 @@ gboolean meh_db_set_executable_favorite(DB* db, const Executable* executable, gb
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 
 	if (return_code != SQLITE_OK) {
-		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
 		return FALSE;
 	}
 
@@ -478,7 +478,7 @@ GQueue* meh_db_get_executable_resources(DB* db, const Executable* executable) {
 	const char* sql = "SELECT \"id\", \"executable_id\", \"type\", \"filepath\" FROM executable_resource WHERE executable_id = ?1";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
-		g_critical("Can't execute the query: %s\nError: %s\n", sql, sqlite3_errstr(return_code));
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
 		return NULL;
 	}
 

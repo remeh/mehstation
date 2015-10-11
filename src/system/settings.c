@@ -29,7 +29,7 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 			&error);
 
 	if (error != NULL) {
-		g_critical("Error while reading the configuration file: %s\n", error->message);
+		g_critical("Error while reading the configuration file: %s", error->message);
 		g_error_free(error);
 	}
 
