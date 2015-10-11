@@ -17,7 +17,7 @@
 #include "view/screen/executable_list.h"
 #include "view/screen/fade.h"
 #include "view/screen/platform_list.h"
-#include "view/screen/settings.h"
+#include "view/screen/main_popup.h"
 
 static void meh_screen_platform_change_platform(App* app, Screen* screen);
 
@@ -191,16 +191,14 @@ int meh_screen_platform_list_messages_handler(App* app, Screen* screen, Message*
 	return 0;
 }
 
-static void meh_screen_platform_list_start_settings(App* app, Screen* screen) {
+static void meh_screen_platform_list_start_popup(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
 	/* create the child screen */
-	Screen* settings_screen = meh_screen_settings_new(app);
-	settings_screen->parent_screen = screen;
-	Screen* fade_screen = meh_screen_fade_new(app, screen, settings_screen);
-	meh_app_set_current_screen(app, fade_screen, TRUE);
-	/* NOTE we don't free the memory of the current screen, the fade screen
+	Screen* popup_screen = meh_main_popup_new(app, screen);
+	meh_app_set_current_screen(app, popup_screen, TRUE);
+	/* NOTE we don't free the memory of the current screen, the popup screen
 	 * will go back to it later. */
 }
 
@@ -238,8 +236,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			app->mainloop.running = FALSE;
 			break;
 		case MEH_INPUT_BUTTON_START:
-			// FIXME De-activated for now
-			//meh_screen_platform_list_start_settings(app, screen);
+			meh_screen_platform_list_start_popup(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_A:
 			meh_screen_platform_list_start_platform(app, screen);

@@ -21,7 +21,7 @@ You configure your platforms (Native, Emulators, ...) and the executables to lau
 
 ## Configuration
 
-To configure your mehstation, the easiest solution is to use the dedicated tool shipped with mehstation called [mehstation-config](https://github.com/remeh/mehstation-config). The usage of this configuration tool is documented in the [mmehstation wiki](https://github.com/remeh/mehstation/wiki).
+To configure your mehstation, the easiest solution is to use the dedicated tool shipped with mehstation called [mehstation-config](https://github.com/remeh/mehstation-config). The usage of this configuration tool is documented in the [mehstation wiki](https://github.com/remeh/mehstation/wiki).
 
 ## Developer infos
 
@@ -49,6 +49,8 @@ make -j
 
 The binary `mehstation ` will be created and ready to launch.
 Please create an issue if you have a problem compiling mehstation.
+
+For further infos, see the [compilation chapters in the wiki](https://github.com/remeh/mehstation/wiki).
 
 
 ## License
