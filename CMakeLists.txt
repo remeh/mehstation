@@ -4,6 +4,8 @@ IF(MINGW_BUILD)
   SET(CMAKE_SYSTEM_NAME Generic)
 ENDIF()
 
+INCLUDE(CheckIncludeFile)
+
 PROJECT(mehstation)
 
 SET(
@@ -77,6 +79,8 @@ ${mehstation_BINARY_DIR}/src
 
 LINK_DIRECTORIES(${mehstation_BINARY_DIR}/src)
 
+CHECK_INCLUDE_FILE(/opt/vc/include/bcm_host.h BCMHOST)
+
 IF(MINGW_BUILD)
   SET (CMAKE_C_COMPILER             "/usr/bin/i686-w64-mingw32-gcc")
   SET (CMAKE_C_FLAGS                "-Wall -std=c11")
@@ -84,7 +88,11 @@ IF(MINGW_BUILD)
 ELSE(UNIX)
   # Use Clang
   #SET (CMAKE_C_COMPILER             "clang")
-  SET (CMAKE_C_FLAGS                "-g -Wall -std=c11")
+  IF (BCMHOST)
+          SET (CMAKE_C_FLAGS                "-g -Wall -std=c99")
+  ELSE()
+          SET (CMAKE_C_FLAGS                "-g -Wall -std=c11")
+  ENDIF()
   SET (CMAKE_C_FLAGS_DEBUG          "-g")
 ENDIF()
 
