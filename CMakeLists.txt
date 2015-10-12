@@ -80,13 +80,15 @@ ${mehstation_BINARY_DIR}/src
 
 LINK_DIRECTORIES(${mehstation_BINARY_DIR}/src)
 
-CHECK_INCLUDE_FILE(/opt/vc/include/bcm_host.h BCMHOST)
+CHECK_INCLUDE_FILE(/opt/vc/include/bcm_host.h RASPBERRY)
 
 IF(MINGW_BUILD)
   SET (CMAKE_C_COMPILER             "/usr/bin/i686-w64-mingw32-gcc")
   SET (CMAKE_C_FLAGS                "-Wall -std=c11")
   SET (CMAKE_C_FLAGS_DEBUG          "-g")
+  ADD_DEFINITIONS(-DWINDOWS)
 ELSE(UNIX)
+  ADD_DEFINITIONS(-DLINUX)
   # Use Clang
   #SET (CMAKE_C_COMPILER             "clang")
   IF (BCMHOST)
