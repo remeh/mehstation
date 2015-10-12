@@ -6,6 +6,7 @@
 
 #include "system/app.h"
 #include "system/consts.h"
+#include "system/os.h"
 #include "view/screen.h"
 #include "view/widget_rect.h"
 #include "view/screen/main_popup.h"
@@ -158,7 +159,7 @@ static void meh_main_popup_button_pressed(App* app, Screen* screen, int pressed_
 		case MEH_INPUT_BUTTON_A:
 			switch (data->action) {
 				case 0:
-					g_message("Shutdown");
+					meh_os_shutdown();
 					break;
 			}
 		/* quit the popup */

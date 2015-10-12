@@ -16,6 +16,8 @@ SET(
         src/system/flags.c
         src/system/input.c
         src/system/message.c
+        src/system/os_linux.c
+        src/system/os_windows.c
         src/system/settings.c
         src/system/transition.c
         src/system/db/executable.c
