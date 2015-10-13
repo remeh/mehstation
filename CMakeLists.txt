@@ -93,7 +93,7 @@ ELSE(UNIX)
   ADD_DEFINITIONS(-DLINUX)
   # Use Clang
   #SET (CMAKE_C_COMPILER             "clang")
-  IF (BCMHOST)
+  IF (RASPBERRY)
           SET (CMAKE_C_FLAGS                "-Wall -std=c99")
   ELSE()
           SET (CMAKE_C_FLAGS                "-Wall -std=c11")
