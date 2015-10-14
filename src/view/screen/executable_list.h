@@ -17,7 +17,13 @@
 struct App;
 
 #define MEH_EXEC_LIST_MAX_CACHE (7)
-#define MEH_EXEC_LIST_DELTA (3) /* Don't delete the cache of the object around the cursor */
+
+#ifdef RASPBERRY
+  #define MEH_EXEC_LIST_DELTA (1) /* Limit the amount of data loaded on a Raspberry */
+#else
+  #define MEH_EXEC_LIST_DELTA (3)
+#endif
+
 
 #define MEH_EXEC_LIST_SIZE (17) /* Maximum amount of executables displayed */
 

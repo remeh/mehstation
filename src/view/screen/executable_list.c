@@ -383,7 +383,8 @@ static void meh_exec_list_delete_some_cache(Screen* screen) {
 
 /*
  * meh_exec_list_select_resources uses the resources of the currently selected
- * executable to select a background and a cover.
+ * executable to select a background, a cover, a logo, fanarts, screenshots
+ * and a video, if available.
  */
 static void meh_exec_list_select_resources(Screen* screen) {
 	g_assert(screen != NULL);
