@@ -216,10 +216,10 @@ int meh_app_main_loop(App* app) {
 		 * We can sleep 16 - delta if the delta < 16ms (60fps)
 		 * we even remove some seconds for the OS */
 		int delta = SDL_GetTicks() - start_tick;
-		if (delta < 16) {
+		if (delta < DELTA_TO_SKIP) {
 			delta -= 3;
 			if (delta < 0) { delta = 0; }
-			SDL_Delay(16-delta);
+			SDL_Delay(DELTA_TO_SKIP - delta);
 		}
 	}
 
