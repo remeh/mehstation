@@ -382,6 +382,66 @@ Platform* meh_db_get_platform(DB* db, int platform_id) {
 }
 
 /*
+ * meh_db_read_executable reads an executable in the given statement.
+ */
+Executable* meh_db_read_executable(sqlite3_stmt* statement) {
+	g_assert(statement != NULL);
+
+	/* read column */
+	int id = sqlite3_column_int(statement, 0);
+	const char* display_name = (const char*)sqlite3_column_text(statement, 1);	
+	const char* filepath = (const char*)sqlite3_column_text(statement, 2);
+	const char* description = (const char*)sqlite3_column_text(statement, 3);
+	const char* genres = (const char*)sqlite3_column_text(statement, 4);
+	const char* publisher = (const char*)sqlite3_column_text(statement, 5);
+	const char* developer = (const char*)sqlite3_column_text(statement, 6);
+	const char* release_date = (const char*)sqlite3_column_text(statement, 7);
+	const char* rating = (const char*)sqlite3_column_text(statement, 8);
+	const char* players = (const char*)sqlite3_column_text(statement, 9);
+	const char* extra_parameter = (const char*)sqlite3_column_text(statement, 10);
+	gboolean favorite = sqlite3_column_int(statement, 11) > 0 ? TRUE : FALSE;
+	GDateTime* last_played = g_date_time_new_from_unix_local(sqlite3_column_int(statement, 12));
+
+	/* build the object */
+	Executable* executable = meh_model_executable_new(id, display_name, filepath, description,
+			genres, publisher, developer, release_date, rating, players, extra_parameter,
+			favorite, last_played);
+
+	return executable;
+}
+
+
+/*
+ * meh_db_get_platform_executable gets one executable in SQLite3, platform_id will be
+ * set to the id of the executable's platform.
+ */
+Executable* meh_db_get_random_executable(DB* db, int* platform_id) {
+	g_assert(db != NULL);
+
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "SELECT \"e1\".\"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\",\"extra_parameter\", \"favorite\", \"last_played\", \"platform_id\" FROM \"executable\" AS \"e1\" JOIN \"platform\" ON \"platform\".\"id\" = \"e1\".\"platform_id\" ORDER BY RANDOM() LIMIT 1;";
+
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	if (return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
+		return NULL;
+	}
+
+
+	/* read the value */
+	Executable* executable = NULL;
+	if (sqlite3_step(statement) == SQLITE_ROW) {
+		executable = meh_db_read_executable(statement);
+		*platform_id = sqlite3_column_int(statement, 13);
+	}
+
+	sqlite3_finalize(statement);
+
+	return executable;
+}
+
+/*
  * meh_db_get_platform_executables gets in  the SQLite3 database all the executables
  * available for the given platform.
  */
@@ -405,25 +465,7 @@ GQueue* meh_db_get_platform_executables(DB* db, const Platform* platform, gboole
 	 * read every row
 	 */
 	while (sqlite3_step(statement) == SQLITE_ROW) {
-		/* read column */
-		int id = sqlite3_column_int(statement, 0);
-		const char* display_name = (const char*)sqlite3_column_text(statement, 1);	
-		const char* filepath = (const char*)sqlite3_column_text(statement, 2);
-		const char* description = (const char*)sqlite3_column_text(statement, 3);
-		const char* genres = (const char*)sqlite3_column_text(statement, 4);
-		const char* publisher = (const char*)sqlite3_column_text(statement, 5);
-		const char* developer = (const char*)sqlite3_column_text(statement, 6);
-		const char* release_date = (const char*)sqlite3_column_text(statement, 7);
-		const char* rating = (const char*)sqlite3_column_text(statement, 8);
-		const char* players = (const char*)sqlite3_column_text(statement, 9);
-		const char* extra_parameter = (const char*)sqlite3_column_text(statement, 10);
-		gboolean favorite = sqlite3_column_int(statement, 11) > 0 ? TRUE : FALSE;
-		GDateTime* last_played = g_date_time_new_from_unix_local(sqlite3_column_int(statement, 12));
-
-		/* build the object */
-		Executable* executable = meh_model_executable_new(id, display_name, filepath, description,
-				genres, publisher, developer, release_date, rating, players, extra_parameter,
-				favorite, last_played);
+		Executable* executable = meh_db_read_executable(statement);
 
 		if (executable != NULL) {
 			/* do we get the resources of this executable ? */

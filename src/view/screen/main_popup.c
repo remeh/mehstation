@@ -66,10 +66,10 @@ Screen* meh_main_popup_new(App* app, Screen* src_screen)  {
 			TRUE);
 
 
-	/* Shutdown */
-	data->favorite_widget = meh_widget_text_new(
+	/* Run random executable */
+	data->random_widget = meh_widget_text_new(
 			app->small_font,
-			"Shutdown",
+			"Run random executable",
 			data->x+20,
 			data->y+55,
 			data->width-20,
@@ -77,6 +77,17 @@ Screen* meh_main_popup_new(App* app, Screen* src_screen)  {
 			white,
 			TRUE);
 
+
+	/* Shutdown */
+	data->favorite_widget = meh_widget_text_new(
+			app->small_font,
+			"Shutdown",
+			data->x+20,
+			data->y+87,
+			data->width-20,
+			30,
+			white,
+			TRUE);
 	screen->data = data;
 
 	return screen;
@@ -146,6 +157,23 @@ int meh_main_popup_messages_handler(struct App* app, Screen* screen, Message* me
 
 
 /*
+ * meh_main_popup_button_pressed moves the currently selected position.
+ */
+static void meh_main_popup_move_selection(App* app, Screen* screen) {
+	g_assert(app);
+	g_assert(screen);
+
+	MainPopupData* data = meh_main_popup_get_data(screen);
+	g_assert(data);
+
+	int old = data->action;
+	data->action = data->action ? 0 : 1;
+	
+	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, (data->y+54) + old*32, (data->y+54) + (data->action*32), 100);
+	meh_screen_add_rect_transitions(screen, data->selection_widget);
+}
+
+/*
  * meh_main_popup_button_pressed is called when we received a button pressed
  * message.
  */
@@ -154,11 +182,19 @@ static void meh_main_popup_button_pressed(App* app, Screen* screen, int pressed_
 	g_assert(screen != NULL);
 
 	MainPopupData* data = meh_main_popup_get_data(screen);
+	g_assert(data);
 
 	switch (pressed_button) {
+		case MEH_INPUT_BUTTON_DOWN:
+		case MEH_INPUT_BUTTON_UP:
+			meh_main_popup_move_selection(app, screen);
+			break;
 		case MEH_INPUT_BUTTON_A:
 			switch (data->action) {
 				case 0:
+					meh_main_popup_random_executable(app);
+					break;
+				case 1:
 					meh_os_shutdown();
 					break;
 			}
@@ -168,6 +204,24 @@ static void meh_main_popup_button_pressed(App* app, Screen* screen, int pressed_
 		case MEH_INPUT_SPECIAL_ESCAPE:
 			meh_main_popup_close(screen);
 			break;
+	}
+}
+
+/*
+ * meh_main_popup_random_executable starts a random executable.
+ */
+void meh_main_popup_random_executable(struct App* app) {
+	g_assert(app != NULL);
+
+	int platform_id = 0;
+	Executable* executable = meh_db_get_random_executable(app->db, &platform_id);
+	if (executable) {
+		Platform* platform = meh_db_get_platform(app->db, platform_id);
+		if (platform) {
+			meh_app_start_executable(app, platform, executable);
+			meh_model_platform_destroy(platform);
+		}
+		meh_model_executable_destroy(executable);
 	}
 }
 
@@ -213,6 +267,7 @@ void meh_main_popup_render(struct App* app, Screen* screen) {
 
 		meh_widget_rect_render(app->window, data->selection_widget);
 		meh_widget_text_render(app->window, data->favorite_widget);
+		meh_widget_text_render(app->window, data->random_widget);
 	}
 
 	meh_window_render(app->window);

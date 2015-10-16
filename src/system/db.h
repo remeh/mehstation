@@ -18,6 +18,8 @@ DB* meh_db_open_or_create(const char* filename);
 void meh_db_close(DB* db);
 GQueue* meh_db_get_platforms(DB* db);
 struct Platform* meh_db_get_platform(DB* db, int platform_id);
+struct Executable* meh_db_read_executable(sqlite3_stmt* statement);
+struct Executable* meh_db_get_random_executable(DB* db, int* platform_id);
 GQueue* meh_db_get_platform_executables(DB* db, const struct Platform* platform, gboolean get_resources);
 int meh_db_count_platform_executables(DB* db, const struct Platform* platform);
 GQueue* meh_db_get_executable_resources(DB* db, const struct Executable* executable);
