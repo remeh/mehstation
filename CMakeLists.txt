@@ -36,6 +36,7 @@ SET(
         src/view/screen/executable_list.c
         src/view/screen/exec_list_video.c
         src/view/screen/fade.c
+        src/view/screen/exec_selection.c
         src/view/screen/launch.c
         src/view/screen/mapping.c
         src/view/screen/settings.c

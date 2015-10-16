@@ -20,6 +20,7 @@
 #include "view/screen.h"
 #include "view/screen/fade.h"
 #include "view/screen/executable_list.h"
+#include "view/screen/exec_selection.h"
 #include "view/screen/launch.h"
 #include "view/screen/popup.h"
 
@@ -102,13 +103,10 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	g_assert(data != NULL);
 
 	SDL_Color white = { 255, 255, 255, 255 };
-	SDL_Color white_transparent = { 255, 255, 255, 50 };
 	SDL_Color gray = { 10, 10, 10, 235 };
 
-	/* Selection. */
-	data->selection_widget = meh_widget_rect_new(0, -100, 415, 28, white_transparent, TRUE);
-	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 130, 500);
-	meh_screen_add_rect_transitions(screen, data->selection_widget);
+	/* Selection */
+	meh_exec_selection_prepare(app, screen, data);
 
 	/* Background */
 	data->background_widget = meh_widget_image_new(NULL, -50, -50, MEH_FAKE_WIDTH+50, MEH_FAKE_HEIGHT+50);
@@ -121,13 +119,6 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	data->header_text_widget->uppercase = TRUE;
 	data->header_text_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 20, 300);
 	meh_screen_add_text_transitions(screen, data->header_text_widget);
-
-	/* Executables */
-	for (int i = 0; i < MEH_EXEC_LIST_SIZE; i++) {
-		WidgetText* text = meh_widget_text_new(app->small_font, "", 55, 130+(i*32), 350, 30, white, FALSE);
-		text->uppercase = TRUE; /* executables name in uppercase */
-		g_queue_push_tail(data->executable_widgets, text);
-	}
 
 	/*
 	 * Extra information
@@ -219,8 +210,9 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		meh_model_executables_destroy(data->executables);
 
 		/* Destroy the widgets */
+		meh_exec_selection_destroy(screen, data);
+
 		meh_widget_image_destroy(data->background_widget);
-		meh_widget_rect_destroy(data->selection_widget);
 		meh_widget_rect_destroy(data->bg_hover_widget);
 		meh_widget_image_destroy(data->cover_widget);
 		meh_widget_image_destroy(data->logo_widget);
@@ -243,11 +235,6 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		meh_widget_text_destroy(data->release_date_widget);
 
 		meh_widget_text_destroy(data->description_widget);
-
-		for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
-			meh_widget_text_destroy( g_queue_peek_nth( data->executable_widgets, i) );
-		}
-		g_queue_free(data->executable_widgets);
 
 		/* Free the executables id cache. */
 		for (unsigned int i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
@@ -1005,9 +992,6 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	/* header */
 	meh_widget_text_render(app->window, data->header_text_widget);
 
-	/* selection */
-	meh_widget_rect_render(app->window, data->selection_widget);
-
 	/* cover */
 	if (data->cover != -1) {
 		meh_widget_image_render(app->window, data->cover_widget);
@@ -1049,13 +1033,9 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 		meh_widget_text_render(app->window, data->description_widget);
 	}
 
-	/* render all the executables names. */
-	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
-		meh_widget_text_render(app->window, g_queue_peek_nth(data->executable_widgets, i));
-	}
+	meh_exec_selection_render(app, screen, data);
 
 	/* video overlay */
-
 	meh_exec_list_video_render(app->window, data->exec_list_video);
 
 	if (flip == TRUE) {
