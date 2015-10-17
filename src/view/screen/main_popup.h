@@ -21,8 +21,9 @@ typedef struct {
 
 	WidgetText* title_widget;
 
-	WidgetText* favorite_widget;
 	WidgetText* random_widget;
+	WidgetText* close_widget;
+	WidgetText* shutdown_widget;
 
 	WidgetRect* selection_widget;
 

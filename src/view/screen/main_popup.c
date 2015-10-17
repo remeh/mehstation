@@ -75,12 +75,23 @@ Screen* meh_main_popup_new(App* app, Screen* src_screen)  {
 			white,
 			TRUE);
 
+	/* Close mehstation */
+	data->close_widget = meh_widget_text_new(
+			app->small_font,
+			"Close mehstation",
+			400,
+			data->y+87,
+			data->width-20,
+			30,
+			white,
+			TRUE);
+
 	/* Shutdown */
-	data->favorite_widget = meh_widget_text_new(
+	data->shutdown_widget = meh_widget_text_new(
 			app->small_font,
 			"Shutdown",
 			400,
-			data->y+87,
+			data->y+119,
 			data->width-20,
 			30,
 			white,
@@ -98,7 +109,11 @@ void meh_main_popup_destroy_data(Screen* screen) {
 	MainPopupData* data = meh_main_popup_get_data(screen);
 	meh_widget_rect_destroy(data->hover_widget);
 	meh_widget_text_destroy(data->title_widget);
-	meh_widget_text_destroy(data->favorite_widget);
+
+	meh_widget_text_destroy(data->random_widget);
+	meh_widget_text_destroy(data->close_widget);
+	meh_widget_text_destroy(data->shutdown_widget);
+
 	meh_widget_rect_destroy(data->selection_widget);
 	screen->data = NULL;
 }
@@ -155,7 +170,7 @@ int meh_main_popup_messages_handler(struct App* app, Screen* screen, Message* me
 /*
  * meh_main_popup_button_pressed moves the currently selected position.
  */
-static void meh_main_popup_move_selection(App* app, Screen* screen) {
+static void meh_main_popup_move_selection(App* app, Screen* screen, gboolean down) {
 	g_assert(app);
 	g_assert(screen);
 
@@ -163,8 +178,15 @@ static void meh_main_popup_move_selection(App* app, Screen* screen) {
 	g_assert(data);
 
 	int old = data->action;
-	data->action = data->action ? 0 : 1;
-	
+
+	data->action = down == TRUE ? data->action+1 : data->action-1;
+
+	if (data->action > 2) {
+		data->action = 0;	
+	} else if (data->action == -1) {
+		data->action = 2;
+	}
+
 	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, (data->y+54) + old*32, (data->y+54) + (data->action*32), 100);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 }
@@ -182,8 +204,10 @@ static void meh_main_popup_button_pressed(App* app, Screen* screen, int pressed_
 
 	switch (pressed_button) {
 		case MEH_INPUT_BUTTON_DOWN:
+			meh_main_popup_move_selection(app, screen, TRUE);
+			break;
 		case MEH_INPUT_BUTTON_UP:
-			meh_main_popup_move_selection(app, screen);
+			meh_main_popup_move_selection(app, screen, FALSE);
 			break;
 		case MEH_INPUT_BUTTON_A:
 			switch (data->action) {
@@ -191,9 +215,14 @@ static void meh_main_popup_button_pressed(App* app, Screen* screen, int pressed_
 					meh_main_popup_random_executable(app);
 					break;
 				case 1:
+					/* stop the main loop */
+					app->mainloop.running = FALSE;
+					break;
+				case 2:
 					meh_os_shutdown();
 					break;
 			}
+			break;
 		/* quit the popup */
 		case MEH_INPUT_BUTTON_START:
 		case MEH_INPUT_BUTTON_B:
@@ -253,8 +282,10 @@ void meh_main_popup_render(struct App* app, Screen* screen) {
 	meh_widget_text_render(app->window, data->title_widget);
 
 	meh_widget_rect_render(app->window, data->selection_widget);
-	meh_widget_text_render(app->window, data->favorite_widget);
+
 	meh_widget_text_render(app->window, data->random_widget);
+	meh_widget_text_render(app->window, data->close_widget);
+	meh_widget_text_render(app->window, data->shutdown_widget);
 
 	meh_window_render(app->window);
 }

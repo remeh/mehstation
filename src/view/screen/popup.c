@@ -133,6 +133,7 @@ void meh_screen_popup_button_pressed(App* app, Screen* screen, int pressed_butto
 					meh_screen_popup_favorite_toggle(app, screen);
 					break;
 			}
+			break;
 		/* quit the popup */
 		case MEH_INPUT_BUTTON_START:
 		case MEH_INPUT_BUTTON_B:
@@ -216,6 +217,9 @@ static void meh_screen_popup_favorite_toggle(App* app, Screen* screen) {
 
 		meh_exec_list_after_cursor_move(app, data->src_screen, prev_selected);
 	}
+
+	/* finally close the popup */
+	meh_screen_popup_close(app, screen);
 }
 
 static void meh_screen_popup_close(App* app, Screen* screen) {
