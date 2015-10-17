@@ -41,48 +41,45 @@ Screen* meh_main_popup_new(App* app, Screen* src_screen)  {
 
 	SDL_Color white = { 255, 255, 255, 255 };
 	SDL_Color black = { 0, 0, 0, 240 };
-	SDL_Color gray = { 15, 15, 15, 120 };
-	SDL_Color light_gray = { 90, 90, 90, 220 };
-	SDL_Color very_light_gray = { 40, 40, 40, 220 };
+	SDL_Color light_gray = { 40, 40, 40, 220 };
 
-	data->background_widget = meh_widget_rect_new(data->x, data->y, data->width, data->height, very_light_gray, TRUE);
-	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -data->height, data->background_widget->y.value, 150);
-	meh_screen_add_rect_transitions(screen, data->background_widget);
 	screen->data = data;
 
-	black.a = 150;
+	black.a = 210;
 	data->hover_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, black, TRUE); 
 
 	/* Title */
 	data->title_widget = meh_widget_text_new(app->small_bold_font, "COMMANDS", data->x+10, data->y+5, data->width-10, 40, white, TRUE);
-	data->title_bg_widget = meh_widget_rect_new(data->x, data->y, data->width, 45, gray, TRUE);
+	data->title_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, -300, 300, 350);
+	meh_screen_add_text_transitions(screen, data->title_widget);
 
 	data->selection_widget = meh_widget_rect_new(
-			data->x+5,
+			0,
 			data->y+54,
-			data->width-10,
+			MEH_FAKE_WIDTH,
 			30,
 			light_gray,
 			TRUE);
+	data->title_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, -300, 300, 350);
+	meh_screen_add_text_transitions(screen, data->title_widget);
 
 
 	/* Run random executable */
 	data->random_widget = meh_widget_text_new(
 			app->small_font,
 			"Run random executable",
-			data->x+20,
+			400,
 			data->y+55,
 			data->width-20,
 			30,
 			white,
 			TRUE);
 
-
 	/* Shutdown */
 	data->favorite_widget = meh_widget_text_new(
 			app->small_font,
 			"Shutdown",
-			data->x+20,
+			400,
 			data->y+87,
 			data->width-20,
 			30,
@@ -99,10 +96,8 @@ Screen* meh_main_popup_new(App* app, Screen* src_screen)  {
  */
 void meh_main_popup_destroy_data(Screen* screen) {
 	MainPopupData* data = meh_main_popup_get_data(screen);
-	meh_widget_rect_destroy(data->background_widget);
 	meh_widget_rect_destroy(data->hover_widget);
 	meh_widget_text_destroy(data->title_widget);
-	meh_widget_rect_destroy(data->title_bg_widget);
 	meh_widget_text_destroy(data->favorite_widget);
 	meh_widget_rect_destroy(data->selection_widget);
 	screen->data = NULL;
@@ -112,8 +107,7 @@ static void meh_main_popup_close(Screen* screen) {
 	g_assert(screen != NULL);
 
 	MainPopupData* data = meh_main_popup_get_data(screen);
-	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, data->background_widget->y.value, MEH_FAKE_HEIGHT, 150);
-	meh_screen_add_rect_transitions(screen, data->background_widget);
+
 	data->quitting = TRUE;
 }
 
@@ -238,7 +232,7 @@ int meh_main_popup_update(struct App* app, Screen* screen) {
 	meh_message_send(app, data->src_screen, MEH_MSG_UPDATE, NULL);
 
 	/* quit the screen at the end of the exit animation. */
-	if (data->quitting && data->background_widget->y.ended) {
+	if (data->quitting && data->title_widget->x.ended) {
 		meh_app_set_current_screen(app, data->src_screen, TRUE);
 		meh_screen_destroy(screen);
 	}
@@ -258,17 +252,13 @@ void meh_main_popup_render(struct App* app, Screen* screen) {
 	/* render the popup screen */
 
 	meh_widget_rect_render(app->window, data->hover_widget);
-	meh_widget_rect_render(app->window, data->background_widget);
 
-	if (data->background_widget->y.ended) {
-		/* title */
-		meh_widget_rect_render(app->window, data->title_bg_widget);
-		meh_widget_text_render(app->window, data->title_widget);
+	/* title */
+	meh_widget_text_render(app->window, data->title_widget);
 
-		meh_widget_rect_render(app->window, data->selection_widget);
-		meh_widget_text_render(app->window, data->favorite_widget);
-		meh_widget_text_render(app->window, data->random_widget);
-	}
+	meh_widget_rect_render(app->window, data->selection_widget);
+	meh_widget_text_render(app->window, data->favorite_widget);
+	meh_widget_text_render(app->window, data->random_widget);
 
 	meh_window_render(app->window);
 }

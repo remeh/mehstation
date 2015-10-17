@@ -17,11 +17,9 @@ typedef struct {
 	Screen* src_screen;
 	
 	/* Widgets */
-	WidgetRect* background_widget;
 	WidgetRect* hover_widget;
 
 	WidgetText* title_widget;
-	WidgetRect* title_bg_widget;
 
 	WidgetText* favorite_widget;
 	WidgetText* random_widget;
