@@ -22,11 +22,9 @@ typedef struct {
 	struct Executable* executable;
 	
 	/* Widgets */
-	WidgetRect* background_widget;
 	WidgetRect* hover_widget;
 
 	WidgetText* title_widget;
-	WidgetRect* title_bg_widget;
 
 	WidgetText* favorite_widget;
 
@@ -39,9 +37,6 @@ typedef struct {
 	int width;
 
 	int action;
-
-	gboolean quitting;
-
 } PopupData;
 
 Screen* meh_screen_popup_new(App* app, Screen* src_screen, struct Executable* executable);

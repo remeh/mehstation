@@ -14,7 +14,7 @@
 
 static void meh_screen_popup_favorite_toggle(App* app, Screen* screen);
 static void meh_screen_popup_button_pressed(App* app, Screen* screen, int pressed_button);
-static void meh_screen_popup_close(Screen* screen);
+static void meh_screen_popup_close(App* app, Screen* screen);
 
 Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executable)  {
 	g_assert(app != NULL);
@@ -39,42 +39,36 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executabl
 	data->height = 200;
 	data->x = MEH_FAKE_WIDTH/2 - data->width/2;
 	data->y = MEH_FAKE_HEIGHT/2 - data->height/2;
-	data->quitting = FALSE;
 
 	/* Popup background */
 
 	SDL_Color white = { 255, 255, 255, 255 };
 	SDL_Color black = { 0, 0, 0, 240 };
-	SDL_Color gray = { 15, 15, 15, 120 };
-	SDL_Color light_gray = { 90, 90, 90, 220 };
-	SDL_Color very_light_gray = { 40, 40, 40, 220 };
+	SDL_Color light_gray = { 40, 40, 40, 220 };
 
-	data->background_widget = meh_widget_rect_new(data->x, data->y, data->width, data->height, very_light_gray, TRUE);
-	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -data->height, data->background_widget->y.value, 150);
-	meh_screen_add_rect_transitions(screen, data->background_widget);
 	screen->data = data;
 
-	black.a = 150;
+	black.a = 210;
 	data->hover_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, black, TRUE); 
 
 	/* Title */
-	data->title_widget = meh_widget_text_new(app->small_bold_font, "OPTIONS", data->x+10, data->y+5, data->width-10, 40, white, TRUE);
-	data->title_bg_widget = meh_widget_rect_new(data->x, data->y, data->width, 45, gray, TRUE);
+	data->title_widget = meh_widget_text_new(app->small_bold_font, "OPTIONS", -300, data->y+5, data->width-10, 40, white, TRUE);
+	data->title_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, -300, 300, 350);
+	meh_screen_add_text_transitions(screen, data->title_widget);
 
 	data->selection_widget = meh_widget_rect_new(
-			data->x+5,
+			0,
 			data->y+54,
-			data->width-10,
+			MEH_FAKE_WIDTH,
 			30,
 			light_gray,
 			TRUE);
-
 
 	/* Add/Remove to favorite */
 	data->favorite_widget = meh_widget_text_new(
 			app->small_font,
 			executable->favorite == 1 ? "Remove from favorite" : "Add to favorite",
-			data->x+20,
+			400,
 			data->y+55,
 			data->width-20,
 			30,
@@ -92,10 +86,8 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executabl
  */
 void meh_screen_popup_destroy_data(Screen* screen) {
 	PopupData* data = meh_screen_popup_get_data(screen);
-	meh_widget_rect_destroy(data->background_widget);
 	meh_widget_rect_destroy(data->hover_widget);
 	meh_widget_text_destroy(data->title_widget);
-	meh_widget_rect_destroy(data->title_bg_widget);
 	meh_widget_text_destroy(data->favorite_widget);
 	meh_widget_rect_destroy(data->selection_widget);
 	screen->data = NULL;
@@ -121,12 +113,6 @@ int meh_screen_popup_update(struct App* app, Screen* screen) {
 	/* update the src screen */
 	meh_message_send(app, data->src_screen, MEH_MSG_UPDATE, NULL);
 
-	/* quit the screen at the end of the exit animation. */
-	if (data->quitting && data->background_widget->y.ended) {
-		meh_app_set_current_screen(app, data->src_screen, TRUE);
-		meh_screen_destroy(screen);
-	}
-
 	return 0;
 }
 
@@ -151,7 +137,7 @@ void meh_screen_popup_button_pressed(App* app, Screen* screen, int pressed_butto
 		case MEH_INPUT_BUTTON_START:
 		case MEH_INPUT_BUTTON_B:
 		case MEH_INPUT_SPECIAL_ESCAPE:
-			meh_screen_popup_close(screen);
+			meh_screen_popup_close(app, screen);
 			break;
 	}
 }
@@ -230,19 +216,17 @@ static void meh_screen_popup_favorite_toggle(App* app, Screen* screen) {
 
 		meh_exec_list_after_cursor_move(app, data->src_screen, prev_selected);
 	}
-
-	/* finally close the popup */
-
-	meh_screen_popup_close(screen);
 }
 
-static void meh_screen_popup_close(Screen* screen) {
+static void meh_screen_popup_close(App* app, Screen* screen) {
+	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
 	PopupData* data = meh_screen_popup_get_data(screen);
-	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, data->background_widget->y.value, MEH_FAKE_HEIGHT, 150);
-	meh_screen_add_rect_transitions(screen, data->background_widget);
-	data->quitting = TRUE;
+
+	meh_app_set_current_screen(app, data->src_screen, TRUE);
+	meh_screen_destroy(screen);
+	screen = NULL;
 }
 
 int meh_screen_popup_messages_handler(struct App* app, Screen* screen, Message* message) {
@@ -284,20 +268,15 @@ void meh_screen_popup_render(struct App* app, Screen* screen) {
 	*flip = FALSE;
 	meh_message_send(app, data->src_screen, MEH_MSG_RENDER, flip);
 
-
 	/* render the popup screen */
 
 	meh_widget_rect_render(app->window, data->hover_widget);
-	meh_widget_rect_render(app->window, data->background_widget);
 
-	if (data->background_widget->y.ended) {
-		/* title */
-		meh_widget_rect_render(app->window, data->title_bg_widget);
-		meh_widget_text_render(app->window, data->title_widget);
+	/* title */
+	meh_widget_text_render(app->window, data->title_widget);
 
-		meh_widget_rect_render(app->window, data->selection_widget);
-		meh_widget_text_render(app->window, data->favorite_widget);
-	}
+	meh_widget_rect_render(app->window, data->selection_widget);
+	meh_widget_text_render(app->window, data->favorite_widget);
 
 	meh_window_render(app->window);
 }

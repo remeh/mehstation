@@ -12,7 +12,7 @@
 #include "view/screen/main_popup.h"
 
 static void meh_main_popup_button_pressed(App* app, Screen* screen, int pressed_button);
-static void meh_main_popup_close(Screen* screen);
+static void meh_main_popup_close(App* app, Screen* screen);
 
 Screen* meh_main_popup_new(App* app, Screen* src_screen)  {
 	g_assert(app != NULL);
@@ -35,7 +35,6 @@ Screen* meh_main_popup_new(App* app, Screen* src_screen)  {
 	data->height = 200;
 	data->x = MEH_FAKE_WIDTH/2 - data->width/2;
 	data->y = MEH_FAKE_HEIGHT/2 - data->height/2;
-	data->quitting = FALSE;
 
 	/* Popup background */
 
@@ -60,6 +59,7 @@ Screen* meh_main_popup_new(App* app, Screen* src_screen)  {
 			30,
 			light_gray,
 			TRUE);
+
 	data->title_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, -300, 300, 350);
 	meh_screen_add_text_transitions(screen, data->title_widget);
 
@@ -103,12 +103,14 @@ void meh_main_popup_destroy_data(Screen* screen) {
 	screen->data = NULL;
 }
 
-static void meh_main_popup_close(Screen* screen) {
+static void meh_main_popup_close(App* app, Screen* screen) {
+	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
 	MainPopupData* data = meh_main_popup_get_data(screen);
 
-	data->quitting = TRUE;
+	meh_app_set_current_screen(app, data->src_screen, TRUE);
+	meh_screen_destroy(screen);
 }
 
 MainPopupData* meh_main_popup_get_data(Screen* screen) {
@@ -196,7 +198,7 @@ static void meh_main_popup_button_pressed(App* app, Screen* screen, int pressed_
 		case MEH_INPUT_BUTTON_START:
 		case MEH_INPUT_BUTTON_B:
 		case MEH_INPUT_SPECIAL_ESCAPE:
-			meh_main_popup_close(screen);
+			meh_main_popup_close(app, screen);
 			break;
 	}
 }
@@ -230,12 +232,6 @@ int meh_main_popup_update(struct App* app, Screen* screen) {
 
 	/* update the src screen */
 	meh_message_send(app, data->src_screen, MEH_MSG_UPDATE, NULL);
-
-	/* quit the screen at the end of the exit animation. */
-	if (data->quitting && data->title_widget->x.ended) {
-		meh_app_set_current_screen(app, data->src_screen, TRUE);
-		meh_screen_destroy(screen);
-	}
 
 	return 0;
 }

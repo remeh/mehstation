@@ -34,8 +34,6 @@ typedef struct {
 
 	int action;
 
-	gboolean quitting;
-
 } MainPopupData;
 
 Screen* meh_main_popup_new(App* app, Screen* src_screen);
