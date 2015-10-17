@@ -364,7 +364,7 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	parts[g_queue_get_length(commands)] = NULL;
 	g_queue_free(commands);
 
-	g_debug("Launching '%s' on '%s'", executable->display_name, platform->name);
+	g_message("Launching '%s' on '%s'", executable->display_name, platform->name);
 
 	int exit_status = 0;
 	GError* error = NULL;
@@ -385,7 +385,7 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 		g_error_free(error);
 	}
 
-	g_debug("End of execution of '%s'", executable->display_name);
+	g_message("End of execution of '%s'", executable->display_name);
 
 	/* when launching something, we may have missed some
 	 * input events, reset everything in case of. */
