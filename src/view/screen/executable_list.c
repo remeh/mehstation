@@ -20,6 +20,7 @@
 #include "view/screen.h"
 #include "view/screen/fade.h"
 #include "view/screen/executable_list.h"
+#include "view/screen/exec_desc.h"
 #include "view/screen/exec_selection.h"
 #include "view/screen/launch.h"
 #include "view/screen/popup.h"
@@ -68,10 +69,10 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 
 	data->exec_list_video = NULL;
 
+	screen->data = data;
+
 	/* create widgets */
 	meh_exec_create_widgets(app, screen, data);
-
-	screen->data = data;
 
 	/*
 	 * Select and load the first resources
@@ -83,20 +84,6 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 	return screen;
 }
 
-static void meh_exec_list_metadata_init(App* app, Screen* screen,
-										WidgetText** label, WidgetText** value, gchar* title, int delay,
-										int title_x, int title_y, int title_w, int title_h,
-										int value_x, int value_y, int value_w, int value_h) {
-	g_assert(app != NULL);
-	g_assert(screen != NULL);
-
-	SDL_Color white = { 255, 255, 255, 255 };
-	*label = meh_widget_text_new(app->small_bold_font, title, title_x, title_y, title_w, title_h, white, TRUE);
-	*value = meh_widget_text_new(app->small_font, NULL, value_x, value_y, value_w, value_h, white, TRUE);
-	(*value)->x = meh_transition_start(MEH_TRANSITION_CUBIC, value_x+MEH_FAKE_WIDTH, value_x, 300+delay);
-	meh_screen_add_text_transitions(screen, (*value));
-}
-
 static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
@@ -106,7 +93,7 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	SDL_Color gray = { 10, 10, 10, 235 };
 
 	/* Selection */
-	meh_exec_selection_prepare(app, screen, data);
+	meh_exec_selection_prepare(app, screen);
 
 	/* Background */
 	data->background_widget = meh_widget_image_new(NULL, -50, -50, MEH_FAKE_WIDTH+50, MEH_FAKE_HEIGHT+50);
@@ -120,66 +107,8 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	data->header_text_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 20, 300);
 	meh_screen_add_text_transitions(screen, data->header_text_widget);
 
-	/*
-	 * Extra information
-	 */
-
-	/* Genres */
-	meh_exec_list_metadata_init(app, screen,
-								&data->genres_l_widget, &data->genres_widget,
-								"Genres", 0,
-								870, 396, 80, 30,
-								1070, 400, 150, 30);
-
-	/* Players */
-	meh_exec_list_metadata_init(app, screen,
-								&data->players_l_widget, &data->players_widget,
-								"Players", 0,
-								870, 426, 80, 30,
-								1070, 430, 150, 30);
-
-	/* Publisher */
-	meh_exec_list_metadata_init(app, screen,
-								&data->publisher_l_widget, &data->publisher_widget,
-								"Publisher", 150,
-								870, 456, 120, 30,
-								1070, 460, 150, 30);
-
-	/* Developer */
-	meh_exec_list_metadata_init(app, screen,
-								&data->developer_l_widget, &data->developer_widget,
-								"Developer", 150,
-								870, 488, 150, 30,
-								1070, 490, 150, 30);
-
-	/* Rating */
-	meh_exec_list_metadata_init(app, screen,
-								&data->rating_l_widget, &data->rating_widget,
-								"Rating", 300,
-								870, 518, 100, 30,
-								1070, 520, 150, 30);
-
-	/* Release date */
-	meh_exec_list_metadata_init(app, screen,
-								&data->release_date_l_widget, &data->release_date_widget,
-								 "Release date", 300,
-								 870, 548, 150, 30,
-								 1070, 550, 150, 30);
-
-	/* Cover */
-	data->cover_widget = meh_widget_image_new(NULL, 1030, 60, 200, 300);
-
-	/* Logo */
-	data->logo_widget = meh_widget_image_new(NULL, 530, 60, 350, 100);
-
-	/* Screenshots */
-	for (int i = 0; i < 3; i++) {
-		data->screenshots_widget[i] = meh_widget_image_new(NULL, 500 + (265*i), 620, 190, 80);
-	}
-
-	/* Description */
-	data->description_widget = meh_widget_text_new(app->small_font, NULL, 500, 180, 450, 280, white, FALSE);
-	data->description_widget->multi = TRUE;
+	/* Create the executable description */
+	meh_exec_desc_create_widgets(app, screen);
 }
 
 /*
@@ -209,38 +138,22 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		meh_model_platform_destroy(data->platform);
 		meh_model_executables_destroy(data->executables);
 
-		/* Destroy the widgets */
-		meh_exec_selection_destroy(screen, data);
+		/* destroy the selection widgets */
+		meh_exec_selection_destroy(screen);
 
+		/* background and header */
 		meh_widget_image_destroy(data->background_widget);
 		meh_widget_rect_destroy(data->bg_hover_widget);
-		meh_widget_image_destroy(data->cover_widget);
-		meh_widget_image_destroy(data->logo_widget);
-		for (int i = 0; i < 3; i++) {
-			meh_widget_image_destroy(data->screenshots_widget[i]);
-		}
 		meh_widget_text_destroy(data->header_text_widget);
 
-		meh_widget_text_destroy(data->genres_l_widget);
-		meh_widget_text_destroy(data->genres_widget);
-		meh_widget_text_destroy(data->players_l_widget);
-		meh_widget_text_destroy(data->players_widget);
-		meh_widget_text_destroy(data->publisher_l_widget);
-		meh_widget_text_destroy(data->publisher_widget);
-		meh_widget_text_destroy(data->developer_l_widget);
-		meh_widget_text_destroy(data->developer_widget);
-		meh_widget_text_destroy(data->rating_l_widget);
-		meh_widget_text_destroy(data->rating_widget);
-		meh_widget_text_destroy(data->release_date_l_widget);
-		meh_widget_text_destroy(data->release_date_widget);
-
-		meh_widget_text_destroy(data->description_widget);
-
-		/* Free the executables id cache. */
+		/* free the executables id cache. */
 		for (unsigned int i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
 			g_free(g_queue_peek_nth(data->cache_executables_id, i));
 		}
 		g_queue_free(data->cache_executables_id);
+
+		/* destroy executable description */
+		meh_exec_desc_destroy(screen);
 
 		/* destroy the video overlay */
 		meh_exec_list_video_destroy(data->exec_list_video);
@@ -488,6 +401,7 @@ static void meh_exec_list_select_resources(Screen* screen) {
  * meh_exec_list_get_data returns the data of the executable_list screen
  */
 ExecutableListData* meh_exec_list_get_data(Screen* screen) {
+	g_assert(screen != NULL);
 	ExecutableListData* data = (ExecutableListData*) screen->data;
 	g_assert(data != NULL);
 	return data;
@@ -658,73 +572,13 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, 130 + prev_selected*32, 130 + (selected*32), 100);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 
-	/*
-	 * look whether the image is a portrait / landscape image
-	 * and change the size of the description / cover in function
-	 */
-
-	if (data->logo == -1) {
-		/* no logo, use the full height for the description */
-		data->description_widget->y.value = 50;
-		data->description_widget->h = 280;
-	} else {
-		/* we have a logo, reduce the descrpition size and animate the logo */
-		data->description_widget->y.value = 180;
-		data->description_widget->h = 150;
-		data->logo_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 60, 200);
-		meh_screen_add_image_transitions(screen, data->logo_widget);
-	}
-
-	if (data->cover == -1 || data->cover_widget->texture == NULL) {
-		/* no cover, use the full width for the description */
-		data->description_widget->w = 650;
-		data->cover_widget->texture = NULL;
-	} else {
-		/* detect the landscape/portrait mode */
-		int w = 0,h = 0;
-		SDL_QueryTexture(data->cover_widget->texture, NULL, NULL, &w, &h);
-		if (w >= h) {
-			/* landscape */
-			data->cover_widget->x.value = 930;
-			data->cover_widget->w.value = 300;
-			data->cover_widget->h.value = 200;
-			data->logo_widget->w.value = 340;
-			data->description_widget->w = 340;
-		} else {
-			/* portrait */
-			data->cover_widget->x.value = 1030;
-			data->cover_widget->w.value = 200;
-			data->cover_widget->h.value = 300;
-			data->logo_widget->w.value = 440;
-			data->description_widget->w = 440;
-		}
-	}
-
-	/* 
-	 * refreshes the text widgets about game info.
-	 */
-
-	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
-	if (current_executable != NULL) {
-		data->genres_widget->text = current_executable->genres;
-		meh_widget_text_reload(app->window, data->genres_widget);
-		data->players_widget->text = current_executable->players;
-		meh_widget_text_reload(app->window, data->players_widget);
-		data->publisher_widget->text = current_executable->publisher;
-		meh_widget_text_reload(app->window, data->publisher_widget);
-		data->developer_widget->text = current_executable->developer;
-		meh_widget_text_reload(app->window, data->developer_widget);
-		data->rating_widget->text = current_executable->rating;
-		meh_widget_text_reload(app->window, data->rating_widget);
-		data->release_date_widget->text = current_executable->release_date;
-		meh_widget_text_reload(app->window, data->release_date_widget);
-		data->description_widget->text = current_executable->description;
-		meh_widget_text_reload(app->window, data->description_widget);
-	}
+	/* adapt the executable description view. */
+	meh_exec_desc_adapt_view(app, screen);
 
 	/*
 	 * do we need to refresh the executable widgets ?
 	 * only on page changes
+	 * TODO(remy): put this in the exec_selection part ?
 	 */
 
 	int relative_new = data->selected_executable%MEH_EXEC_LIST_SIZE;
@@ -733,47 +587,8 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 		/* The two cases of First -> last */
 	    (relative_new == MEH_EXEC_LIST_SIZE-1 && relative_old == 0) ||
 		(data->selected_executable == data->executables_length-1))	{
-		meh_exec_list_refresh_executables_widget(app, screen);
+		meh_exec_selection_refresh_executables_widgets(app, screen);
 	}
-
-	/* re-creates the video widget overlay */
-	
-	if (data->exec_list_video != NULL) {
-		meh_exec_list_video_destroy(data->exec_list_video);
-		data->exec_list_video = NULL;
-	}
-	data->exec_list_video = meh_exec_list_video_new(app->window, screen, current_executable);
-
-	/* if no video, we'll put the metadata instead. */
-	if (!meh_exec_list_video_has_video(data->exec_list_video)) {
-		data->genres_l_widget->x = data->players_l_widget->x =
-		data->publisher_l_widget->x = data->developer_l_widget->x =
-		data->rating_l_widget->x = data->release_date_l_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, data->genres_l_widget->x.value, 500, 200);
-		data->genres_widget->x = data->players_widget->x =
-		data->publisher_widget->x = data->developer_widget->x =
-		data->rating_widget->x = data->release_date_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, data->genres_widget->x.value, 800, 200);
-	} else {
-		data->genres_l_widget->x = data->players_l_widget->x =
-		data->publisher_l_widget->x = data->developer_l_widget->x =
-		data->rating_l_widget->x = data->release_date_l_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, data->genres_l_widget->x.value, 870, 200);
-		data->genres_widget->x = data->players_widget->x =
-		data->publisher_widget->x = data->developer_widget->x =
-		data->rating_widget->x = data->release_date_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, data->genres_widget->x.value, 1070, 200);
-	}
-
-	/* starts the transition of the metadata */
-	meh_screen_add_text_transitions(screen, data->genres_widget);
-	meh_screen_add_text_transitions(screen, data->genres_l_widget);
-	meh_screen_add_text_transitions(screen, data->players_widget);
-	meh_screen_add_text_transitions(screen, data->players_l_widget);
-	meh_screen_add_text_transitions(screen, data->publisher_widget);
-	meh_screen_add_text_transitions(screen, data->publisher_l_widget);
-	meh_screen_add_text_transitions(screen, data->developer_widget);
-	meh_screen_add_text_transitions(screen, data->developer_l_widget);
-	meh_screen_add_text_transitions(screen, data->rating_widget);
-	meh_screen_add_text_transitions(screen, data->rating_l_widget);
-	meh_screen_add_text_transitions(screen, data->release_date_widget);
-	meh_screen_add_text_transitions(screen, data->release_date_l_widget);
 
 	/*
 	 * anim the bg
@@ -789,34 +604,6 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 
 	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 		meh_widget_text_reset_move(g_queue_peek_nth(data->executable_widgets, i));
-	}
-}
-
-/*
- * meh_exec_list_refresh_executables_widget re-creates all the texture
- * in the text widgets for the executables.
- */
-void meh_exec_list_refresh_executables_widget(App* app, Screen* screen) {
-	ExecutableListData* data = meh_exec_list_get_data(screen);
-
-	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));
-
-	/* for every executable text widget */
-	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
-		WidgetText* text = g_queue_peek_nth(data->executable_widgets, i);
-		text->text = "";
-		
-		/* look for the executable text if any */
-		int executable_idx = page*(MEH_EXEC_LIST_SIZE) + i;
-		if (executable_idx <= data->executables_length) {
-			Executable* executable = g_queue_peek_nth(data->executables, executable_idx);
-			if (executable != NULL) {
-				text->text = executable->display_name;
-			}
-		}
-
-		/* reload the text texture. */
-		meh_widget_text_reload(app->window, text);
 	}
 }
 
@@ -931,16 +718,8 @@ int meh_exec_list_update(Screen* screen) {
 		meh_widget_text_update(screen, t);
 	}
 
-	meh_widget_text_update(screen, data->description_widget);
-
-	meh_widget_text_update(screen, data->genres_widget);
-	meh_widget_text_update(screen, data->rating_widget);
-	meh_widget_text_update(screen, data->publisher_widget);
-	meh_widget_text_update(screen, data->release_date_widget);
-	meh_widget_text_update(screen, data->developer_widget);
-	meh_widget_text_update(screen, data->players_widget);
-
-	meh_exec_list_video_update(screen, data->exec_list_video);
+	/* update the executable description */
+	meh_exec_desc_update(screen);
 
 	return 0;
 }
@@ -982,8 +761,6 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
-	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
-
 	/* background */
 	meh_widget_image_render(app->window, data->background_widget);
 
@@ -993,51 +770,9 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	/* header */
 	meh_widget_text_render(app->window, data->header_text_widget);
 
-	/* cover */
-	if (data->cover != -1) {
-		meh_widget_image_render(app->window, data->cover_widget);
-	}
+	meh_exec_desc_render(app, screen);
 
-	/* logo */
-	if (data->logo != -1) {
-		meh_widget_image_render(app->window, data->logo_widget);
-	}
-
-	/* render the screenshots */
-	for (int i = 0; i < 3; i++) {
-		meh_widget_image_render(app->window, data->screenshots_widget[i]);
-	}
-
-	/*
-	 * extra info
-	 */
-	if (current_executable != NULL) {
-		/* Genres */
-		meh_widget_text_render(app->window, data->genres_l_widget);
-		meh_widget_text_render(app->window, data->genres_widget);
-		/* Players */
-		meh_widget_text_render(app->window, data->players_l_widget);
-		meh_widget_text_render(app->window, data->players_widget);
-		/* Publisher */
-		meh_widget_text_render(app->window, data->publisher_l_widget);
-		meh_widget_text_render(app->window, data->publisher_widget);
-		/* Developer */
-		meh_widget_text_render(app->window, data->developer_l_widget);
-		meh_widget_text_render(app->window, data->developer_widget);
-		/* Release date */
-		meh_widget_text_render(app->window, data->rating_l_widget);
-		meh_widget_text_render(app->window, data->rating_widget);
-		/* Release date */
-		meh_widget_text_render(app->window, data->release_date_l_widget);
-		meh_widget_text_render(app->window, data->release_date_widget);
-		/* Description */
-		meh_widget_text_render(app->window, data->description_widget);
-	}
-
-	meh_exec_selection_render(app, screen, data);
-
-	/* video overlay */
-	meh_exec_list_video_render(app->window, data->exec_list_video);
+	meh_exec_selection_render(app, screen);
 
 	if (flip == TRUE) {
 		meh_window_render(app->window);

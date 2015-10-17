@@ -1,10 +1,17 @@
+/*
+ * mehstation - Executable selection in the executables list.
+ *
+ * Copyright © 2015 Rémy Mathieu
+ */
+
 #include "view/screen/exec_selection.h"
 #include "view/screen/executable_list.h"
 
-void meh_exec_selection_prepare(App* app, Screen* screen, ExecutableListData* data) {
+void meh_exec_selection_prepare(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
-	g_assert(data != NULL);
+
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	SDL_Color white = { 255, 255, 255, 255 };
 	SDL_Color white_transparent = { 255, 255, 255, 50 };
@@ -22,9 +29,10 @@ void meh_exec_selection_prepare(App* app, Screen* screen, ExecutableListData* da
 	}
 }
 
-void meh_exec_selection_destroy(Screen* screen, ExecutableListData* data) {
+void meh_exec_selection_destroy(Screen* screen) {
 	g_assert(screen != NULL);
-	g_assert(data != NULL);
+
+	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	/* Selection */
 	meh_widget_rect_destroy(data->selection_widget);
@@ -36,7 +44,9 @@ void meh_exec_selection_destroy(Screen* screen, ExecutableListData* data) {
 	g_queue_free(data->executable_widgets);
 }
 
-void meh_exec_selection_render(App* app, Screen* screen, ExecutableListData* data) {
+void meh_exec_selection_render(App* app, Screen* screen) {
+	ExecutableListData* data = meh_exec_list_get_data(screen);
+
 	/* selection */
 	meh_widget_rect_render(app->window, data->selection_widget);
 
@@ -45,3 +55,32 @@ void meh_exec_selection_render(App* app, Screen* screen, ExecutableListData* dat
 		meh_widget_text_render(app->window, g_queue_peek_nth(data->executable_widgets, i));
 	}
 }
+
+/*
+ * meh_exec_list_refresh_executables_widget re-creates all the texture
+ * in the text widgets for the executables.
+ */
+void meh_exec_selection_refresh_executables_widgets(App* app, Screen* screen) {
+	ExecutableListData* data = meh_exec_list_get_data(screen);
+
+	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));
+
+	/* for every executable text widget */
+	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
+		WidgetText* text = g_queue_peek_nth(data->executable_widgets, i);
+		text->text = "";
+
+		/* look for the executable text if any */
+		int executable_idx = page*(MEH_EXEC_LIST_SIZE) + i;
+		if (executable_idx <= data->executables_length) {
+			Executable* executable = g_queue_peek_nth(data->executables, executable_idx);
+			if (executable != NULL) {
+				text->text = executable->display_name;
+			}
+		}
+
+		/* reload the text texture. */
+		meh_widget_text_reload(app->window, text);
+	}
+}
+

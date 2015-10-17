@@ -10,6 +10,7 @@
 #include "view/widget_rect.h"
 #include "view/screen/popup.h"
 #include "view/screen/executable_list.h"
+#include "view/screen/exec_selection.h"
 
 static void meh_screen_popup_favorite_toggle(App* app, Screen* screen);
 static void meh_screen_popup_button_pressed(App* app, Screen* screen, int pressed_button);
@@ -223,7 +224,7 @@ static void meh_screen_popup_favorite_toggle(App* app, Screen* screen) {
 
 		/* redraw the executables list texts */
 
-		meh_exec_list_refresh_executables_widget(app, data->src_screen);
+		meh_exec_selection_refresh_executables_widgets(app, data->src_screen);
 
 		/* move and redraw the selection */
 
