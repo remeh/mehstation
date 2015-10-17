@@ -22,6 +22,9 @@ static void meh_exec_desc_metadata_init(App* app, Screen* screen,
 	meh_screen_add_text_transitions(screen, (*value));
 }
 
+/*
+ * meh_exec_desc_create_widgets creates the widget needed for the executable description.
+ */
 void meh_exec_desc_create_widgets(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
@@ -122,6 +125,10 @@ void meh_exec_desc_destroy(Screen* screen) {
 	}
 }
 
+/*
+ * meh_exec_desc_adapt_view adapts the view to the currently
+ * selected executable.
+ */
 void meh_exec_desc_adapt_view(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
@@ -232,6 +239,9 @@ void meh_exec_desc_adapt_view(App* app, Screen* screen) {
 	meh_screen_add_text_transitions(screen, data->release_date_l_widget);
 }
 
+/*
+ * meh_exec_desc_update updates the widgets of the description part of the executable.
+ */
 void meh_exec_desc_update(Screen* screen) {
 	g_assert(screen != NULL);
 
@@ -249,6 +259,9 @@ void meh_exec_desc_update(Screen* screen) {
 	meh_exec_list_video_update(screen, data->exec_list_video);
 }
 
+/*
+ * meh_exec_desc_render renders the description part of the executable.
+ */
 void meh_exec_desc_render(App* app, Screen* screen) {
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);

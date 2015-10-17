@@ -115,6 +115,7 @@ void meh_main_popup_destroy_data(Screen* screen) {
 	meh_widget_text_destroy(data->shutdown_widget);
 
 	meh_widget_rect_destroy(data->selection_widget);
+
 	screen->data = NULL;
 }
 
