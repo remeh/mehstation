@@ -412,7 +412,37 @@ Executable* meh_db_read_executable(sqlite3_stmt* statement) {
 
 
 /*
- * meh_db_get_platform_executable gets one executable in SQLite3, platform_id will be
+ * meh_db_get_platform_random_executable gets one random executable in SQLite3 for the given
+ * platform.
+ */
+Executable* meh_db_get_platform_random_executable(DB* db, int platform_id) {
+	g_assert(db != NULL);
+
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "SELECT \"e1\".\"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\",\"extra_parameter\", \"favorite\", \"last_played\" FROM \"executable\" AS \"e1\" where \"platform_id\" = ?1 ORDER BY RANDOM() LIMIT 1;";
+
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	if (return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
+		return NULL;
+	}
+
+	sqlite3_bind_int(statement, 1, platform_id);
+
+	/* read the value */
+	Executable* executable = NULL;
+	if (sqlite3_step(statement) == SQLITE_ROW) {
+		executable = meh_db_read_executable(statement);
+	}
+
+	sqlite3_finalize(statement);
+
+	return executable;
+}
+
+/*
+ * meh_db_get_random_executable gets one random executable in SQLite3, platform_id will be
  * set to the id of the executable's platform.
  */
 Executable* meh_db_get_random_executable(DB* db, int* platform_id) {
