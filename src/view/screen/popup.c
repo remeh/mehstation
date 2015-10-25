@@ -188,7 +188,6 @@ void meh_screen_popup_button_pressed(App* app, Screen* screen, int pressed_butto
 				case 1:
 					meh_screen_popup_random_executable(app, screen);
 					break;
-					// TODO(remy): start a random executable.
 			}
 			break;
 		/* quit the popup */
