@@ -410,7 +410,6 @@ Executable* meh_db_read_executable(sqlite3_stmt* statement) {
 	return executable;
 }
 
-
 /*
  * meh_db_get_platform_random_executable gets one random executable in SQLite3 for the given
  * platform.

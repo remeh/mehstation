@@ -16,7 +16,7 @@ static void meh_screen_popup_favorite_toggle(App* app, Screen* screen);
 static void meh_screen_popup_button_pressed(App* app, Screen* screen, int pressed_button);
 static void meh_screen_popup_close(App* app, Screen* screen);
 
-Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executable)  {
+Screen* meh_screen_popup_new(App* app, Screen* src_screen, Platform* platform, Executable* executable)  {
 	g_assert(app != NULL);
 	g_assert(src_screen != NULL);
 	g_assert(executable != NULL);
@@ -34,6 +34,7 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executabl
 
 	data->src_screen = src_screen;
 	data->executable = executable;
+	data->platform = platform;
 	data->action = 0;
 	data->width = 400;
 	data->height = 200;
@@ -70,6 +71,17 @@ Screen* meh_screen_popup_new(App* app, Screen* src_screen, Executable* executabl
 			executable->favorite == 1 ? "Remove from favorite" : "Add to favorite",
 			400,
 			data->y+55,
+			data->width-20,
+			30,
+			white,
+			TRUE);
+
+	/* Run random */
+	data->random_widget = meh_widget_text_new(
+			app->small_font,
+			"Run random executable of this platform",
+			400,
+			data->y+87,
 			data->width-20,
 			30,
 			white,
@@ -115,6 +127,41 @@ int meh_screen_popup_update(struct App* app, Screen* screen) {
 
 	return 0;
 }
+/*
+ *
+ * meh_popup_button_pressed moves the currently selected position.
+ */
+static void meh_screen_popup_move_selection(App* app, Screen* screen, gboolean down) {
+	g_assert(app);
+	g_assert(screen);
+
+	PopupData* data = meh_screen_popup_get_data(screen);
+	g_assert(data);
+
+	int old = data->action;
+
+	data->action = data->action == 0 ? 1 : 0;
+
+	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, (data->y+54) + old*32, (data->y+54) + (data->action*32), 100);
+	meh_screen_add_rect_transitions(screen, data->selection_widget);
+}
+
+/*
+ * meh_screen_popup_random_executable starts a random executable of this platform.
+ */
+static void meh_screen_popup_random_executable(App* app, Screen* screen) {
+	g_assert(app != NULL);
+
+	PopupData* data = meh_screen_popup_get_data(screen);
+
+	int platform_id = data->platform->id;
+
+	Executable* executable = meh_db_get_platform_random_executable(app->db, platform_id);
+	if (executable) {
+		meh_app_start_executable(app, data->platform, executable);
+		meh_model_executable_destroy(executable);
+	}
+}
 
 /*
  * meh_screen_popup_button_pressed is called when we received a button pressed
@@ -127,11 +174,21 @@ void meh_screen_popup_button_pressed(App* app, Screen* screen, int pressed_butto
 	PopupData* data = meh_screen_popup_get_data(screen);
 
 	switch (pressed_button) {
+		case MEH_INPUT_BUTTON_DOWN:
+			meh_screen_popup_move_selection(app, screen, TRUE);
+			break;
+		case MEH_INPUT_BUTTON_UP:
+			meh_screen_popup_move_selection(app, screen, FALSE);
+			break;
 		case MEH_INPUT_BUTTON_A:
 			switch (data->action) {
 				case 0:
 					meh_screen_popup_favorite_toggle(app, screen);
 					break;
+				case 1:
+					meh_screen_popup_random_executable(app, screen);
+					break;
+					// TODO(remy): start a random executable.
 			}
 			break;
 		/* quit the popup */
@@ -281,6 +338,7 @@ void meh_screen_popup_render(struct App* app, Screen* screen) {
 
 	meh_widget_rect_render(app->window, data->selection_widget);
 	meh_widget_text_render(app->window, data->favorite_widget);
+	meh_widget_text_render(app->window, data->random_widget);
 
 	meh_window_render(app->window);
 }

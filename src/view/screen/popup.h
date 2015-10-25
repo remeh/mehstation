@@ -14,12 +14,14 @@
 
 struct App;
 struct Executable;
+struct Platform;
 
 typedef struct {
 	/* upon which screen the popup is appearing. */
 	Screen* src_screen;
 
 	struct Executable* executable;
+	struct Platform* platform;
 	
 	/* Widgets */
 	WidgetRect* hover_widget;
@@ -27,6 +29,7 @@ typedef struct {
 	WidgetText* title_widget;
 
 	WidgetText* favorite_widget;
+	WidgetText* random_widget;
 
 	WidgetRect* selection_widget;
 
@@ -39,7 +42,7 @@ typedef struct {
 	int action;
 } PopupData;
 
-Screen* meh_screen_popup_new(App* app, Screen* src_screen, struct Executable* executable);
+Screen* meh_screen_popup_new(App* app, Screen* src_screen, struct Platform* platform, struct Executable* executable);
 PopupData* meh_screen_popup_get_data(Screen* screen);
 void meh_screen_popup_destroy_data(Screen* screen);
 int meh_screen_popup_messages_handler(struct App* app, Screen* screen, Message* message);
