@@ -45,6 +45,7 @@ SET(
         src/view/screen/platform_list.c
         src/view/screen/main_popup.c
         src/view/screen/popup.c
+        src/view/screen/simple_popup.c
 )
 
 ADD_EXECUTABLE(
