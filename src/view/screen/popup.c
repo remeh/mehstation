@@ -101,6 +101,7 @@ void meh_screen_popup_destroy_data(Screen* screen) {
 	meh_widget_rect_destroy(data->hover_widget);
 	meh_widget_text_destroy(data->title_widget);
 	meh_widget_text_destroy(data->favorite_widget);
+	meh_widget_text_destroy(data->random_widget);
 	meh_widget_rect_destroy(data->selection_widget);
 	screen->data = NULL;
 }
