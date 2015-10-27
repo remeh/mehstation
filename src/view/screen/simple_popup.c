@@ -2,6 +2,7 @@
  * mehstation - Reusable popup.
  *
  * Copyright © 2015 Rémy Mathieu
+ * TODO(remy): add a widget_text to each Action object.
  */
 
 #include "system/app.h"
@@ -18,7 +19,6 @@ static void meh_simple_popup_close(App* app, Screen* screen);
 Screen* meh_simple_popup_new(App* app, Screen* src_screen, Platform* platform, Executable* executable)  {
 	g_assert(app != NULL);
 	g_assert(src_screen != NULL);
-	g_assert(executable != NULL);
 
 	Screen* screen = meh_screen_new(app->window);
 
@@ -46,6 +46,9 @@ Screen* meh_simple_popup_new(App* app, Screen* src_screen, Platform* platform, E
 	data->height = 200;
 	data->x = MEH_FAKE_WIDTH/2 - data->width/2;
 	data->y = MEH_FAKE_HEIGHT/2 - data->height/2;
+
+	/* Popup list of actions */
+	data->actions = g_queue_new();
 
 	/* Popup background */
 
@@ -85,6 +88,14 @@ void meh_simple_popup_destroy_data(Screen* screen) {
 	meh_widget_rect_destroy(data->hover_widget);
 	meh_widget_text_destroy(data->title_widget);
 	meh_widget_rect_destroy(data->selection_widget);
+
+	/* free the actions objects */
+	for (unsigned int i = 0; i < g_queue_get_length(data->actions); i++) {
+		SimplePopupAction* action = g_queue_peek_nth(data->actions, i);
+		g_free(action->label);
+	}
+	g_queue_free(data->actions);
+
 	screen->data = NULL;
 }
 
@@ -130,6 +141,34 @@ static void meh_simple_popup_move_selection(App* app, Screen* screen, gboolean d
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 }
 
+/**
+ * meh_simple_popup_run_action runs the underlying action.
+ */
+static void meh_simple_popup_run_action(App* app, Screen* screen, int selected_action) {
+	SimplePopupData* data = meh_simple_popup_get_data(screen);
+	SimplePopupAction* action = g_queue_peek_nth(data->actions, selected_action);
+	if (action != NULL) {
+		action->run(app, screen);
+	}
+}
+
+/*
+ * meh_simple_popup_add_action adds an action to the popup.
+ */
+void meh_simple_popup_add_action(Screen* screen, gchar* label, void (*func) (struct App*, struct Screen*)) {
+	g_assert(label != NULL);
+	g_assert(func != NULL);
+
+
+	SimplePopupData* data = meh_simple_popup_get_data(screen);
+	SimplePopupAction* new_action = g_new(SimplePopupAction, 1);
+
+	new_action->label = label;
+	new_action->run = func;
+
+	g_queue_push_tail(data->actions, new_action);
+}
+
 /*
  * meh_simple_popup_button_pressed is called when we received a button pressed
  * message.
@@ -148,7 +187,7 @@ void meh_simple_popup_button_pressed(App* app, Screen* screen, int pressed_butto
 			meh_simple_popup_move_selection(app, screen, FALSE);
 			break;
 		case MEH_INPUT_BUTTON_A:
-			/* TODO(remy): send a message to the underlying popup */
+			meh_simple_popup_run_action(app, screen, data->action);
 			break;
 		/* quit the popup */
 		case MEH_INPUT_BUTTON_START:

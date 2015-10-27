@@ -17,9 +17,11 @@
 #include "view/screen/executable_list.h"
 #include "view/screen/fade.h"
 #include "view/screen/platform_list.h"
+#include "view/screen/simple_popup.h"
 #include "view/screen/main_popup.h"
 
 static void meh_screen_platform_change_platform(App* app, Screen* screen);
+static Platform* meh_screen_platform_get_current(Screen* screen);
 
 Screen* meh_screen_platform_list_new(App* app) {
 	Screen* screen = meh_screen_new(app->window);
@@ -155,6 +157,13 @@ PlatformListData* meh_screen_platform_list_get_data(Screen* screen) {
 	return data;
 }
 
+static Platform* meh_screen_platform_get_current(Screen* screen) {
+	PlatformListData* data = meh_screen_platform_list_get_data(screen);
+	Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
+	g_assert(platform != NULL);
+	return platform;
+}
+
 int meh_screen_platform_list_messages_handler(App* app, Screen* screen, Message* message) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
@@ -196,7 +205,11 @@ static void meh_screen_platform_list_start_popup(App* app, Screen* screen) {
 	g_assert(screen != NULL);
 
 	/* create the child screen */
-	Screen* popup_screen = meh_main_popup_new(app, screen);
+	Platform* platform = meh_screen_platform_get_current(screen);
+	Screen* popup_screen = meh_simple_popup_new(app, screen, platform, NULL);
+	meh_simple_popup_add_action(popup_screen,
+			g_strdup("Run random executable"),
+			&meh_main_popup_random_executable);
 	meh_app_set_current_screen(app, popup_screen, TRUE);
 	/* NOTE we don't free the memory of the current screen, the popup screen
 	 * will go back to it later. */
@@ -206,9 +219,7 @@ static void meh_screen_platform_list_start_platform(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
-	/* get the platform */
-	PlatformListData* data = meh_screen_platform_list_get_data(screen);
-	Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
+	Platform* platform = meh_screen_platform_get_current(screen);
 
 	if (platform != NULL) {
 		/* create the child screen */

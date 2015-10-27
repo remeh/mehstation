@@ -213,7 +213,7 @@ static void meh_main_popup_button_pressed(App* app, Screen* screen, int pressed_
 		case MEH_INPUT_BUTTON_A:
 			switch (data->action) {
 				case 0:
-					meh_main_popup_random_executable(app);
+					meh_main_popup_random_executable(app, screen);
 					break;
 				case 1:
 					/* stop the main loop */
@@ -236,7 +236,7 @@ static void meh_main_popup_button_pressed(App* app, Screen* screen, int pressed_
 /*
  * meh_main_popup_random_executable starts a random executable.
  */
-void meh_main_popup_random_executable(struct App* app) {
+void meh_main_popup_random_executable(App* app, Screen* screen) {
 	g_assert(app != NULL);
 
 	int platform_id = 0;

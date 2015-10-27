@@ -43,4 +43,4 @@ void meh_main_popup_destroy_data(Screen* screen);
 int meh_main_popup_messages_handler(struct App* app, Screen* screen, Message* message);
 int meh_main_popup_update(struct App* app, Screen* screen);
 void meh_main_popup_render(struct App* app, Screen* screen);
-void meh_main_popup_random_executable(struct App* app);
+void meh_main_popup_random_executable(struct App* app, Screen* screen);
