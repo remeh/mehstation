@@ -48,6 +48,7 @@ typedef struct {
 typedef struct {
 	gchar* label;
 	void (*run) (struct App*, struct Screen*);
+	WidgetText* widget;
 } SimplePopupAction;
 
 Screen* meh_simple_popup_new(App* app, Screen* src_screen, struct Platform* platform, struct Executable* executable);
@@ -56,4 +57,4 @@ void meh_simple_popup_destroy_data(Screen* screen);
 int meh_simple_popup_messages_handler(struct App* app, Screen* screen, Message* message);
 int meh_simple_popup_update(struct App* app, Screen* screen);
 void meh_simple_popup_render(struct App* app, Screen* screen);
-void meh_simple_popup_add_action(Screen* screen, gchar* label, void (*func) (struct App*, struct Screen*));
+void meh_simple_popup_add_action(App* app, Screen* screen, gchar* label, void (*func) (struct App*, struct Screen*));

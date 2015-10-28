@@ -2,7 +2,6 @@
  * mehstation - Reusable popup.
  *
  * Copyright © 2015 Rémy Mathieu
- * TODO(remy): add a widget_text to each Action object.
  */
 
 #include "system/app.h"
@@ -92,6 +91,7 @@ void meh_simple_popup_destroy_data(Screen* screen) {
 	/* free the actions objects */
 	for (unsigned int i = 0; i < g_queue_get_length(data->actions); i++) {
 		SimplePopupAction* action = g_queue_peek_nth(data->actions, i);
+		meh_widget_text_destroy(action->widget);
 		g_free(action->label);
 	}
 	g_queue_free(data->actions);
@@ -135,7 +135,19 @@ static void meh_simple_popup_move_selection(App* app, Screen* screen, gboolean d
 	/* TODO(remy): support action change */
 	int old = data->action;
 
-	/* data->action = data->action == 0 ? 1 : 0; */
+	if (down) {
+		data->action += 1;
+	} else {
+		data->action -= 1;
+	}
+
+	int actions_count = g_queue_get_length(data->actions);
+
+	if (data->action < 0) {
+		data->action = actions_count-1;
+	} else if (data->action >= actions_count) {
+		data->action = 0;
+	}
 
 	data->selection_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, (data->y+54) + old*32, (data->y+54) + (data->action*32), 100);
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
@@ -155,7 +167,7 @@ static void meh_simple_popup_run_action(App* app, Screen* screen, int selected_a
 /*
  * meh_simple_popup_add_action adds an action to the popup.
  */
-void meh_simple_popup_add_action(Screen* screen, gchar* label, void (*func) (struct App*, struct Screen*)) {
+void meh_simple_popup_add_action(App* app, Screen* screen, gchar* label, void (*func) (struct App*, struct Screen*)) {
 	g_assert(label != NULL);
 	g_assert(func != NULL);
 
@@ -165,6 +177,19 @@ void meh_simple_popup_add_action(Screen* screen, gchar* label, void (*func) (str
 
 	new_action->label = label;
 	new_action->run = func;
+
+	SDL_Color white = { 255, 255, 255, 0 };
+
+	/* compute the position of this widget */
+	new_action->widget = meh_widget_text_new(
+			app->small_font,
+			new_action->label,
+			400,
+			data->y+55 + (32*g_queue_get_length(data->actions)),
+			data->width-20,
+			30,
+			white,
+			TRUE);
 
 	g_queue_push_tail(data->actions, new_action);
 }
@@ -256,6 +281,12 @@ void meh_simple_popup_render(struct App* app, Screen* screen) {
 	meh_widget_text_render(app->window, data->title_widget);
 
 	meh_widget_rect_render(app->window, data->selection_widget);
+
+	/* render the action */
+	for (int i = 0; i < g_queue_get_length(data->actions); i++) {
+		SimplePopupAction* action = g_queue_peek_nth(data->actions, i);
+		meh_widget_text_render(app->window, action->widget);
+	}
 
 	meh_window_render(app->window);
 }

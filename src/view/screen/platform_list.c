@@ -207,9 +207,12 @@ static void meh_screen_platform_list_start_popup(App* app, Screen* screen) {
 	/* create the child screen */
 	Platform* platform = meh_screen_platform_get_current(screen);
 	Screen* popup_screen = meh_simple_popup_new(app, screen, platform, NULL);
-	meh_simple_popup_add_action(popup_screen,
+	meh_simple_popup_add_action(
+			app,
+			popup_screen,
 			g_strdup("Run random executable"),
-			&meh_main_popup_random_executable);
+			&meh_main_popup_random_executable
+			);
 	meh_app_set_current_screen(app, popup_screen, TRUE);
 	/* NOTE we don't free the memory of the current screen, the popup screen
 	 * will go back to it later. */
