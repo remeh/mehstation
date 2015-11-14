@@ -23,7 +23,8 @@
 #include "view/screen/exec_desc.h"
 #include "view/screen/exec_selection.h"
 #include "view/screen/launch.h"
-#include "view/screen/popup.h"
+#include "view/screen/simple_popup.h"
+#include "view/screen/exec_popup.h"
 
 static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data);
 static void meh_exec_list_destroy_resources(Screen* screen);
@@ -618,8 +619,16 @@ static void meh_exec_list_open_popup(App* app, Screen* screen) {
 		return;
 	}
 
+	/* TODO(remy): generate the text for the favorite (add or remove?) */
+
 	/* create the child screen */
-	Screen* popup_screen = meh_screen_popup_new(app, screen, data->platform, executable);
+	Screen* popup_screen = meh_simple_popup_new(app, screen, data->platform, executable);
+	meh_simple_popup_add_action(
+			app,
+			popup_screen,
+			g_strdup("Toggle favorite"),
+			&meh_exec_popup_favorite_toggle
+			);
 	meh_app_set_current_screen(app, popup_screen, TRUE);
 	/* NOTE we don't free the memory of the current screen, the popup screen
 	 * will go back to it later. */

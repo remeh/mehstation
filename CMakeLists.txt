@@ -44,7 +44,7 @@ SET(
         src/view/screen/starting.c
         src/view/screen/platform_list.c
         src/view/screen/main_popup.c
-        src/view/screen/popup.c
+        src/view/screen/exec_popup.c
         src/view/screen/simple_popup.c
 )
 
