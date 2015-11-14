@@ -132,7 +132,6 @@ static void meh_simple_popup_move_selection(App* app, Screen* screen, gboolean d
 	SimplePopupData* data = meh_simple_popup_get_data(screen);
 	g_assert(data);
 
-	/* TODO(remy): support action change */
 	int old = data->action;
 
 	if (down) {

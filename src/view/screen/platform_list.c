@@ -213,6 +213,18 @@ static void meh_screen_platform_list_start_popup(App* app, Screen* screen) {
 			g_strdup("Run random executable"),
 			&meh_main_popup_random_executable
 			);
+	meh_simple_popup_add_action(
+			app,
+			popup_screen,
+			g_strdup("Close mehstation"),
+			&meh_main_popup_close
+			);
+	meh_simple_popup_add_action(
+			app,
+			popup_screen,
+			g_strdup("Shutdown"),
+			&meh_main_popup_os_shutdown
+			);
 	meh_app_set_current_screen(app, popup_screen, TRUE);
 	/* NOTE we don't free the memory of the current screen, the popup screen
 	 * will go back to it later. */
