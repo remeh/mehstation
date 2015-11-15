@@ -10,6 +10,27 @@
 #include "view/screen/executable_list.h"
 #include "view/screen/simple_popup.h"
 
+void meh_exec_popup_start_random_executable(App* app, Screen* screen) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
+
+	SimplePopupData* data = meh_simple_popup_get_data(screen);
+	ExecutableListData* exec_list_data = meh_exec_list_get_data(data->src_screen);
+
+	/* get a random executable */
+	int platform_id = exec_list_data->platform->id;
+	Executable* executable = meh_db_get_platform_random_executable(app->db, platform_id);
+
+	if (executable) {
+		Platform* platform = meh_db_get_platform(app->db, platform_id);
+		if (platform) {
+			meh_app_start_executable(app, platform, executable);
+			meh_model_platform_destroy(platform);
+		}
+		meh_model_executable_destroy(executable);
+	}
+}
+
 void meh_exec_popup_favorite_toggle(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);

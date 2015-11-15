@@ -10,4 +10,5 @@
 
 struct App;
 
+void meh_exec_popup_start_random_executable(App* app, Screen* screen);
 void meh_exec_popup_favorite_toggle(struct App* app, Screen* screen);
