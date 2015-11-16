@@ -7,7 +7,7 @@
  */
 
 #include "system/app.h"
-#include "view/screen/exec_app_selec.h"
+#include "view/screen/exec_cover_selec.h"
 #include "view/screen/executable_list.h"
 
 void meh_game_app_create_widgets(App* app, Screen* screen) {

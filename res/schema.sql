@@ -3,7 +3,8 @@ CREATE TABLE "platform"  (
 	`name`	TEXT NOT NULL,
 	`command`	TEXT,
     `icon`  TEXT,
-    `background` TEXT
+    `background` TEXT,
+    `type` TEXT DEFAULT 'complete'
 );
 CREATE TABLE "mehstation" (
     `name` TEXT NOT NULL PRIMARY KEY UNIQUE,
