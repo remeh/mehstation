@@ -7,7 +7,7 @@
 #include "view/screen/exec_game_selec.h"
 #include "view/screen/executable_list.h"
 
-void meh_game_selec_prepare(App* app, Screen* screen) {
+void meh_game_selec_create_widgets(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 

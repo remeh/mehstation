@@ -38,6 +38,7 @@ SET(
         src/view/screen/fade.c
         src/view/screen/exec_desc.c
         src/view/screen/exec_game_selec.c
+        src/view/screen/exec_app_selec.c
         src/view/screen/launch.c
         src/view/screen/mapping.c
         src/view/screen/settings.c

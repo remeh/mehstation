@@ -33,6 +33,7 @@ static void meh_exec_list_start_executable(App* app, Screen* screen);
 static void meh_exec_list_select_resources(Screen* screen);
 static void meh_exec_list_start_bg_anim(Screen* screen);
 static void meh_exec_list_resolve_tex(Screen* screen);
+static void meh_exec_list_init_widgets_to_null(ExecutableListData* data);
 
 Screen* meh_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
@@ -59,7 +60,11 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 	data->cache_executables_id = g_queue_new();
 	data->selected_executable = 0;
 
+	/* init every widgets to NULL */
+	meh_exec_list_init_widgets_to_null(data);
+
 	/* display resources */
+
 	data->textures = NULL;
 	data->background = -1;
 	data->cover = -1;
@@ -85,6 +90,32 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 	return screen;
 }
 
+void meh_exec_list_init_widgets_to_null(ExecutableListData* data) {
+	data->selection_widget =
+	data->bg_hover_widget = NULL;
+	data->cover_widget = 
+	data->logo_widget =
+	data->background_widget =
+	data->screenshots_widget[0] =
+	data->screenshots_widget[1] =
+	data->screenshots_widget[2] = NULL;
+	data->header_text_widget =
+	data->genres_widget =
+	data->genres_l_widget =
+	data->players_widget =
+	data->players_l_widget =
+	data->publisher_widget =
+	data->publisher_l_widget =
+	data->developer_widget =
+	data->developer_l_widget =
+	data->rating_widget =
+	data->rating_l_widget =
+	data->release_date_widget =
+	data->release_date_l_widget = 
+	data->description_widget = NULL;
+	data->exec_list_video = NULL;
+}
+
 static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData* data) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
@@ -92,9 +123,6 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 
 	SDL_Color white = { 255, 255, 255, 255 };
 	SDL_Color gray = { 10, 10, 10, 235 };
-
-	/* Selection */
-	meh_game_selec_prepare(app, screen);
 
 	/* Background */
 	data->background_widget = meh_widget_image_new(NULL, -50, -50, MEH_FAKE_WIDTH+50, MEH_FAKE_HEIGHT+50);
@@ -108,8 +136,15 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	data->header_text_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 20, 300);
 	meh_screen_add_text_transitions(screen, data->header_text_widget);
 
+	// TODO(remy): if complete mode {
+	/* Selection */
+	meh_game_selec_create_widgets(app, screen);
+
 	/* Create the executable description */
 	meh_exec_desc_create_widgets(app, screen);
+	//} else {
+	// // TODO(remy): cover mode
+	//}
 }
 
 /*

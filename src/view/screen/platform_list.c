@@ -259,8 +259,6 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 
 	switch (pressed_button) {
 		case MEH_INPUT_SPECIAL_ESCAPE:
-			app->mainloop.running = FALSE;
-			break;
 		case MEH_INPUT_BUTTON_START:
 			meh_screen_platform_list_start_popup(app, screen);
 			break;
