@@ -10,7 +10,7 @@
 #include "view/widget_rect.h"
 #include "view/screen/simple_popup.h"
 #include "view/screen/executable_list.h"
-#include "view/screen/exec_game_selec.h"
+#include "view/screen/exec_complete_selec.h"
 
 static void meh_simple_popup_button_pressed(App* app, Screen* screen, int pressed_button);
 static void meh_simple_popup_close(App* app, Screen* screen);

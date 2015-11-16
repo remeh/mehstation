@@ -4,7 +4,7 @@
  * Copyright © 2015 Rémy Mathieu
  */
 
-#include "view/screen/exec_game_selec.h"
+#include "view/screen/exec_complete_selec.h"
 #include "view/screen/executable_list.h"
 
 void meh_game_selec_create_widgets(App* app, Screen* screen) {

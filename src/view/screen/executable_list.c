@@ -21,7 +21,7 @@
 #include "view/screen/fade.h"
 #include "view/screen/executable_list.h"
 #include "view/screen/exec_desc.h"
-#include "view/screen/exec_game_selec.h"
+#include "view/screen/exec_complete_selec.h"
 #include "view/screen/launch.h"
 #include "view/screen/simple_popup.h"
 #include "view/screen/exec_popup.h"
@@ -93,7 +93,7 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 void meh_exec_list_init_widgets_to_null(ExecutableListData* data) {
 	data->selection_widget =
 	data->bg_hover_widget = NULL;
-	data->cover_widget = 
+	data->cover_widget =
 	data->logo_widget =
 	data->background_widget =
 	data->screenshots_widget[0] =
@@ -111,7 +111,7 @@ void meh_exec_list_init_widgets_to_null(ExecutableListData* data) {
 	data->rating_widget =
 	data->rating_l_widget =
 	data->release_date_widget =
-	data->release_date_l_widget = 
+	data->release_date_l_widget =
 	data->description_widget = NULL;
 	data->exec_list_video = NULL;
 }
