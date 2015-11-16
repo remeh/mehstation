@@ -5,7 +5,7 @@
 
 struct ExecutableListData;
 
-void meh_exec_selection_prepare(App* app, Screen* screen);
-void meh_exec_selection_destroy(Screen* screen);
-void meh_exec_selection_render(App* app, Screen* screen);
-void meh_exec_selection_refresh_executables_widgets(App* app, Screen* screen);
+void meh_game_selec_prepare(App* app, Screen* screen);
+void meh_game_selec_destroy(Screen* screen);
+void meh_game_selec_render(App* app, Screen* screen);
+void meh_game_selec_refresh_executables_widgets(App* app, Screen* screen);

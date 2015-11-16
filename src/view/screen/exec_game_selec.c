@@ -7,7 +7,7 @@
 #include "view/screen/exec_game_selec.h"
 #include "view/screen/executable_list.h"
 
-void meh_exec_selection_prepare(App* app, Screen* screen) {
+void meh_game_selec_prepare(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
@@ -29,7 +29,7 @@ void meh_exec_selection_prepare(App* app, Screen* screen) {
 	}
 }
 
-void meh_exec_selection_destroy(Screen* screen) {
+void meh_game_selec_destroy(Screen* screen) {
 	g_assert(screen != NULL);
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);
@@ -44,7 +44,7 @@ void meh_exec_selection_destroy(Screen* screen) {
 	g_queue_free(data->executable_widgets);
 }
 
-void meh_exec_selection_render(App* app, Screen* screen) {
+void meh_game_selec_render(App* app, Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	/* selection */
@@ -60,7 +60,7 @@ void meh_exec_selection_render(App* app, Screen* screen) {
  * meh_exec_list_refresh_executables_widget re-creates all the texture
  * in the text widgets for the executables.
  */
-void meh_exec_selection_refresh_executables_widgets(App* app, Screen* screen) {
+void meh_game_selec_refresh_executables_widgets(App* app, Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));

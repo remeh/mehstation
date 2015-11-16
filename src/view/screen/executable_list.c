@@ -94,7 +94,7 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	SDL_Color gray = { 10, 10, 10, 235 };
 
 	/* Selection */
-	meh_exec_selection_prepare(app, screen);
+	meh_game_selec_prepare(app, screen);
 
 	/* Background */
 	data->background_widget = meh_widget_image_new(NULL, -50, -50, MEH_FAKE_WIDTH+50, MEH_FAKE_HEIGHT+50);
@@ -140,7 +140,7 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		meh_model_executables_destroy(data->executables);
 
 		/* destroy the selection widgets */
-		meh_exec_selection_destroy(screen);
+		meh_game_selec_destroy(screen);
 
 		/* background and header */
 		meh_widget_image_destroy(data->background_widget);
@@ -588,7 +588,7 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 		/* The two cases of First -> last */
 	    (relative_new == MEH_EXEC_LIST_SIZE-1 && relative_old == 0) ||
 		(data->selected_executable == data->executables_length-1))	{
-		meh_exec_selection_refresh_executables_widgets(app, screen);
+		meh_game_selec_refresh_executables_widgets(app, screen);
 	}
 
 	/*
@@ -787,7 +787,7 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 
 	meh_exec_desc_render(app, screen);
 
-	//meh_exec_selection_render(app, screen);
+	meh_game_selec_render(app, screen);
 
 	if (flip == TRUE) {
 		meh_window_render(app->window);
