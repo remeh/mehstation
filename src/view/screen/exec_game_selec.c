@@ -4,7 +4,7 @@
  * Copyright © 2015 Rémy Mathieu
  */
 
-#include "view/screen/exec_selection.h"
+#include "view/screen/exec_game_selec.h"
 #include "view/screen/executable_list.h"
 
 void meh_exec_selection_prepare(App* app, Screen* screen) {

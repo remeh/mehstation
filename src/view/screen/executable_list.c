@@ -21,7 +21,7 @@
 #include "view/screen/fade.h"
 #include "view/screen/executable_list.h"
 #include "view/screen/exec_desc.h"
-#include "view/screen/exec_selection.h"
+#include "view/screen/exec_game_selec.h"
 #include "view/screen/launch.h"
 #include "view/screen/simple_popup.h"
 #include "view/screen/exec_popup.h"
@@ -787,7 +787,7 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 
 	meh_exec_desc_render(app, screen);
 
-	meh_exec_selection_render(app, screen);
+	//meh_exec_selection_render(app, screen);
 
 	if (flip == TRUE) {
 		meh_window_render(app->window);
