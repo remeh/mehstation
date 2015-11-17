@@ -9,4 +9,6 @@
 
 struct App;
 
-void meh_game_app_create_widgets(struct App* app, Screen* screen);
+void meh_cover_selec_create_widgets(struct App* app, Screen* screen);
+void meh_cover_selec_destroy(Screen* screen);
+void meh_cover_selec_render(App* app, Screen* screen);

@@ -99,7 +99,7 @@ void meh_exec_popup_favorite_toggle(App* app, Screen* screen) {
 
 		/* redraw the executables list texts */
 
-		meh_game_selec_refresh_executables_widgets(app, data->src_screen);
+		meh_complete_selec_refresh_executables_widgets(app, data->src_screen);
 
 		/* move and redraw the selection */
 

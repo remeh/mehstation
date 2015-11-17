@@ -3,7 +3,9 @@
  *
  * Copyright © 2015 Rémy Mathieu
  *
- * TODO We could free the cache when an executable is launched.
+ * TODO(remy): this part is the more complicated of mehstation,
+ * it should probably be re-done with better code (for example the
+ * support of many modes appeared lately in the code).
  */
 
 #include <glib.h>
@@ -136,15 +138,13 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	data->header_text_widget->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 20, 300);
 	meh_screen_add_text_transitions(screen, data->header_text_widget);
 
-	// TODO(remy): if complete mode {
-	/* Selection */
-	meh_game_selec_create_widgets(app, screen);
-
-	/* Create the executable description */
-	meh_exec_desc_create_widgets(app, screen);
-	//} else {
-	// // TODO(remy): cover mode
-	//}
+	/* Complete / cover mode */
+	if (g_strcmp0(data->platform->type, "complete") == 0) {
+		meh_complete_selec_create_widgets(app, screen);
+		meh_exec_desc_create_widgets(app, screen);
+	} else {
+		// TODO(remy): cover mode
+	}
 }
 
 /*
@@ -174,9 +174,6 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		meh_model_platform_destroy(data->platform);
 		meh_model_executables_destroy(data->executables);
 
-		/* destroy the selection widgets */
-		meh_game_selec_destroy(screen);
-
 		/* background and header */
 		if (data->background_widget) {
 			meh_widget_image_destroy(data->background_widget);
@@ -194,8 +191,15 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		}
 		g_queue_free(data->cache_executables_id);
 
-		/* destroy executable description */
-		meh_exec_desc_destroy(screen);
+		if (g_strcmp0(data->platform->type, "complete")) {
+			/* destroy the selection widgets */
+			meh_complete_selec_destroy(screen);
+
+			/* destroy executable description */
+			meh_exec_desc_destroy(screen);
+		} else {
+			// TODO(remy): cover mode
+		}
 
 		/* destroy the video overlay */
 		meh_exec_list_video_destroy(data->exec_list_video);
@@ -615,7 +619,11 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 
 	/* adapt the executable description view. */
-	meh_exec_desc_adapt_view(app, screen);
+	if (g_strcmp0(data->platform->type, "complete") == 0) {
+		meh_exec_desc_adapt_view(app, screen);
+	} else {
+		// TODO(remy): cover mode
+	}
 
 	/*
 	 * do we need to refresh the executable widgets ?
@@ -629,7 +637,7 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 		/* The two cases of First -> last */
 	    (relative_new == MEH_EXEC_LIST_SIZE-1 && relative_old == 0) ||
 		(data->selected_executable == data->executables_length-1))	{
-		meh_game_selec_refresh_executables_widgets(app, screen);
+		meh_complete_selec_refresh_executables_widgets(app, screen);
 	}
 
 	/*
@@ -774,8 +782,12 @@ int meh_exec_list_update(Screen* screen) {
 		meh_widget_text_update(screen, t);
 	}
 
-	/* update the executable description */
-	meh_exec_desc_update(screen);
+	if (g_strcmp0(data->platform->type, "complete") == 0) {
+		/* update the executable description */
+		meh_exec_desc_update(screen);
+	} else {
+		// TODO(remy): cover
+	}
 
 	return 0;
 }
@@ -826,9 +838,12 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	/* header */
 	meh_widget_text_render(app->window, data->header_text_widget);
 
-	meh_exec_desc_render(app, screen);
-
-	meh_game_selec_render(app, screen);
+	if (g_strcmp0(data->platform->type, "complete") == 0) {
+		meh_exec_desc_render(app, screen);
+		meh_complete_selec_render(app, screen);
+	} else {
+		// TODO(remy): cover mode.
+	}
 
 	if (flip == TRUE) {
 		meh_window_render(app->window);
