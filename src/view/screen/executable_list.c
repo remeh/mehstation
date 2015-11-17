@@ -143,7 +143,7 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 		meh_complete_selec_create_widgets(app, screen);
 		meh_exec_desc_create_widgets(app, screen);
 	} else {
-		// TODO(remy): cover mode
+		meh_cover_selec_create_widgets(app, screen);
 	}
 }
 
@@ -191,14 +191,14 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		}
 		g_queue_free(data->cache_executables_id);
 
-		if (g_strcmp0(data->platform->type, "complete")) {
+		if (g_strcmp0(data->platform->type, "complete") == 0) {
 			/* destroy the selection widgets */
 			meh_complete_selec_destroy(screen);
 
 			/* destroy executable description */
 			meh_exec_desc_destroy(screen);
 		} else {
-			// TODO(remy): cover mode
+			meh_cover_selec_destroy(screen);
 		}
 
 		/* destroy the video overlay */
@@ -207,6 +207,7 @@ void meh_exec_list_destroy_data(Screen* screen) {
 
 		/* we must free the textures cache */
 		meh_exec_list_destroy_resources(screen);
+
 	}
 }
 
@@ -362,8 +363,23 @@ static void meh_exec_list_select_resources(Screen* screen) {
 	data->cover = -1;
 	data->logo = -1;
 	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
-	data->cover_widget->texture = data->logo_widget->texture = NULL;
-	data->screenshots_widget[0]->texture = data->screenshots_widget[1]->texture = data->screenshots_widget[2]->texture = NULL;
+	if (data->cover_widget != NULL) {
+		data->cover_widget->texture = NULL;
+	}
+
+	if (data->logo_widget != NULL) {
+		data->logo_widget->texture = NULL;
+	}
+
+	if (data->screenshots_widget[0] != NULL) {
+		data->screenshots_widget[0]->texture = NULL;
+	}
+	if (data->screenshots_widget[1] != NULL) {
+		data->screenshots_widget[1]->texture = NULL;
+	}
+	if (data->screenshots_widget[2] != NULL) {
+		data->screenshots_widget[2]->texture = NULL;
+	}
 
 	/*
 	 * Select a random resource if any and tries to not take a cover nor a logo if possible.
@@ -650,7 +666,9 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 	 * reset the move of the texts
 	 */
 
-	meh_widget_text_reset_move(data->description_widget);
+	if (data->description_widget != NULL) {
+		meh_widget_text_reset_move(data->description_widget);
+	}
 
 	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 		meh_widget_text_reset_move(g_queue_peek_nth(data->executable_widgets, i));
@@ -786,7 +804,7 @@ int meh_exec_list_update(Screen* screen) {
 		/* update the executable description */
 		meh_exec_desc_update(screen);
 	} else {
-		// TODO(remy): cover
+		// TODO(remy): update
 	}
 
 	return 0;
@@ -801,18 +819,20 @@ static void meh_exec_list_resolve_tex(Screen* screen) {
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
-	if (data->background > -1) {
+	if (data->background > -1 && data->background_widget != NULL) {
 		data->background_widget->texture = g_hash_table_lookup(data->textures, &(data->background));
 	}
-	if (data->cover > -1) {
+	if (data->cover > -1 && data->cover_widget != NULL) {
 		data->cover_widget->texture = g_hash_table_lookup(data->textures, &(data->cover));
 	}
-	if (data->logo > -1) {
+	if (data->logo > -1 && data->logo_widget != NULL) {
 		data->logo_widget->texture = g_hash_table_lookup(data->textures, &(data->logo));
 	}
 	for (int i = 0; i < 3; i++) {
 		if (data->screenshots[i] > -1) {
-			data->screenshots_widget[i]->texture = g_hash_table_lookup(data->textures, &(data->screenshots[i]));
+			if (data->screenshots_widget[i] != NULL) {
+				data->screenshots_widget[i]->texture = g_hash_table_lookup(data->textures, &(data->screenshots[i]));
+			}
 		}
 	}
 }
@@ -842,7 +862,7 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 		meh_exec_desc_render(app, screen);
 		meh_complete_selec_render(app, screen);
 	} else {
-		// TODO(remy): cover mode.
+		meh_cover_selec_render(app, screen);
 	}
 
 	if (flip == TRUE) {

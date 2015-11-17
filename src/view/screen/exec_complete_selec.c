@@ -35,12 +35,16 @@ void meh_complete_selec_destroy(Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	/* Selection */
-	meh_widget_rect_destroy(data->selection_widget);
+	if (data->selection_widget != NULL) {
+		meh_widget_rect_destroy(data->selection_widget);
+		data->selection_widget = NULL;
+	}
 
 	/* Executables */
 	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 		meh_widget_text_destroy( g_queue_peek_nth( data->executable_widgets, i) );
 	}
+
 	g_queue_free(data->executable_widgets);
 }
 

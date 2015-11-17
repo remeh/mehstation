@@ -34,10 +34,16 @@ void meh_cover_selec_destroy(Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	/* Selection */
-	meh_widget_rect_destroy(data->selection_widget);
+	if (data->selection_widget != NULL) {
+		meh_widget_rect_destroy(data->selection_widget);
+		data->selection_widget = NULL;
+	}
 
 	/* Cover */
-	meh_widget_image_destroy(data->cover_widget);
+	if (data->cover_widget != NULL) {
+		meh_widget_image_destroy(data->cover_widget);
+		data->cover_widget = NULL;
+	}
 }
 
 void meh_cover_selec_render(App* app, Screen* screen) {
