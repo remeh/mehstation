@@ -178,9 +178,15 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		meh_game_selec_destroy(screen);
 
 		/* background and header */
-		meh_widget_image_destroy(data->background_widget);
-		meh_widget_rect_destroy(data->bg_hover_widget);
-		meh_widget_text_destroy(data->header_text_widget);
+		if (data->background_widget) {
+			meh_widget_image_destroy(data->background_widget);
+		}
+		if (data->bg_hover_widget) {
+			meh_widget_rect_destroy(data->bg_hover_widget);
+		}
+		if (data->header_text_widget) {
+			meh_widget_text_destroy(data->header_text_widget);
+		}
 
 		/* free the executables id cache. */
 		for (unsigned int i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
