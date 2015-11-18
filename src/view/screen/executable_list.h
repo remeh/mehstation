@@ -48,11 +48,17 @@ typedef struct ExecutableListData {
 	WidgetRect* bg_hover_widget;
 	WidgetText* header_text_widget;
 
+	/* Both */
+
 	WidgetImage* cover_widget;
 	WidgetImage* logo_widget;
 	WidgetImage* background_widget;
-	WidgetImage* screenshots_widget[3];
 
+	WidgetText* description_widget;
+
+	/* Exec desc only */
+
+	WidgetImage* screenshots_widget[3];
 	WidgetText* genres_widget;
 	WidgetText* genres_l_widget;
 
@@ -70,8 +76,6 @@ typedef struct ExecutableListData {
 
 	WidgetText* release_date_widget;
 	WidgetText* release_date_l_widget;
-
-	WidgetText* description_widget;
 
 	ExecListVideo* exec_list_video;
 
