@@ -15,8 +15,7 @@
  * meh_main_popup_os_shutdown shutdowns the OS.
  */
 void meh_main_popup_os_shutdown(App* app, Screen* screen) {
-	//meh_os_shutdown();
-	g_message("Shutdown.");
+	meh_os_shutdown();
 }
 
 /**

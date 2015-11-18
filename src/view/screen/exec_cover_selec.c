@@ -25,7 +25,14 @@ void meh_cover_selec_create_widgets(App* app, Screen* screen) {
 	meh_screen_add_rect_transitions(screen, data->selection_widget);
 
 	/* Cover */
-	data->cover_widget = meh_widget_image_new(NULL, 440, 160, 400, 400);
+	data->cover_widget = meh_widget_image_new(NULL, 120, 160, 400, 400);
+
+	/* Logo */
+	data->logo_widget = meh_widget_image_new(NULL, 600, 180, 600, 100);
+
+	/* Description */
+	data->description_widget = meh_widget_text_new(app->small_font, NULL, 650, 320, 490, 280, white, FALSE);
+	data->description_widget->multi = TRUE;
 }
 
 void meh_cover_selec_destroy(Screen* screen) {
@@ -44,6 +51,28 @@ void meh_cover_selec_destroy(Screen* screen) {
 		meh_widget_image_destroy(data->cover_widget);
 		data->cover_widget = NULL;
 	}
+
+	if (data->description_widget != NULL) {
+		meh_widget_text_destroy(data->description_widget);
+	}
+}
+
+void meh_cover_selec_adapt_view(App* app, Screen* screen) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
+
+	ExecutableListData* data = meh_exec_list_get_data(screen);
+
+	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
+	if (current_executable != NULL) {
+		data->description_widget->text = current_executable->description;
+		meh_widget_text_reload(app->window, data->description_widget);
+	}
+
+	if (data->logo != -1) {
+		data->logo_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 180, 200);
+		meh_screen_add_image_transitions(screen, data->logo_widget);
+	}
 }
 
 void meh_cover_selec_render(App* app, Screen* screen) {
@@ -56,4 +85,10 @@ void meh_cover_selec_render(App* app, Screen* screen) {
 	if (data->cover != -1) {
 		meh_widget_image_render(app->window, data->cover_widget);
 	}
+
+	if (data->logo != -1) {
+		meh_widget_image_render(app->window, data->logo_widget);
+	}
+
+	meh_widget_text_render(app->window, data->description_widget);
 }

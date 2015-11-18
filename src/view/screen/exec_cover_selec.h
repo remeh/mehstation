@@ -11,4 +11,5 @@ struct App;
 
 void meh_cover_selec_create_widgets(struct App* app, Screen* screen);
 void meh_cover_selec_destroy(Screen* screen);
-void meh_cover_selec_render(App* app, Screen* screen);
+void meh_cover_selec_render(struct App* app, Screen* screen);
+void meh_cover_selec_adapt_view(struct App* app, Screen* screen);
