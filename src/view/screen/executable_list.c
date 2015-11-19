@@ -742,8 +742,8 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 			/* launch the game */
 			meh_exec_list_start_executable(app, screen);
 			break;
+		case MEH_INPUT_BUTTON_LEFT:
 		case MEH_INPUT_BUTTON_UP:
-		case MEH_INPUT_BUTTON_RIGHT:
 			if (data->selected_executable == 0) {
 				data->selected_executable = data->executables_length-1;
 			} else {
@@ -751,7 +751,7 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 			}
 			meh_exec_list_after_cursor_move(app, screen, prev_selected_exec);
 			break;
-		case MEH_INPUT_BUTTON_LEFT:
+		case MEH_INPUT_BUTTON_RIGHT:
 		case MEH_INPUT_BUTTON_DOWN:
 			if (data->selected_executable == data->executables_length-1) {
 				data->selected_executable = 0;
