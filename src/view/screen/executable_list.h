@@ -77,6 +77,10 @@ typedef struct ExecutableListData {
 	WidgetText* release_date_widget;
 	WidgetText* release_date_l_widget;
 
+	/* Exec cover only */
+	WidgetText* prev_executable_widget;
+	WidgetText* next_executable_widget;
+
 	ExecListVideo* exec_list_video;
 
 	GQueue* executable_widgets;

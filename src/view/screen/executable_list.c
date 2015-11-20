@@ -24,6 +24,7 @@
 #include "view/screen/executable_list.h"
 #include "view/screen/exec_desc.h"
 #include "view/screen/exec_complete_selec.h"
+#include "view/screen/exec_cover_selec.h"
 #include "view/screen/launch.h"
 #include "view/screen/simple_popup.h"
 #include "view/screen/exec_popup.h"
@@ -114,7 +115,9 @@ void meh_exec_list_init_widgets_to_null(ExecutableListData* data) {
 	data->rating_l_widget =
 	data->release_date_widget =
 	data->release_date_l_widget =
-	data->description_widget = NULL;
+	data->description_widget =
+	data->prev_executable_widget =
+	data->next_executable_widget = NULL;
 	data->exec_list_video = NULL;
 }
 

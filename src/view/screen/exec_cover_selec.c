@@ -33,6 +33,13 @@ void meh_cover_selec_create_widgets(App* app, Screen* screen) {
 	/* Description */
 	data->description_widget = meh_widget_text_new(app->small_font, NULL, 650, 320, 490, 280, white, FALSE);
 	data->description_widget->multi = TRUE;
+
+	/* Place the next / prev executable labels
+	 * NOTE(remy): the next_executable_widget is repositioned each time it is generated
+	 * because we don't know this actual width and its necesarry to display aligned right. */
+
+	data->prev_executable_widget = meh_widget_text_new(app->small_font, NULL, 20, MEH_FAKE_HEIGHT-50, 490, 280, white, FALSE);
+	data->next_executable_widget = meh_widget_text_new(app->small_font, NULL, MEH_FAKE_WIDTH-100, MEH_FAKE_HEIGHT-50, 490, 280, white, FALSE);
 }
 
 void meh_cover_selec_destroy(Screen* screen) {
@@ -52,11 +59,26 @@ void meh_cover_selec_destroy(Screen* screen) {
 		data->cover_widget = NULL;
 	}
 
+	/* Description */
 	if (data->description_widget != NULL) {
 		meh_widget_text_destroy(data->description_widget);
+		data->description_widget = NULL;
+	}
+
+	/* Next / prev widget */
+	if (data->next_executable_widget != NULL) {
+		meh_widget_text_destroy(data->next_executable_widget);
+		data->next_executable_widget = NULL;
+	}
+
+	if (data->prev_executable_widget != NULL) {
+		meh_widget_text_destroy(data->prev_executable_widget);
+		data->prev_executable_widget = NULL;
 	}
 }
 
+/* meh_cover_selec_adapt_view adapts the view (text, positions, ...) each time
+ * the selected executable change. */
 void meh_cover_selec_adapt_view(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
@@ -65,14 +87,19 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen) {
 
 	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
 	if (current_executable != NULL) {
+		/* description */
 		data->description_widget->text = current_executable->description;
 		meh_widget_text_reload(app->window, data->description_widget);
+
+		/* pick the prev / next executable and render their label */
+		// TODO(remy): generation + position of next_executable_widget
+
+		if (data->logo != -1) {
+			data->logo_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 180, 200);
+			meh_screen_add_image_transitions(screen, data->logo_widget);
+		}
 	}
 
-	if (data->logo != -1) {
-		data->logo_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 180, 200);
-		meh_screen_add_image_transitions(screen, data->logo_widget);
-	}
 }
 
 void meh_cover_selec_render(App* app, Screen* screen) {
@@ -91,4 +118,7 @@ void meh_cover_selec_render(App* app, Screen* screen) {
 	}
 
 	meh_widget_text_render(app->window, data->description_widget);
+
+	meh_widget_text_render(app->window, data->prev_executable_widget);
+	meh_widget_text_render(app->window, data->next_executable_widget);
 }
