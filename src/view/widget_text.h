@@ -53,6 +53,7 @@ typedef struct {
 WidgetText* meh_widget_text_new(const Font* font, const char* text, int x, int y, int w, int h, SDL_Color color, gboolean shadow);
 void meh_widget_text_destroy(WidgetText* text);
 void meh_widget_text_render(Window* window, WidgetText* text);
+void meh_widget_text_set_text(Window* window, WidgetText* widget, gchar* text);
 void meh_widget_text_reload(Window* window, WidgetText* text);
 void meh_widget_text_reset_move(WidgetText* text);
 void meh_widget_text_update(struct Screen* screen, WidgetText* text);

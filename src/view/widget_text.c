@@ -62,6 +62,16 @@ void meh_widget_text_destroy(WidgetText* text) {
 	g_free(text);
 }
 
+void meh_widget_text_set_text(Window* window, WidgetText* widget, gchar* text) {
+	g_assert(window != NULL);
+	g_assert(widget != NULL);
+
+	g_free(widget->text);
+	widget->text = g_strdup(text);
+
+	meh_widget_text_reload(window, widget);
+}
+
 /*
  * meh_widget_text_reload writes the text on a texture and store it in the WidgetText.
  */
