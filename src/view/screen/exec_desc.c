@@ -183,20 +183,13 @@ void meh_exec_desc_adapt_view(App* app, Screen* screen) {
 
 	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
 	if (current_executable != NULL) {
-		data->genres_widget->text = current_executable->genres;
-		meh_widget_text_reload(app->window, data->genres_widget);
-		data->players_widget->text = current_executable->players;
-		meh_widget_text_reload(app->window, data->players_widget);
-		data->publisher_widget->text = current_executable->publisher;
-		meh_widget_text_reload(app->window, data->publisher_widget);
-		data->developer_widget->text = current_executable->developer;
-		meh_widget_text_reload(app->window, data->developer_widget);
-		data->rating_widget->text = current_executable->rating;
-		meh_widget_text_reload(app->window, data->rating_widget);
-		data->release_date_widget->text = current_executable->release_date;
-		meh_widget_text_reload(app->window, data->release_date_widget);
-		data->description_widget->text = current_executable->description;
-		meh_widget_text_reload(app->window, data->description_widget);
+		meh_widget_text_set_text(app->window, data->genres_widget, current_executable->genres);
+		meh_widget_text_set_text(app->window, data->players_widget, current_executable->players);
+		meh_widget_text_set_text(app->window, data->publisher_widget, current_executable->publisher);
+		meh_widget_text_set_text(app->window, data->developer_widget, current_executable->developer);
+		meh_widget_text_set_text(app->window, data->rating_widget, current_executable->rating);
+		meh_widget_text_set_text(app->window, data->release_date_widget, current_executable->release_date);
+		meh_widget_text_set_text(app->window, data->description_widget, current_executable->description);
 	}
 
 	/* re-creates the video widget overlay */
