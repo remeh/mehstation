@@ -7,6 +7,7 @@
  */
 
 #include "system/app.h"
+#include "system/transition.h"
 #include "view/screen/exec_cover_selec.h"
 #include "view/screen/executable_list.h"
 
@@ -79,7 +80,7 @@ void meh_cover_selec_destroy(Screen* screen) {
 
 /* meh_cover_selec_adapt_view adapts the view (text, positions, ...) each time
  * the selected executable change. */
-void meh_cover_selec_adapt_view(App* app, Screen* screen) {
+void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
@@ -121,8 +122,39 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen) {
 			meh_widget_text_set_text(app->window, data->next_executable_widget, upper);
 			g_free(upper);
 			g_free(new_val);
-			// re-pos the widget
-			data->next_executable_widget->x.value = MEH_FAKE_WIDTH-20-data->next_executable_widget->tex_w;
+		}
+
+		/* animate prev/next executables text */
+		if (prev_selected_id > data->selected_executable) {
+			// previous
+			data->next_executable_widget->x = meh_transition_start(
+					MEH_TRANSITION_CUBIC,
+					data->prev_executable_widget->x.value,
+					MEH_FAKE_WIDTH-20-data->next_executable_widget->tex_w,
+					300);
+			meh_screen_add_text_transitions(screen, data->next_executable_widget);
+
+			data->prev_executable_widget->x = meh_transition_start(
+					MEH_TRANSITION_CUBIC,
+					-200,
+					20,
+					300);
+			meh_screen_add_text_transitions(screen, data->prev_executable_widget);
+		} else {
+			// next
+			data->prev_executable_widget->x = meh_transition_start(
+					MEH_TRANSITION_CUBIC,
+					data->next_executable_widget->x.value,
+					20,
+					300);
+			meh_screen_add_text_transitions(screen, data->prev_executable_widget);
+
+			data->next_executable_widget->x = meh_transition_start(
+					MEH_TRANSITION_CUBIC,
+					MEH_FAKE_WIDTH+200, 
+					MEH_FAKE_WIDTH-20-data->next_executable_widget->tex_w,
+					300);
+			meh_screen_add_text_transitions(screen, data->next_executable_widget);
 		}
 
 		if (data->logo != -1) {

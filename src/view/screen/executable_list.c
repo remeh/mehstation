@@ -641,7 +641,7 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 	if (g_strcmp0(data->platform->type, "complete") == 0) {
 		meh_exec_desc_adapt_view(app, screen);
 	} else {
-		meh_cover_selec_adapt_view(app, screen);
+		meh_cover_selec_adapt_view(app, screen, prev_selected);
 	}
 
 	/*
