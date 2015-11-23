@@ -3,7 +3,7 @@
 
 `mehstation` is a multi-launcher frontend fully driven by a gamepad/keyboard.
 
-You configure your platforms (Native, Emulators, ...) and the executables to launch on these platforms (binary, ROMs, ...) and you'll have an interface usable to launch everything using a gamepad controller or a keyboard.
+After having configured your platforms (Native, Emulators, ...) and the executables to launch on these platforms (binary, ROMs, ...), you will  have an interface usable to launch everything using a gamepad controller or a keyboard.
 
 ## Video
 
@@ -12,9 +12,11 @@ You configure your platforms (Native, Emulators, ...) and the executables to lau
 ## Features
 
   * Clean and beautiful interface
-  * Display screenshots, play videos, show description of executables
-  * Multi-platform: Linux, Windows.
-  * Easy configuration with mehstation-config
+  * Two kind of view, configurable per platform:
+    * Games view displaying screenshots, playing videos and showing description of executables
+    * App mode focused on starting traditional apps (VLC, Firefox, Steam, etc.). Also more suitable for Raspberry Pi.
+  * Multi-platform: Linux, Windows, (not tested on Mac yet).
+  * Easy configuration with the dedicated app : mehstation-config
   * Automatic scraping of games resources
   * Import configuration from EmulationStation
   * Automatic detection and visual mapping of gamepads.
@@ -26,7 +28,7 @@ To configure your mehstation, the easiest solution is to use the dedicated tool 
 ## Developer infos
 
 mehstation is developed in C with SDL2, glib, ffmpeg and SQLite3.
-Please free to contribute and to send any pull requests.
+Please free to contribute and to send any pull requests, comments or issues.
 
 ## How to compile
 
