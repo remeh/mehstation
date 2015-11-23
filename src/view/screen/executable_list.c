@@ -724,9 +724,6 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 
 	switch (pressed_button) {
 		case MEH_INPUT_SPECIAL_ESCAPE:
-			/* exit mehstation */
-			app->mainloop.running = FALSE;
-			break;
 		case MEH_INPUT_BUTTON_B:
 			if (screen->parent_screen != NULL) {
 				/* back to the platform screen using a fade
