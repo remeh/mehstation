@@ -76,6 +76,12 @@ void meh_cover_selec_destroy(Screen* screen) {
 		meh_widget_text_destroy(data->prev_executable_widget);
 		data->prev_executable_widget = NULL;
 	}
+
+	/* Executable title */
+	if (data->executable_title_widget != NULL) {
+		meh_widget_text_destroy(data->executable_title_widget);
+		data->executable_title_widget = NULL;
+	}
 }
 
 /* meh_cover_selec_adapt_view adapts the view (text, positions, ...) each time
@@ -160,6 +166,15 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 		if (data->logo != -1) {
 			data->logo_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 180, 200);
 			meh_screen_add_image_transitions(screen, data->logo_widget);
+		} else {
+			/* there is no logo, generates a title */
+			if (data->executable_title_widget != NULL) {
+				meh_widget_text_destroy(data->executable_title_widget);
+			}
+			SDL_Color white = { 255, 255, 255, 255 };
+			data->executable_title_widget = meh_widget_text_new(app->big_font, current_executable->display_name, 650, 180, 600, 100, white, FALSE);
+			data->executable_title_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 180, 200);
+			meh_screen_add_text_transitions(screen, data->executable_title_widget);
 		}
 	}
 
@@ -178,6 +193,8 @@ void meh_cover_selec_render(App* app, Screen* screen) {
 
 	if (data->logo != -1) {
 		meh_widget_image_render(app->window, data->logo_widget);
+	} else if (data->executable_title_widget != NULL) {
+		meh_widget_text_render(app->window, data->executable_title_widget);
 	}
 
 	meh_widget_text_render(app->window, data->description_widget);

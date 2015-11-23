@@ -81,6 +81,8 @@ typedef struct ExecutableListData {
 	WidgetText* prev_executable_widget;
 	WidgetText* next_executable_widget;
 
+	WidgetText* executable_title_widget;
+
 	ExecListVideo* exec_list_video;
 
 	GQueue* executable_widgets;

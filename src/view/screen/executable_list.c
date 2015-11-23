@@ -117,7 +117,8 @@ void meh_exec_list_init_widgets_to_null(ExecutableListData* data) {
 	data->release_date_l_widget =
 	data->description_widget =
 	data->prev_executable_widget =
-	data->next_executable_widget = NULL;
+	data->next_executable_widget =
+	data->executable_title_widget = NULL;
 	data->exec_list_video = NULL;
 }
 

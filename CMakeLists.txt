@@ -96,7 +96,7 @@ IF(MINGW_BUILD)
 ELSE(UNIX)
   ADD_DEFINITIONS(-DLINUX)
   # Use Clang
-  #SET (CMAKE_C_COMPILER             "clang")
+  SET (CMAKE_C_COMPILER             "clang")
   IF (RASPBERRY)
           SET (CMAKE_C_FLAGS                "-Wall -std=c99")
   ELSE()
