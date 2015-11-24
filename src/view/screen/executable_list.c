@@ -807,7 +807,7 @@ int meh_exec_list_update(Screen* screen) {
 		/* update the executable description */
 		meh_exec_desc_update(screen);
 	} else {
-		// TODO(remy): update
+		meh_cover_selec_update(screen);
 	}
 
 	return 0;

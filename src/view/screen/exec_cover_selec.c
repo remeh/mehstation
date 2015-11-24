@@ -39,8 +39,8 @@ void meh_cover_selec_create_widgets(App* app, Screen* screen) {
 	 * NOTE(remy): the next_executable_widget is repositioned each time it is generated
 	 * because we don't know this actual width and its necesarry to display aligned right. */
 
-	data->prev_executable_widget = meh_widget_text_new(app->small_bold_font, NULL, 20, MEH_FAKE_HEIGHT-50, 490, 280, white, FALSE);
-	data->next_executable_widget = meh_widget_text_new(app->small_bold_font, NULL, MEH_FAKE_WIDTH-100, MEH_FAKE_HEIGHT-50, 490, 200, white, FALSE);
+	data->prev_executable_widget = meh_widget_text_new(app->small_bold_font, NULL, 20, MEH_FAKE_HEIGHT-50, (MEH_FAKE_WIDTH/2) - 20, 280, white, TRUE);
+	data->next_executable_widget = meh_widget_text_new(app->small_bold_font, NULL, MEH_FAKE_WIDTH-100, MEH_FAKE_HEIGHT-50, (MEH_FAKE_WIDTH/2) - 20, 200, white, TRUE);
 }
 
 void meh_cover_selec_destroy(Screen* screen) {
@@ -81,6 +81,20 @@ void meh_cover_selec_destroy(Screen* screen) {
 	if (data->executable_title_widget != NULL) {
 		meh_widget_text_destroy(data->executable_title_widget);
 		data->executable_title_widget = NULL;
+	}
+}
+
+void meh_cover_selec_update(Screen* screen) {
+	g_assert(screen != NULL);
+
+	ExecutableListData* data = meh_exec_list_get_data(screen);
+
+	if (data->prev_executable_widget != NULL) {
+		meh_widget_text_update(screen, data->prev_executable_widget);
+	}
+
+	if (data->next_executable_widget != NULL) {
+		meh_widget_text_update(screen, data->next_executable_widget);
 	}
 }
 
@@ -133,10 +147,15 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 		/* animate prev/next executables text */
 		if (prev_selected_id > data->selected_executable) {
 			// previous
+			int right_pos = MEH_FAKE_WIDTH-20-data->next_executable_widget->tex_w;
+			if (right_pos < ((MEH_FAKE_WIDTH/2)+20)) {
+				right_pos = (MEH_FAKE_WIDTH/2)+20;
+			}
+
 			data->next_executable_widget->x = meh_transition_start(
 					MEH_TRANSITION_CUBIC,
 					data->prev_executable_widget->x.value,
-					MEH_FAKE_WIDTH-20-data->next_executable_widget->tex_w,
+					right_pos,
 					300);
 			meh_screen_add_text_transitions(screen, data->next_executable_widget);
 
@@ -148,6 +167,11 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 			meh_screen_add_text_transitions(screen, data->prev_executable_widget);
 		} else {
 			// next
+			int right_pos = MEH_FAKE_WIDTH-20-data->next_executable_widget->tex_w;
+			if (right_pos < ((MEH_FAKE_WIDTH/2)+20)) {
+				right_pos = (MEH_FAKE_WIDTH/2)+20;
+			}
+
 			data->prev_executable_widget->x = meh_transition_start(
 					MEH_TRANSITION_CUBIC,
 					data->next_executable_widget->x.value,
@@ -158,7 +182,7 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 			data->next_executable_widget->x = meh_transition_start(
 					MEH_TRANSITION_CUBIC,
 					MEH_FAKE_WIDTH+200, 
-					MEH_FAKE_WIDTH-20-data->next_executable_widget->tex_w,
+					right_pos,
 					300);
 			meh_screen_add_text_transitions(screen, data->next_executable_widget);
 		}
@@ -172,7 +196,9 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 				meh_widget_text_destroy(data->executable_title_widget);
 			}
 			SDL_Color white = { 255, 255, 255, 255 };
-			data->executable_title_widget = meh_widget_text_new(app->big_font, current_executable->display_name, 650, 180, 600, 100, white, FALSE);
+			data->executable_title_widget = meh_widget_text_new(app->big_font, current_executable->display_name, 650, 180, 600, 200, white, FALSE);
+			data->executable_title_widget->multi = TRUE;
+			meh_widget_text_reload(app->window, data->executable_title_widget);
 			data->executable_title_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 180, 200);
 			meh_screen_add_text_transitions(screen, data->executable_title_widget);
 		}
