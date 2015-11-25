@@ -99,7 +99,7 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	app->big_font = font;
 
 	/* Input manager */
-	InputManager* input_manager = meh_input_manager_new(app->db, settings);
+	InputManager* input_manager = meh_input_manager_new(app->db, app->settings);
 	app->input_manager = input_manager;
 
 	/* Sets the starting screen as the current screen */
@@ -134,6 +134,10 @@ int meh_app_destroy(App* app) {
 
 	meh_db_close(app->db);
 
+	if (app->settings.name != NULL && strlen(app->settings.name) > 0) {
+		g_free(app->settings.name);
+	}
+
 	/* Free the resource */
 	meh_font_destroy(app->small_font);
 	app->small_font = NULL;
@@ -147,6 +151,7 @@ int meh_app_destroy(App* app) {
 
 	if (app->current_screen != NULL) {
 		meh_screen_destroy(app->current_screen);
+		app->current_screen = NULL;
 	}
 
 	meh_input_manager_destroy(app->input_manager);
@@ -369,6 +374,9 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 
 	g_message("Launching '%s' on '%s'", executable->display_name, platform->name);
 
+	/* Re-show the cursor */
+	SDL_ShowCursor(SDL_ENABLE);
+
 	int exit_status = 0;
 	GError* error = NULL;
 	g_spawn_sync(NULL,
@@ -389,6 +397,9 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	}
 
 	g_message("End of execution of '%s'", executable->display_name);
+
+	/* Re-show the cursor */
+	SDL_ShowCursor(SDL_DISABLE);
 
 	/* when launching something, we may have missed some
 	 * input events, reset everything in case of. */
