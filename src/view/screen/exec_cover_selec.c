@@ -60,6 +60,12 @@ void meh_cover_selec_destroy(Screen* screen) {
 		data->cover_widget = NULL;
 	}
 
+	/* Logo */
+	if (data->logo_widget != NULL) {
+		meh_widget_image_destroy(data->logo_widget);
+		data->logo_widget = NULL;
+	}
+
 	/* Description */
 	if (data->description_widget != NULL) {
 		meh_widget_text_destroy(data->description_widget);

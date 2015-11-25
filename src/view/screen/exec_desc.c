@@ -102,8 +102,16 @@ void meh_exec_desc_destroy(Screen* screen) {
 	g_assert(screen != NULL);
 
 	ExecutableListData* data = meh_exec_list_get_data(screen); if (data != NULL) {
-		meh_widget_image_destroy(data->cover_widget);
-		meh_widget_image_destroy(data->logo_widget);
+		if (data->cover_widget != NULL) {
+			meh_widget_image_destroy(data->cover_widget);
+			data->cover_widget = NULL;
+		}
+
+		if (data->logo_widget != NULL) {
+			meh_widget_image_destroy(data->logo_widget);
+			data->logo_widget = NULL;
+		}
+
 		for (int i = 0; i < 3; i++) {
 			meh_widget_image_destroy(data->screenshots_widget[i]);
 		}

@@ -108,6 +108,7 @@ void meh_input_manager_assign_mapping(DB* db, InputManager* input_manager) {
 		/* first, free the mapping if any */
 		if (state->mapping != NULL) {
 			meh_model_mapping_destroy(state->mapping);
+			state->mapping = NULL;
 		}
 
 		/* look in the db if there is a mapping for this input state */
@@ -124,6 +125,7 @@ void meh_input_manager_assign_mapping(DB* db, InputManager* input_manager) {
 
 		/* finally assign what is in the database to the InputState */
 		Mapping* mapping = meh_db_get_mapping(db, name);
+
 		if (mapping != NULL) {
 			state->mapping = mapping;
 		}

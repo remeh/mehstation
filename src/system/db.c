@@ -50,7 +50,10 @@ void meh_db_close(DB* db) {
 
 	if (db->sqlite != NULL) {
 		sqlite3_close_v2(db->sqlite);
+		db->sqlite = NULL;
 	}
+
+	g_free(db);
 }
 
 /*

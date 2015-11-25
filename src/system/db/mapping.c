@@ -30,5 +30,7 @@ void meh_model_mapping_destroy(Mapping* mapping) {
 	g_hash_table_destroy(mapping->m);
 
 	g_free(mapping->id);
+
+	g_free(mapping);
 }
 

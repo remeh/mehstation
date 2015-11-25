@@ -190,11 +190,6 @@ void meh_exec_list_destroy_data(Screen* screen) {
 			data->header_text_widget = NULL;
 		}
 
-		if (data->logo_widget != NULL) {
-			meh_widget_image_destroy(data->logo_widget);
-			data->logo_widget = NULL;
-		}
-
 		/* free the executables id cache. */
 		for (unsigned int i = 0; i < g_queue_get_length(data->cache_executables_id); i++) {
 			g_free(g_queue_peek_nth(data->cache_executables_id, i));

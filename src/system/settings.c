@@ -31,6 +31,9 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 	if (error != NULL) {
 		g_critical("Error while reading the configuration file: %s", error->message);
 		g_error_free(error);
+		g_key_file_free(keyfile);
+		keyfile = NULL;
+		return FALSE;
 	}
 
 	settings->name = meh_settings_read_string(keyfile, "mehstation", "name", "mehstation 1.0");
@@ -47,6 +50,8 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 	settings->zoom_logo = meh_settings_read_bool(keyfile, "render", "zoom_logo", FALSE);
 
 	g_message("Zoom: %d", settings->zoom_logo);
+
+	g_key_file_free(keyfile);
 
 	return TRUE;
 }
