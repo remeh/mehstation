@@ -25,6 +25,7 @@ void meh_model_platform_destroy(Platform* platform) {
 	g_free(platform->type);
 
 	g_free(platform);
+	platform = NULL;
 }
 
 void meh_model_platforms_destroy(GQueue* platforms) {

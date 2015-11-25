@@ -18,6 +18,7 @@ static GHashTable* meh_input_create_default_keyboard_mapping();
 static GHashTable* meh_input_create_default_gamepad_mapping();
 static InputState* meh_input_manager_get_input_state(InputManager* input_manager, SDL_Event* sdl_event);
 static void meh_input_manager_reset_button_state(InputManager* input_manager, int button);
+static void destroy_int_from_mapping(gpointer data);
 
 /*
  * meh_input_manager_new creates a new InputManager.
@@ -76,6 +77,10 @@ InputManager* meh_input_manager_new(DB* db, Settings settings) {
 	meh_input_manager_reset_buttons_state(input_manager);
 
 	return input_manager;
+}
+
+static void destroy_int_from_mapping(gpointer data) {
+	g_free(data);
 }
 
 /*
@@ -154,6 +159,7 @@ void meh_input_manager_destroy(InputManager* input_manager) {
 
 	g_hash_table_destroy(input_manager->keyboard_mapping);
 	g_hash_table_destroy(input_manager->gamepad_mapping);
+
 	g_free(input_manager);
 }
 
@@ -426,7 +432,11 @@ void meh_input_message_destroy(Message* message) {
  */
 GHashTable* meh_input_create_mapping(int up, int down, int left, int right, int start,
 									int select, int a, int b, int l, int r, int escape) {
-	GHashTable* mapping = g_hash_table_new(g_int_hash, g_int_equal);
+	GHashTable* mapping = g_hash_table_new_full(
+			g_int_hash, 
+			g_int_equal,
+			(GDestroyNotify)destroy_int_from_mapping,
+			(GDestroyNotify)destroy_int_from_mapping);
 
 	int* sdl = g_new(int, 1); *sdl = up;
 	int* button_mapping = g_new(int, 1); *button_mapping = MEH_INPUT_BUTTON_UP;

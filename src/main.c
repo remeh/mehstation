@@ -21,5 +21,6 @@ int main(int argc, char* argv[]) {
 
 	/* clean behind us. */
 	meh_app_destroy(app);
+
 	return 0;
 }

@@ -175,18 +175,24 @@ void meh_exec_list_destroy_data(Screen* screen) {
 
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 	if (data != NULL) {
-		meh_model_platform_destroy(data->platform);
-		meh_model_executables_destroy(data->executables);
 
 		/* background and header */
-		if (data->background_widget) {
+		if (data->background_widget != NULL) {
 			meh_widget_image_destroy(data->background_widget);
+			data->background_widget = NULL;
 		}
-		if (data->bg_hover_widget) {
+		if (data->bg_hover_widget != NULL) {
 			meh_widget_rect_destroy(data->bg_hover_widget);
+			data->bg_hover_widget = NULL;
 		}
-		if (data->header_text_widget) {
+		if (data->header_text_widget != NULL) {
 			meh_widget_text_destroy(data->header_text_widget);
+			data->header_text_widget = NULL;
+		}
+
+		if (data->logo_widget != NULL) {
+			meh_widget_image_destroy(data->logo_widget);
+			data->logo_widget = NULL;
 		}
 
 		/* free the executables id cache. */
@@ -209,9 +215,12 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		meh_exec_list_video_destroy(data->exec_list_video);
 		data->exec_list_video = NULL;
 
+		/* finally destroy the models */
+		meh_model_platform_destroy(data->platform);
+		meh_model_executables_destroy(data->executables);
+
 		/* we must free the textures cache */
 		meh_exec_list_destroy_resources(screen);
-
 	}
 }
 

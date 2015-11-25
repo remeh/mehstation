@@ -158,6 +158,11 @@ static void meh_simple_popup_move_selection(App* app, Screen* screen, gboolean d
 static void meh_simple_popup_run_action(App* app, Screen* screen, int selected_action) {
 	SimplePopupData* data = meh_simple_popup_get_data(screen);
 	SimplePopupAction* action = g_queue_peek_nth(data->actions, selected_action);
+
+	/* close the popup */
+	meh_simple_popup_close(app, screen);
+
+	/* then start the action */
 	if (action != NULL) {
 		action->run(app, screen);
 	}

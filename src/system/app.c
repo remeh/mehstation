@@ -154,6 +154,9 @@ int meh_app_destroy(App* app) {
 	SDL_Quit();
 	TTF_Quit();
 
+	g_free(app);
+	app = NULL;
+
 	return 0;
 }
 

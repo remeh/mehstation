@@ -126,18 +126,16 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 		meh_widget_text_reload(app->window, data->description_widget);
 
 		/* pick the prev / next executable and render their label */
-		if (prev_executable != NULL) {
-			gchar* new_val = g_new(gchar, strlen(prev_executable->display_name) + 2);
-			sprintf(new_val, "< %s", prev_executable->display_name);
+		if (prev_executable != NULL && prev_executable->display_name != NULL) {
+			gchar* new_val = g_strdup_printf("< %s", prev_executable->display_name);
 			gchar* upper = g_utf8_strup(new_val, -1);
 			meh_widget_text_set_text(app->window, data->prev_executable_widget, upper);
 			g_free(upper);
 			g_free(new_val);
 		}
 
-		if (next_executable != NULL) {
-			gchar* new_val = g_new(gchar, strlen(next_executable->display_name) + 2);
-			sprintf(new_val, "%s >", next_executable->display_name);
+		if (next_executable != NULL && next_executable->display_name != NULL) {
+			gchar* new_val = g_strdup_printf("%s >", next_executable->display_name);
 			gchar* upper = g_utf8_strup(new_val, -1);
 			meh_widget_text_set_text(app->window, data->next_executable_widget, upper);
 			g_free(upper);
