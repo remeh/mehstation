@@ -1,7 +1,11 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
-IF(MINGW_BUILD)
+IF($ENV{MINGW_BUILD})
   SET(CMAKE_SYSTEM_NAME Generic)
+ENDIF()
+
+IF($ENV{DEBUG})
+  MESSAGE("--- DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG ---")
 ENDIF()
 
 INCLUDE(CheckIncludeFile)
@@ -55,7 +59,7 @@ ADD_EXECUTABLE(
 )
 
 INCLUDE(FindPkgConfig)
-IF(MINGW_BUILD)
+IF($ENV{MINGW_BUILD})
   SET (PKG_CONFIG_EXECUTABLE i686-w64-mingw32-pkg-config)
 ENDIF()
 
@@ -88,7 +92,7 @@ LINK_DIRECTORIES(${mehstation_BINARY_DIR}/src)
 
 CHECK_INCLUDE_FILE(/opt/vc/include/bcm_host.h RASPBERRY)
 
-IF(MINGW_BUILD)
+IF($ENV{MINGW_BUILD})
   SET (CMAKE_C_COMPILER             "/usr/bin/i686-w64-mingw32-gcc")
   SET (CMAKE_C_FLAGS                "-Wall -std=c11")
   SET (CMAKE_C_FLAGS_DEBUG          "-g")
@@ -97,12 +101,16 @@ ELSE(UNIX)
   ADD_DEFINITIONS(-DLINUX)
   # Use Clang
   SET (CMAKE_C_COMPILER             "clang")
-  IF (RASPBERRY)
-          SET (CMAKE_C_FLAGS                "-Wall -std=c99")
+
+  IF ($ENV{RASPBERRY})
+    SET (CMAKE_C_FLAGS                "-Wall -std=c99")
+  ELSEIF($ENV{DEBUG})
+    SET (CMAKE_C_FLAGS                "-Wall -std=c11 -g3 -fsanitize=address")
   ELSE()
-          SET (CMAKE_C_FLAGS                "-Wall -std=c11")
+    SET (CMAKE_C_FLAGS                "-Wall -std=c11")
   ENDIF()
-  SET (CMAKE_C_FLAGS_DEBUG          "-g")
+
+  SET (CMAKE_C_FLAGS_DEBUG          "-g3")
 ENDIF()
 
 # sources
