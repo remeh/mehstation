@@ -132,6 +132,9 @@ static void meh_screen_mapping_next_screen(App* app, Screen* screen) {
 	/* re-assign the mapping */
 	meh_input_manager_assign_mapping(app->db, app->input_manager);
 
+	meh_model_mapping_destroy(mapping);
+	mapping = NULL;
+
 	/* create the child screen */
 	Screen* platform_screen = meh_screen_platform_list_new(app);
 	Screen* fade_screen = meh_screen_fade_new(app, screen, platform_screen);
@@ -158,6 +161,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 
 	switch (data->step) {
 		case MEH_MAPPING_STEP_IDENTIFY:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->title);
 			data->title = meh_widget_text_new(app->big_font, "Configuring:", 50, 50, 1230, 50, white, FALSE);
 			data->device_configuring = meh_widget_text_new(app->big_font, name, 300, 50, 1030, 50, white, FALSE);
@@ -166,6 +170,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			meh_screen_add_text_transitions(screen, data->action);
 			break;
 		case MEH_MAPPING_STEP_UP:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for down", 200, 150, 1030, 50, white, FALSE);
 			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
@@ -174,6 +179,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->up = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_DOWN:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for left", 200, 150, 1030, 50, white, FALSE);
 			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
@@ -181,6 +187,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->down = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_LEFT:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for right", 200, 150, 1030, 50, white, FALSE);
 			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
@@ -188,6 +195,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->left = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_RIGHT:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for A button", 200, 150, 1030, 50, white, FALSE);
 			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
@@ -195,6 +203,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->right = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_A:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for B button", 200, 150, 1030, 50, white, FALSE);
 			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
@@ -202,6 +211,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->a = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_B:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for L button", 200, 150, 1030, 50, white, FALSE);
 			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
@@ -209,6 +219,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->b = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_L:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for R button", 200, 150, 1030, 50, white, FALSE);
 			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
@@ -216,6 +227,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->l = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_R:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for START button", 200, 150, 1030, 50, white, FALSE);
 			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
@@ -223,6 +235,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->r = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_START:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "Press the key for SELECT button", 200, 150, 1030, 50, white, FALSE);
 			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
@@ -230,6 +243,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->start = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_SELECT:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_widget_text_destroy(data->action);
 			data->action = meh_widget_text_new(app->big_font, "All done", 200, 150, 1030, 50, white, FALSE);
 			data->action->x = meh_transition_start(MEH_TRANSITION_LINEAR, MEH_FAKE_WIDTH+200, 200, 200);
@@ -237,6 +251,7 @@ void meh_screen_mapping_button_pressed(App* app, Screen* screen, int pressed_but
 			data->select = sdl_key;
 			break;
 		case MEH_MAPPING_STEP_END:
+			meh_transitions_end(screen->transitions); meh_screen_update_transitions(screen);
 			meh_screen_mapping_next_screen(app, screen);
 
 			break;

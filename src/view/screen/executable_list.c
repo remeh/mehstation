@@ -233,6 +233,7 @@ static void meh_exec_list_destroy_resources(Screen* screen) {
 	}
 
 	GList* keys = g_hash_table_get_keys(data->textures);
+
 	for (unsigned int i = 0; i < g_list_length(keys); i++) {
 		int* key = g_list_nth_data(keys, i);
 		SDL_Texture* texture = g_hash_table_lookup(data->textures, key);
@@ -244,6 +245,7 @@ static void meh_exec_list_destroy_resources(Screen* screen) {
 
 	g_list_free(keys);
 	g_hash_table_destroy(data->textures);
+	data->textures = NULL;
 }
 
 /*
@@ -533,7 +535,7 @@ static void meh_exec_list_load_resources(App* app, Screen* screen) {
 
 	/* Create the hash table if not existing */
 	if (data->textures == NULL) {
-		data->textures = g_hash_table_new(g_int_hash, g_int_equal);
+		data->textures = g_hash_table_new_full(g_int_hash, g_int_equal, (GDestroyNotify)g_free, NULL);
 	}
 
 	/* Loads the textures described in the executable resources

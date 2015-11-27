@@ -30,6 +30,8 @@ void meh_screen_destroy(Screen* screen) {
 		}
 	}
 
+	g_debug("Destroying screen '%s'", screen->name);
+
 	g_free(screen->data);
 	g_queue_free(screen->transitions);
 	g_free(screen->name);

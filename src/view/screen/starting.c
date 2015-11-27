@@ -79,7 +79,8 @@ void meh_screen_starting_destroy_data(Screen* screen) {
 
 	StartingData* data = meh_screen_starting_get_data(screen);
 	if (data != NULL && data->splash_texture != NULL) {
-		SDL_DestroyTexture(data->splash_texture);
+		meh_widget_image_destroy(data->splash);
+		g_free(data);
 	}
 	screen->data = NULL;
 }

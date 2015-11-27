@@ -93,8 +93,10 @@ void meh_simple_popup_destroy_data(Screen* screen) {
 		SimplePopupAction* action = g_queue_peek_nth(data->actions, i);
 		meh_widget_text_destroy(action->widget);
 		g_free(action->label);
+		g_free(action);
 	}
 	g_queue_free(data->actions);
+	g_free(data);
 
 	screen->data = NULL;
 }
@@ -159,13 +161,14 @@ static void meh_simple_popup_run_action(App* app, Screen* screen, int selected_a
 	SimplePopupData* data = meh_simple_popup_get_data(screen);
 	SimplePopupAction* action = g_queue_peek_nth(data->actions, selected_action);
 
-	/* close the popup */
-	meh_simple_popup_close(app, screen);
-
 	/* then start the action */
 	if (action != NULL) {
 		action->run(app, screen);
 	}
+
+	/* close the popup */
+	meh_simple_popup_close(app, screen);
+
 }
 
 /*
@@ -179,7 +182,7 @@ void meh_simple_popup_add_action(App* app, Screen* screen, gchar* label, void (*
 	SimplePopupData* data = meh_simple_popup_get_data(screen);
 	SimplePopupAction* new_action = g_new(SimplePopupAction, 1);
 
-	new_action->label = label;
+	new_action->label = g_strdup(label);
 	new_action->run = func;
 
 	SDL_Color white = { 255, 255, 255, 0 };

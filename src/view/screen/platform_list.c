@@ -134,6 +134,7 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 		meh_model_platforms_destroy(data->platforms);
 
 		/* various widgets */
+		meh_widget_text_destroy(data->executables_count);
 		meh_widget_text_destroy(data->title);
 		meh_widget_text_destroy(data->no_platforms_widget);
 
@@ -210,19 +211,19 @@ static void meh_screen_platform_list_start_popup(App* app, Screen* screen) {
 	meh_simple_popup_add_action(
 			app,
 			popup_screen,
-			g_strdup("Run random executable"),
+			"Run random executable",
 			&meh_main_popup_random_executable
 			);
 	meh_simple_popup_add_action(
 			app,
 			popup_screen,
-			g_strdup("Close mehstation"),
+			"Close mehstation",
 			&meh_main_popup_close
 			);
 	meh_simple_popup_add_action(
 			app,
 			popup_screen,
-			g_strdup("Shutdown"),
+			"Shutdown",
 			&meh_main_popup_os_shutdown
 			);
 	meh_app_set_current_screen(app, popup_screen, TRUE);

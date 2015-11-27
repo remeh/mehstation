@@ -47,6 +47,7 @@ void meh_screen_fade_destroy_data(Screen* screen) {
 	FadeData* data = meh_screen_fade_get_data(screen);
 	meh_widget_rect_destroy(data->fade_widget);
 	screen->data = NULL;
+	g_free(data);
 }
 
 FadeData* meh_screen_fade_get_data(Screen* screen) {
