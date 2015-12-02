@@ -148,6 +148,25 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 			g_free(new_val);
 		}
 
+		if (data->cover != -1 && data->cover_widget->texture != NULL) {
+			/* detect the landscape/portrait mode */
+			int w = 0,h = 0;
+			SDL_QueryTexture(data->cover_widget->texture, NULL, NULL, &w, &h);
+			if (w >= h) {
+				/* landscape */
+				data->cover_widget->x.value = 80;
+				data->cover_widget->y.value = 180;
+				data->cover_widget->w.value = 480;
+				data->cover_widget->h.value = 360;
+			} else {
+				/* portrait */
+				data->cover_widget->x.value = 160;
+				data->cover_widget->y.value = 120;
+				data->cover_widget->w.value = 320;
+				data->cover_widget->h.value = 480;
+			}
+		}
+
 		/* animate prev/next executables text */
 		if (prev_selected_id > data->selected_executable) {
 			// previous
