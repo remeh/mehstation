@@ -168,7 +168,6 @@ static void meh_simple_popup_run_action(App* app, Screen* screen, int selected_a
 
 	/* close the popup */
 	meh_simple_popup_close(app, screen);
-
 }
 
 /*

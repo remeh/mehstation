@@ -107,5 +107,4 @@ void meh_exec_popup_favorite_toggle(App* app, Screen* screen) {
 	}
 
 	meh_app_set_current_screen(app, data->src_screen, TRUE);
-	meh_screen_destroy(screen);
 }
