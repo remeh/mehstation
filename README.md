@@ -9,6 +9,12 @@ After having configured your platforms (Native, Emulators, ...) and the executab
 
 [![mehstation youtube video](http://img.youtube.com/vi/I3FjJBUrcwE/0.jpg)](https://www.youtube.com/watch?v=I3FjJBUrcwE)
 
+## Screenshots
+
+![Platforms list](http://c.remy.io/9YHrbWZm)
+![Executables list](http://c.remy.io/PNjveqzp)
+![Configuration](http://c.remy.io/UWI1B1Ue)
+
 ## Features
 
   * Clean and beautiful interface
