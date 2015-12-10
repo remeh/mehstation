@@ -27,6 +27,11 @@ void meh_complete_selec_create_widgets(App* app, Screen* screen) {
 		text->uppercase = TRUE; /* executables name in uppercase */
 		g_queue_push_tail(data->executable_widgets, text);
 	}
+
+	if (data->favorite_widget != NULL) {
+		data->favorite_widget->w.value = 24;
+		data->favorite_widget->h.value = 24;
+	}
 }
 
 void meh_complete_selec_destroy(Screen* screen) {
@@ -56,7 +61,17 @@ void meh_complete_selec_render(App* app, Screen* screen) {
 
 	/* render all the executables names. */
 	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
-		meh_widget_text_render(app->window, g_queue_peek_nth(data->executable_widgets, i));
+		Executable* executable = g_queue_peek_nth(data->executables, (data->selected_executable/MEH_EXEC_LIST_SIZE)+i);
+		WidgetText* text = g_queue_peek_nth(data->executable_widgets, i);
+		meh_widget_text_render(app->window, text);
+
+		/* favorite ? */
+		if (executable->favorite == TRUE) {
+			/* move the favorite widget to display it here */
+			data->favorite_widget->x.value = text->x.value-35;
+			data->favorite_widget->y.value = text->y.value;
+			meh_widget_image_render(app->window, data->favorite_widget);
+		}
 	}
 }
 

@@ -229,8 +229,8 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 		/* favorite ? */
 		Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
 		if (current_executable != NULL && current_executable->favorite) {
-			data->favorite_widget->x.value = (MEH_FAKE_WIDTH/2)-60;
-			data->favorite_widget->y.value = 200;
+			data->favorite_widget->x.value = MEH_FAKE_WIDTH-100;
+			data->favorite_widget->y.value = 100;
 		}
 	}
 
