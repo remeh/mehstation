@@ -225,6 +225,13 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 			data->executable_title_widget->y = meh_transition_start(MEH_TRANSITION_CUBIC, -100, 180, 200);
 			meh_screen_add_text_transitions(screen, data->executable_title_widget);
 		}
+
+		/* favorite ? */
+		Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
+		if (current_executable != NULL && current_executable->favorite) {
+			data->favorite_widget->x.value = (MEH_FAKE_WIDTH/2)-60;
+			data->favorite_widget->y.value = 200;
+		}
 	}
 
 }
@@ -244,6 +251,12 @@ void meh_cover_selec_render(App* app, Screen* screen) {
 		meh_widget_image_render(app->window, data->logo_widget);
 	} else if (data->executable_title_widget != NULL) {
 		meh_widget_text_render(app->window, data->executable_title_widget);
+	}
+
+	/* favorite */
+	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
+	if (current_executable != NULL && current_executable->favorite) {
+		meh_widget_image_render(app->window, data->favorite_widget);
 	}
 
 	meh_widget_text_render(app->window, data->description_widget);

@@ -53,6 +53,7 @@ typedef struct ExecutableListData {
 	WidgetImage* cover_widget;
 	WidgetImage* logo_widget;
 	WidgetImage* background_widget;
+	WidgetImage* favorite_widget;
 
 	WidgetText* description_widget;
 

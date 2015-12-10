@@ -98,6 +98,7 @@ void meh_exec_list_init_widgets_to_null(ExecutableListData* data) {
 	data->bg_hover_widget = NULL;
 	data->cover_widget =
 	data->logo_widget =
+	data->favorite_widget =
 	data->background_widget =
 	data->screenshots_widget[0] =
 	data->screenshots_widget[1] =
@@ -135,6 +136,11 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 
 	/* Background hover */
 	data->bg_hover_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, gray, TRUE); 
+
+	/* Favorite */
+	/* TODO(remy): deal with the filepath correctly */
+	SDL_Texture* favorite = meh_image_load_file(app->window->sdl_renderer, "res/favorite.png");
+	data->favorite_widget = meh_widget_image_new(favorite, -200, -200, 50, 50); /* hidden favorite image */
 
 	/* Header */
 	data->header_text_widget = meh_widget_text_new(app->big_font, data->platform->name, 20, 55, 400, 40, white, TRUE);
@@ -188,6 +194,14 @@ void meh_exec_list_destroy_data(Screen* screen) {
 		if (data->header_text_widget != NULL) {
 			meh_widget_text_destroy(data->header_text_widget);
 			data->header_text_widget = NULL;
+		}
+
+		/* favorite */
+		if (data->favorite_widget != NULL) {
+			SDL_DestroyTexture(data->favorite_widget->texture);
+			data->favorite_widget->texture = NULL;
+			meh_widget_image_destroy(data->favorite_widget);
+			data->favorite_widget = NULL;
 		}
 
 		/* free the executables id cache. */
@@ -695,8 +709,6 @@ static void meh_exec_list_open_popup(App* app, Screen* screen) {
 	if (executable == NULL) {
 		return;
 	}
-
-	/* TODO(remy): generate the text for the favorite (add or remove?) */
 
 	/* create the child screen */
 	Screen* popup_screen = meh_simple_popup_new(app, screen, data->platform, executable);
