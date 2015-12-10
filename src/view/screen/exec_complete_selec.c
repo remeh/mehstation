@@ -59,9 +59,12 @@ void meh_complete_selec_render(App* app, Screen* screen) {
 	/* selection */
 	meh_widget_rect_render(app->window, data->selection_widget);
 
+	int page = (data->selected_executable / (MEH_EXEC_LIST_SIZE));
+
 	/* render all the executables names. */
 	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
-		Executable* executable = g_queue_peek_nth(data->executables, (data->selected_executable/MEH_EXEC_LIST_SIZE)+i);
+		Executable* executable = g_queue_peek_nth(data->executables, (page*MEH_EXEC_LIST_SIZE)+i);
+
 		WidgetText* text = g_queue_peek_nth(data->executable_widgets, i);
 		meh_widget_text_render(app->window, text);
 
