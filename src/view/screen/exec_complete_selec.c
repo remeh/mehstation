@@ -72,7 +72,7 @@ void meh_complete_selec_render(App* app, Screen* screen) {
 		if (executable->favorite == TRUE) {
 			/* move the favorite widget to display it here */
 			data->favorite_widget->x.value = text->x.value-35;
-			data->favorite_widget->y.value = text->y.value;
+			data->favorite_widget->y.value = text->y.value+2;
 			meh_widget_image_render(app->window, data->favorite_widget);
 		}
 	}
