@@ -29,8 +29,8 @@ void meh_complete_selec_create_widgets(App* app, Screen* screen) {
 	}
 
 	if (data->favorite_widget != NULL) {
-		data->favorite_widget->w.value = 24;
-		data->favorite_widget->h.value = 24;
+		data->favorite_widget->w.value = 20;
+		data->favorite_widget->h.value = 20;
 	}
 }
 
@@ -72,7 +72,7 @@ void meh_complete_selec_render(App* app, Screen* screen) {
 		if (executable->favorite == TRUE) {
 			/* move the favorite widget to display it here */
 			data->favorite_widget->x.value = text->x.value-35;
-			data->favorite_widget->y.value = text->y.value+2;
+			data->favorite_widget->y.value = text->y.value+4;
 			meh_widget_image_render(app->window, data->favorite_widget);
 		}
 	}
