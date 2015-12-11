@@ -12,7 +12,7 @@ After having configured your platforms (Native, Emulators, ...) and the executab
 ## Screenshots
 
 ![Platforms list](http://c.remy.io/9YHrbWZm)
-![Executables list](http://c.remy.io/PNjveqzp)
+![Executables list](http://c.remy.io/oH0ki0Su)
 ![Configuration](http://c.remy.io/UWI1B1Ue)
 
 ## Features
