@@ -65,6 +65,11 @@ void meh_complete_selec_render(App* app, Screen* screen) {
 	for (unsigned int i = 0; i < g_queue_get_length(data->executable_widgets); i++) {
 		Executable* executable = g_queue_peek_nth(data->executables, (page*MEH_EXEC_LIST_SIZE)+i);
 
+		/* happen when no executables have been configured for the platform. */
+		if (executable == NULL) {
+			continue;
+		}
+
 		WidgetText* text = g_queue_peek_nth(data->executable_widgets, i);
 		meh_widget_text_render(app->window, text);
 
