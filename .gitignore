@@ -1,4 +1,5 @@
 database.db
+install_manifest.txt
 *.swp
 CMakeCache.txt
 CMakeFiles
