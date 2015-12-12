@@ -258,7 +258,7 @@ static void meh_app_init_res_dir(App* app) {
 	/* look in system path */
 
 	while (g_get_system_data_dirs()[i] != NULL) {
-		gchar* tmp = g_strdup_printf("%s/mehstation", g_get_system_data_dirs()[i]);
+		gchar* tmp = g_strdup_printf("%s/mehstation/res", g_get_system_data_dirs()[i]);
 		if (meh_test_existing_dir(tmp)) {
 			g_message("Found the resources dir: %s", tmp);
 			app->res_dir = tmp;
@@ -269,19 +269,7 @@ static void meh_app_init_res_dir(App* app) {
 		i++;
 	}
 
-	/* not found, look in the current directory. */
-
-	gchar* current_dir = g_get_current_dir();
-	gchar* tmp = g_strdup_printf("%s/res", current_dir);
-	g_free(current_dir); current_dir = NULL;
-	if (meh_test_existing_dir(tmp)) {
-		g_message("Found the resources dir: %s", tmp);
-		app->res_dir = tmp;
-		return;
-	}
-
-	g_free(tmp);
-	g_error("Can't find the resources directory.");
+	g_error("Can't find the resources directory. Did you run 'make install'.");
 }
 
 static void meh_app_init_dir(App* app) {
