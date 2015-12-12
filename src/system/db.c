@@ -8,10 +8,8 @@
 #include "system/input.h"
 #include "system/db/models.h"
 
-#define MEH_SCHEMA_FILE "res/schema.sql"
-
 static gboolean meh_db_check_schema(DB* db);
-static gboolean meh_db_initialize(DB* db);
+static gboolean meh_db_initialize(App* app, DB* db);
 
 /*
  * meh_db_open_or_create uses the given filename to open
@@ -36,7 +34,7 @@ DB* meh_db_open_or_create(App* app) {
 	if (!meh_db_check_schema(db)) {
 		g_message("Creating the initial schema in database at: %s", db->filename);
 
-		gboolean creation_success = meh_db_initialize(db);
+		gboolean creation_success = meh_db_initialize(app, db);
 		if (creation_success == FALSE) {
 			g_critical("Can't initialize the mehstation database.");
 			return NULL;
@@ -67,14 +65,17 @@ void meh_db_close(DB* db) {
 /*
  * meh_db_initialize initialize the mehstation database.
  */
-static gboolean meh_db_initialize(DB* db) {
+static gboolean meh_db_initialize(App* app, DB* db) {
 	g_assert(db != NULL);
 	sqlite3_stmt *statement = NULL;
 
 	/* Test for the existence of the file. */
-	gboolean exists = g_file_test(MEH_SCHEMA_FILE, G_FILE_TEST_EXISTS);
+	gchar* path = g_strdup_printf("%s/schema.sql", app->res_dir);
+	gboolean exists = g_file_test(path, G_FILE_TEST_EXISTS);
 	if (!exists) {
 		g_critical("The schema file doesn't exist.");
+		g_free(path);
+		path = NULL;
 		return FALSE;
 	}
 
@@ -84,7 +85,10 @@ static gboolean meh_db_initialize(DB* db) {
 	GError* error = NULL;
 
 	/* read the queries file */
-	g_file_get_contents(MEH_SCHEMA_FILE, &content, &length, &error);
+	g_file_get_contents(path, &content, &length, &error);
+
+	g_free(path);
+	path = NULL;
 
 	if (error != NULL) {
 		g_critical("Error while reading the schema file : %s", error->message);
