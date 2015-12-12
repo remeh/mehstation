@@ -3,6 +3,7 @@
 #include <string.h>
 #include <SDL2/SDL.h>
 
+#include "system/app.h"
 #include "system/db.h"
 #include "system/input.h"
 #include "system/db/models.h"
@@ -16,27 +17,32 @@ static gboolean meh_db_initialize(DB* db);
  * meh_db_open_or_create uses the given filename to open
  * or create (if needed) an SQLite3 DB.
  */
-DB* meh_db_open_or_create(const char* filename) {
+DB* meh_db_open_or_create(App* app) {
 	DB* db = g_new(DB, 1);
 
-	db->filename = filename;
+	gchar* conf_dir = meh_app_init_create_dir_conf(app);
+	db->filename = g_strdup_printf("%s/database.db", conf_dir);
+	g_free(conf_dir);
+
 	/* opens/creates the given filename. */
 	int return_code = sqlite3_open_v2(db->filename, &(db->sqlite), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL); 
 
 	if (return_code != SQLITE_OK) {
-		g_critical("Can't open the SQLite database with filename '%s', error: %s", filename, sqlite3_errstr(return_code));
+		g_critical("Can't open the SQLite database with filename '%s', error: %s", db->filename, sqlite3_errstr(return_code));
 		return NULL;
 	}
 
 	/* Initialize the database if needed. */
 	if (!meh_db_check_schema(db)) {
-		g_message("Creating the initial schema in database.");
+		g_message("Creating the initial schema in database at: %s", db->filename);
 
 		gboolean creation_success = meh_db_initialize(db);
 		if (creation_success == FALSE) {
 			g_critical("Can't initialize the mehstation database.");
 			return NULL;
 		}
+	} else {
+		g_message("Using the database file: %s", db->filename);
 	}
 
 	return db;
@@ -53,6 +59,8 @@ void meh_db_close(DB* db) {
 		db->sqlite = NULL;
 	}
 
+	g_free(db->filename);
+	db->filename = NULL;
 	g_free(db);
 }
 

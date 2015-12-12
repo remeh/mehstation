@@ -138,8 +138,10 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	data->bg_hover_widget = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, gray, TRUE); 
 
 	/* Favorite */
-	/* TODO(remy): deal with the filepath correctly */
-	SDL_Texture* favorite = meh_image_load_file(app->window->sdl_renderer, "res/favorite.png");
+	gchar* tmp = g_strdup_printf("%s/favorite.png", app->res_dir);
+	SDL_Texture* favorite = meh_image_load_file(app->window->sdl_renderer, tmp);
+	g_free(tmp);
+	tmp = NULL;
 	data->favorite_widget = meh_widget_image_new(favorite, -200, -200, 50, 50); /* hidden favorite image */
 
 	/* Header */

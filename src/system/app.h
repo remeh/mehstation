@@ -34,6 +34,10 @@ typedef struct App {
 	InputManager* input_manager;
 	Settings settings;
 	Mainloop mainloop;
+
+	gchar* conf_path; /* mehstation file configuration path */
+	gchar* db_path;
+	gchar* res_dir; /* resources directory */
 } App;
 
 App* meh_app_create();
@@ -48,3 +52,4 @@ void meh_app_main_loop_render(App* app);
 void meh_app_send_message(App* app, Message* message);
 gboolean meh_app_open_or_create_db(App*  app);
 void meh_app_start_executable(App* app, Platform* platform, Executable* executable);
+gchar* meh_app_init_create_dir_conf(App* app);

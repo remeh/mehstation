@@ -23,6 +23,9 @@
 #include "system/db/models.h"
 
 static void meh_settings_print_system_infos();
+static void meh_app_init_dir(App* app);
+static void meh_app_init_conf_path(App* app);
+static void meh_copy_file(const gchar* original, const gchar* copy);
 
 App* meh_app_create() {
 	return g_new(App, 1);
@@ -31,8 +34,13 @@ App* meh_app_create() {
 int meh_app_init(App* app, int argc, char* argv[]) {
 	g_assert(app != NULL);
 
+	app->conf_path = NULL;
+	app->res_dir = NULL;
+
 	/* reads the flags */
 	app->flags = meh_flags_parse(argc, argv);
+
+	meh_app_init_dir(app);
 
 	/* Nearly everything is used in the SDL. */
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -66,12 +74,12 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	Settings settings;
 	settings.fullscreen = FALSE;
 	settings.zoom_logo = FALSE;
-	meh_settings_read(&settings, "mehstation.conf");
+	meh_settings_read(&settings, app->conf_path);
 	app->settings = settings;
 
 	/* Open the DB */
 	DB* db;
-	db = meh_db_open_or_create("database.db");
+	db = meh_db_open_or_create(app);
 	app->db = db;
 	if (db == NULL) {
 		return 2;
@@ -91,12 +99,17 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 
 	/* Opens some font. */
 
-	Font* font = meh_font_open("res/fonts/OpenSans-Regular.ttf", meh_window_convert_width(window, 18));
+	gchar* tmp = g_strdup_printf("%s/fonts/OpenSans-Regular.ttf", app->res_dir);
+	Font* font = meh_font_open(tmp, meh_window_convert_width(window, 18));
 	app->small_font = font;
-	font = meh_font_open("res/fonts/OpenSans-Bold.ttf", meh_window_convert_width(window, 22));
+	g_free(tmp);
+
+	tmp = g_strdup_printf("%s/fonts/OpenSans-Bold.ttf", app->res_dir);
+	font = meh_font_open(tmp, meh_window_convert_width(window, 22));
 	app->small_bold_font = font;
-	font = meh_font_open("res/fonts/OpenSans-Bold.ttf", meh_window_convert_width(window, 36));
+	font = meh_font_open(tmp, meh_window_convert_width(window, 36));
 	app->big_font = font;
+	g_free(tmp);
 
 	/* Input manager */
 	InputManager* input_manager = meh_input_manager_new(app->db, app->settings);
@@ -159,10 +172,150 @@ int meh_app_destroy(App* app) {
 	SDL_Quit();
 	TTF_Quit();
 
+	g_free(app->conf_path);
+	g_free(app->res_dir);
+
 	g_free(app);
 	app = NULL;
 
 	return 0;
+}
+
+static gboolean meh_test_existing_file(gchar* path) {
+	return g_file_test(path, G_FILE_TEST_EXISTS) && !g_file_test(path, G_FILE_TEST_IS_DIR);
+}
+
+static gboolean meh_test_existing_dir(gchar* path) {
+	return g_file_test(path, G_FILE_TEST_EXISTS) && g_file_test(path, G_FILE_TEST_IS_DIR);
+}
+
+gchar* meh_app_init_create_dir_conf(App* app) {
+	g_assert(app != NULL);
+	
+	const gchar* user_dir = g_get_user_config_dir(); /* note(remy): shouldn't be freed */
+	gchar* config_dir = g_strdup_printf("%s/mehstation", user_dir);
+
+	if (meh_test_existing_dir(config_dir)) {
+		/* existing directory */
+		return config_dir;
+	}
+
+	if (g_mkdir(config_dir, 0755) == 0) {
+		g_message("Configuration dir created at: %s", config_dir);
+	} else {
+		g_critical("Can't create the configuration directory at: %s", config_dir);
+	}
+
+	return config_dir;
+}
+
+static void meh_app_init_conf_path(App* app) {
+	g_assert(app != NULL);
+
+	gboolean has_conf_path = FALSE;
+
+	/* first look in the config home of the user */
+
+	const gchar* user_dir = g_get_user_config_dir(); /* note(remy): shouldn't be freed */
+	gchar* tmp = g_strdup_printf("%s/mehstation/mehstation.conf", user_dir);
+	if (meh_test_existing_file(tmp)) {
+		has_conf_path = TRUE;
+		g_message("Found configuration file in %s", tmp);
+		app->conf_path = tmp;
+	}
+
+	if (has_conf_path) {
+		return;
+	}
+
+	g_free(tmp);
+
+	/* we didn't find any configuration, we will
+	 * copy the sample one into the config dir.
+	 */
+
+	/* create / retrieve the config dir */
+	gchar* config_dir = meh_app_init_create_dir_conf(app);
+
+	/* copy the sample file from the resources directory. */
+
+	gchar* sample = g_strdup_printf("%s/mehstation.conf.sample", app->res_dir);
+	gchar* target = g_strdup_printf("%s/mehstation.conf", config_dir);
+	meh_copy_file(sample, target);
+
+	g_message("Created the configuration file in %s", target);
+
+	g_free(sample);
+	g_free(config_dir);
+
+	/* finally save this configuration file as the used one. */
+	app->conf_path = target;
+}
+
+static void meh_app_init_res_dir(App* app) {
+	int i = 0;
+
+	/* look in system path */
+
+	while (g_get_system_data_dirs()[i] != NULL) {
+		gchar* tmp = g_strdup_printf("%s/mehstation", g_get_system_data_dirs()[i]);
+		if (meh_test_existing_dir(tmp)) {
+			g_message("Found the resources dir: %s", tmp);
+			app->res_dir = tmp;
+			return;
+		}
+		g_free(tmp);
+
+		i++;
+	}
+
+	/* not found, look in the current directory. */
+
+	gchar* current_dir = g_get_current_dir();
+	gchar* tmp = g_strdup_printf("%s/res", current_dir);
+	g_free(current_dir); current_dir = NULL;
+	if (meh_test_existing_dir(tmp)) {
+		g_message("Found the resources dir: %s", tmp);
+		app->res_dir = tmp;
+		return;
+	}
+
+	g_free(tmp);
+	g_error("Can't find the resources directory.");
+}
+
+static void meh_app_init_dir(App* app) {
+	g_assert(app != NULL);
+
+	/* resources directory */
+
+	meh_app_init_res_dir(app);
+
+	/* configuration */
+
+	meh_app_init_conf_path(app);
+}
+
+static void meh_copy_file(const gchar* original, const gchar* copy) {
+	gsize length;
+	gchar *content;
+	GError* error = NULL;
+	if (g_file_get_contents(original, &content, &length, &error)) {
+		/* write into the other */
+		if (!g_file_set_contents(copy, content, length, &error)) {
+			if (error != NULL) {
+				g_critical("Error while copying the file (while writing): %s", error->message);
+			}
+		}
+
+		/* free the read data */
+		g_free(content);
+	} else {
+		if (error != NULL) {
+			g_critical("Error while copying the file (while reading): %s", error->message);
+			g_error_free(error);
+		}	
+	}
 }
 
 void meh_app_set_current_screen(App* app, Screen* screen, gboolean end_transitions) {

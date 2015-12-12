@@ -32,7 +32,11 @@ Screen* meh_screen_starting_new(App* app) {
 	StartingData* data = g_new(StartingData, 1);
 
 	/* Splashscreen */
-	data->splash_texture = meh_image_load_file(app->window->sdl_renderer, "res/splashscreen.png");
+	gchar* tmp = g_strdup_printf("%s/splashscreen.png", app->res_dir);
+	data->splash_texture = meh_image_load_file(app->window->sdl_renderer, tmp);
+	g_free(tmp);
+	tmp = NULL;
+
 	data->splash = meh_widget_image_new(data->splash_texture, 0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT);
 	data->done = FALSE;
 
