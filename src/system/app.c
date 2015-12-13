@@ -530,6 +530,7 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 
 	/* Re-show the cursor */
 	SDL_ShowCursor(SDL_ENABLE);
+	SDL_HideWindow(app->window->sdl_window);
 
 	int exit_status = 0;
 	GError* error = NULL;
@@ -552,6 +553,7 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 
 	g_message("End of execution of '%s'", executable->display_name);
 
+	SDL_ShowWindow(app->window->sdl_window);
 	/* Re-show the cursor */
 	SDL_ShowCursor(SDL_DISABLE);
 
