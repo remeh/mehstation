@@ -6,6 +6,7 @@
 
 #include <SDL2/SDL_image.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
