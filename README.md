@@ -25,6 +25,7 @@ After having configured your platforms (Native, Emulators, ...) and the executab
   * Easy configuration with the dedicated app : mehstation-config
   * Automatic scraping of games resources
   * Import configuration from EmulationStation
+  * Favorite your executables, launch random executables, etc.
   * Automatic detection and visual mapping of gamepads.
 
 ## Configuration

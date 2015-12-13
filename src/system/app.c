@@ -270,6 +270,18 @@ static void meh_app_init_res_dir(App* app) {
 		i++;
 	}
 
+	/* look in the current dir */
+
+	gchar* current_dir = g_get_current_dir();
+	gchar* tmp = g_strdup_printf("%s/res", current_dir);
+	g_free(current_dir);
+	if (meh_test_existing_dir(tmp)) {
+		g_message("Found the resources dir: %s", tmp);
+		app->res_dir = tmp;
+		return;
+	}
+
+	g_free(tmp);
 	g_error("Can't find the resources directory. Did you run 'make install'.");
 }
 
