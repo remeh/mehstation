@@ -20,7 +20,6 @@
 #include "view/screen/simple_popup.h"
 #include "view/screen/main_popup.h"
 
-static void meh_screen_platform_change_platform(App* app, Screen* screen);
 static Platform* meh_screen_platform_get_current(Screen* screen);
 
 Screen* meh_screen_platform_list_new(App* app) {
@@ -302,7 +301,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 	}
 }
 
-static void meh_screen_platform_change_platform(App* app, Screen* screen) {
+void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	g_assert(screen != NULL);
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);

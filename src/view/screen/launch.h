@@ -30,7 +30,7 @@ typedef struct {
 	WidgetImage* image_widget;
 } LaunchData;
 
-Screen* meh_screen_launch_new(App* app, Screen* src_screen, Platform* platform, Executable* executable,
+Screen* meh_screen_launch_new(struct App* app, Screen* src_screen, Platform* platform, Executable* executable,
 								WidgetImage* src_widget);
 LaunchData* meh_screen_launch_get_data(Screen* screen);
 void meh_screen_launch_destroy_data(Screen* screen);

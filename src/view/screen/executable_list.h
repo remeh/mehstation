@@ -96,4 +96,4 @@ void meh_exec_list_button_pressed(struct App* app, Screen* screen, int pressed_b
 int meh_exec_list_update(Screen* screen);;
 int meh_exec_list_render(struct App* app, Screen* screen, gboolean flip);
 ExecutableListData* meh_exec_list_get_data(Screen* screen);
-void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected_exec);
+void meh_exec_list_after_cursor_move(struct App* app, Screen* screen, int prev_selected_exec);

@@ -103,8 +103,8 @@ int meh_screen_launch_update(struct App* app, Screen* screen) {
 	if (data->fade_widget->a.ended == TRUE) {
 		/* it's time to start the executable and to switch back to the src screen */
 		meh_app_start_executable(app, data->platform, data->executable);
-		meh_app_set_current_screen(app, data->src_screen, TRUE);
-		meh_screen_destroy(screen); /* destroy the launch screen */
+		//meh_app_set_current_screen(app, data->src_screen, TRUE);
+		//meh_screen_destroy(screen); /* destroy the launch screen */
 	}
 
 	return 0;

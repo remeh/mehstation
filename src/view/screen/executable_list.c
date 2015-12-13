@@ -624,15 +624,18 @@ static void meh_exec_list_start_executable(App* app, Screen* screen) {
 	}
 
 	/* starts the launch screen */
+	meh_app_start_executable(app, data->platform, executable);
+	/*
 	Screen* launch_screen = meh_screen_launch_new(app, screen, data->platform, executable, data->logo_widget);
 	meh_app_set_current_screen(app, launch_screen, TRUE);
+	*/
 
 	// TODO(remy): here we could clean resources to free some more ram.
 
-	meh_exec_list_delete_some_cache(screen);
+	//meh_exec_list_delete_some_cache(screen);
 
 	/* end the transitions for when we're coming back */
-	meh_transitions_end(screen->transitions);
+	//meh_transitions_end(screen->transitions);
 }
 
 /*
