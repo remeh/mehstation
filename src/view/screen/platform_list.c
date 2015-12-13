@@ -258,6 +258,15 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 
+	/* no platforms, ignore keystrokes and stop the
+	 * main loop on escape */
+	if (g_queue_get_length(data->platforms) == 0) {
+		if (pressed_button == MEH_INPUT_SPECIAL_ESCAPE) {
+			app->mainloop.running = FALSE;
+		}
+		return;
+	}
+
 	switch (pressed_button) {
 		case MEH_INPUT_SPECIAL_ESCAPE:
 		case MEH_INPUT_BUTTON_START:
