@@ -51,7 +51,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	meh_screen_add_text_transitions(screen, data->title);
 
 	/* No platforms text */
-	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured", 150, 330, 500, 50, white, FALSE);
+	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured. Use mehstation-config", 150, 330, MEH_FAKE_WIDTH-150, 50, white, FALSE);
 
 	/* Platforms */
 	data->icons_widgets = g_queue_new();
