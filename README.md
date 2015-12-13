@@ -53,9 +53,10 @@ Manual:
 ```
 cmake .
 make -j
+sudo make install
 ```
 
-The binary `mehstation ` will be created and ready to launch.
+You can now type `mehstation` to start the app.
 Please create an issue if you have a problem compiling mehstation.
 
 For further infos, see the [compilation chapters in the wiki](https://github.com/remeh/mehstation/wiki).
