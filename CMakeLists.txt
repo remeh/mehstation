@@ -43,7 +43,6 @@ SET(
         src/view/screen/exec_desc.c
         src/view/screen/exec_complete_selec.c
         src/view/screen/exec_cover_selec.c
-        src/view/screen/launch.c
         src/view/screen/mapping.c
         src/view/screen/settings.c
         src/view/screen/starting.c
