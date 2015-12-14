@@ -329,6 +329,7 @@ void meh_app_set_current_screen(App* app, Screen* screen, gboolean end_transitio
 	if (app->current_screen != NULL && end_transitions) {
 	  meh_transitions_end(app->current_screen->transitions); /* before leaving this screen, we must end all its transitions. */
 	}
+
 	app->current_screen = screen;
 }
 
@@ -532,7 +533,6 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 
 	/* Re-show the cursor */
 	SDL_ShowCursor(SDL_ENABLE);
-	SDL_HideWindow(app->window->sdl_window);
 
 	/*
 	 * Destroy the video context
@@ -546,13 +546,25 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	int cursor_platform = platform_list_data->selected_platform;
 	int cursor_exec = exec_list_data->selected_executable;
 	int platform_id = exec_list_data->platform->id;
+	gchar* platform_name = g_strdup(platform->name);
+	gchar* display_name = g_strdup(executable->display_name);
+	gchar* command = g_strdup(platform->command);
 
 	/* destroy screens view */
 	meh_screen_destroy(app->current_screen->parent_screen);
+	app->current_screen->parent_screen = NULL;
+	platform_list_data = NULL;
 	meh_screen_destroy(app->current_screen);
+	app->current_screen = NULL;
+	exec_list_data = NULL;
 
 	/* destroy window context */
 	meh_window_destroy(app->window);
+	app->window = NULL;
+
+	/*
+	 * Launch the external executables.
+	 */
 
 	int exit_status = 0;
 	GError* error = NULL;
@@ -568,16 +580,17 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 				 &error);
 
 	if (error != NULL) {
-		// FIXME(remy): the executable and platform models has been released
-		g_critical("can't start the platform '%s' with the executable '%s' with command '%s'.", platform->name, executable->display_name, platform->command);
+		g_critical("can't start the platform '%s' with the executable '%s' with command '%s'.", platform_name, display_name, command);
 		g_critical("%s", error->message);
 		g_error_free(error);
 	}
 
-	// FIXME(remy): the executable has been released
-	//g_message("End of execution of '%s'", executable->display_name);
+	g_message("End of execution of '%s'", display_name);
 
-	/* recreate the video context */
+	/*
+	 * Recreate the video context
+	 */
+
 	app->window = meh_window_create(
 			app->settings.width,
 			app->settings.height,
@@ -592,6 +605,8 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	exec_list_data->selected_executable = cursor_exec;
 	meh_exec_list_after_cursor_move(app, app->current_screen, 0);
 
+	meh_app_set_current_screen(app, app->current_screen, TRUE);
+
 	/* recreate the parent screen which is the platform list */
 	Screen* platform_screen = meh_screen_platform_list_new(app);
 	app->current_screen->parent_screen = platform_screen;
@@ -600,6 +615,10 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	platform_list_data = meh_screen_platform_list_get_data(platform_screen);
 	platform_list_data->selected_platform = cursor_platform;
 	meh_screen_platform_change_platform(app, platform_screen);
+
+	g_free(platform_name);
+	g_free(display_name);
+	g_free(command);
 
 	/* reshow the window and here we go again */
 	SDL_ShowWindow(app->window->sdl_window);
@@ -611,9 +630,6 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	 * input events, reset everything in case of. */
 	meh_input_manager_reset_buttons_state(app->input_manager);
 
-	/* FIXME When returning from the other app, if the user presses the same
-	 * FIXME key as the one used to start the system, SDL will considered it
-	 * FIXME as a repeatition. We should maybe generate a fake KEYUP event ?*/
 	SDL_RaiseWindow(app->window->sdl_window);
 
 	/* reset the next_tick to avoid extra update/rendering frames. */

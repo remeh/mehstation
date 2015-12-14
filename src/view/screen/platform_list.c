@@ -325,7 +325,6 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 		WidgetImage* image = g_queue_peek_nth(data->icons_widgets, i);
 		image->y = meh_transition_start(MEH_TRANSITION_CUBIC, image->y.value, y, 200);
 		meh_screen_add_image_transitions(screen, image);
-
 	}
 
 	/* platform name */
