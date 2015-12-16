@@ -22,6 +22,7 @@
 #include "view/screen.h"
 #include "view/screen/fade.h"
 #include "view/screen/executable_list.h"
+#include "view/screen/platform_list.h"
 #include "view/screen/exec_desc.h"
 #include "view/screen/exec_complete_selec.h"
 #include "view/screen/exec_cover_selec.h"
@@ -615,15 +616,58 @@ static void meh_exec_list_start_executable(App* app, Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	/* get the executable selected */
-	Executable* executable = g_queue_peek_nth(data->executables, data->selected_executable);
+	Executable* exec = g_queue_peek_nth(data->executables, data->selected_executable);
 
 	/* no executables to launch. */
-	if (executable == NULL) {
+	if (exec == NULL) {
 		return;
 	}
 
-	/* starts the launch screen */
-	meh_app_start_executable(app, data->platform, executable);
+	/* keep some infos */
+	PlatformListData* platform_list_data = meh_screen_platform_list_get_data(screen->parent_screen);
+
+	int cursor_platform = platform_list_data->selected_platform;
+	int cursor_exec = data->selected_executable;
+
+	/* Copy the models */
+	Platform* platform = meh_db_get_platform(app->db, data->platform->id);
+	Executable* executable = meh_db_get_executable(app->db, exec->id);
+
+	/* destroy screens view */
+	meh_screen_destroy(screen->parent_screen);
+	screen->parent_screen = NULL;
+	platform_list_data = NULL;
+	meh_screen_destroy(screen);
+	app->current_screen = NULL;
+	data = NULL;
+
+
+	/* starts the executable */
+
+	meh_app_start_executable(app, platform, executable);
+
+	/* recreate the executable list view */
+	screen = meh_exec_list_new(app, platform->id);
+	data = meh_exec_list_get_data(screen);
+
+	/* restore the cursor position */
+	data->selected_executable = cursor_exec;
+	meh_exec_list_after_cursor_move(app, screen, 0);
+
+	meh_app_set_current_screen(app, screen, TRUE);
+
+	/* recreate the parent screen which is the platform list */
+	Screen* platform_screen = meh_screen_platform_list_new(app);
+	screen->parent_screen = platform_screen;
+
+	/* restore the cursor position */
+	platform_list_data = meh_screen_platform_list_get_data(platform_screen);
+	platform_list_data->selected_platform = cursor_platform;
+	meh_screen_platform_change_platform(app, platform_screen);
+
+	/* Free the models */
+	meh_model_executable_destroy(executable);
+	meh_model_platform_destroy(platform);
 }
 
 /*

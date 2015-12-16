@@ -480,6 +480,12 @@ void meh_app_send_message(App* app, Message* message) {
 
 /*
  * meh_app_start_executable starts the given platform's executable.
+ * WARNING: all the screen should have been destroyed before calling
+ * this method has the OpenGL context is destroyed and recreated here.
+ * The caller has the responsability to destroy the screens and to restore
+ * them.
+ * In the same manner, the caller has the responsability to provide
+ * an Executable and a Platform model which stay valid during the method call.
  * FIXME the algorithm to replace the flags could be better
  * (and not using a queue)
  */
@@ -534,29 +540,13 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	/* Re-show the cursor */
 	SDL_ShowCursor(SDL_ENABLE);
 
-	/*
-	 * Destroy the video context
-	 */
-
-	/* keep some infos */
-
-	ExecutableListData* exec_list_data = meh_exec_list_get_data(app->current_screen);
-	PlatformListData* platform_list_data = meh_screen_platform_list_get_data(app->current_screen->parent_screen);
-
-	int cursor_platform = platform_list_data->selected_platform;
-	int cursor_exec = exec_list_data->selected_executable;
-	int platform_id = exec_list_data->platform->id;
 	gchar* platform_name = g_strdup(platform->name);
 	gchar* display_name = g_strdup(executable->display_name);
 	gchar* command = g_strdup(platform->command);
 
-	/* destroy screens view */
-	meh_screen_destroy(app->current_screen->parent_screen);
-	app->current_screen->parent_screen = NULL;
-	platform_list_data = NULL;
-	meh_screen_destroy(app->current_screen);
-	app->current_screen = NULL;
-	exec_list_data = NULL;
+	/*
+	 * Destroy the video context
+	 */
 
 	/* destroy window context */
 	meh_window_destroy(app->window);
@@ -596,25 +586,6 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 			app->settings.height,
 			app->settings.fullscreen,
 			app->flags.force_software);
-
-	/* recreate the executable list view */
-	app->current_screen = meh_exec_list_new(app, platform_id);
-	exec_list_data = meh_exec_list_get_data(app->current_screen);
-
-	/* restore the cursor position */
-	exec_list_data->selected_executable = cursor_exec;
-	meh_exec_list_after_cursor_move(app, app->current_screen, 0);
-
-	meh_app_set_current_screen(app, app->current_screen, TRUE);
-
-	/* recreate the parent screen which is the platform list */
-	Screen* platform_screen = meh_screen_platform_list_new(app);
-	app->current_screen->parent_screen = platform_screen;
-
-	/* restore the cursor position */
-	platform_list_data = meh_screen_platform_list_get_data(platform_screen);
-	platform_list_data->selected_platform = cursor_platform;
-	meh_screen_platform_change_platform(app, platform_screen);
 
 	g_free(platform_name);
 	g_free(display_name);

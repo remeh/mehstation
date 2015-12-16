@@ -8,6 +8,7 @@
 #include "view/screen.h"
 #include "view/screen/exec_complete_selec.h"
 #include "view/screen/executable_list.h"
+#include "view/screen/platform_list.h"
 #include "view/screen/simple_popup.h"
 
 void meh_exec_popup_start_random_executable(App* app, Screen* screen) {
@@ -24,7 +25,39 @@ void meh_exec_popup_start_random_executable(App* app, Screen* screen) {
 	if (executable) {
 		Platform* platform = meh_db_get_platform(app->db, platform_id);
 		if (platform) {
+			/* keep some infos */
+			PlatformListData* platform_list_data = meh_screen_platform_list_get_data(data->src_screen->parent_screen);
+
+			int cursor_platform = platform_list_data->selected_platform;
+			int cursor_exec = exec_list_data->selected_executable;
+
 			meh_app_start_executable(app, platform, executable);
+
+			/* destroy screens view */
+			meh_screen_destroy(data->src_screen->parent_screen);
+			data->src_screen->parent_screen = NULL;
+			platform_list_data = NULL;
+			meh_screen_destroy(data->src_screen);
+			app->current_screen = NULL;
+			exec_list_data = NULL;
+
+			/* recreate the executable list view */
+			data->src_screen = meh_exec_list_new(app, platform->id);
+			exec_list_data = meh_exec_list_get_data(data->src_screen);
+
+			/* restore the cursor position */
+			exec_list_data->selected_executable = cursor_exec;
+			meh_exec_list_after_cursor_move(app, data->src_screen, 0);
+
+			/* recreate the parent screen which is the platform list */
+			Screen* platform_screen = meh_screen_platform_list_new(app);
+			data->src_screen->parent_screen = platform_screen;
+
+			/* restore the cursor position */
+			platform_list_data = meh_screen_platform_list_get_data(platform_screen);
+			platform_list_data->selected_platform = cursor_platform;
+			meh_screen_platform_change_platform(app, platform_screen);
+
 			meh_model_platform_destroy(platform);
 		}
 		meh_model_executable_destroy(executable);
