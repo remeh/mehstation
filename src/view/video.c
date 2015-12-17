@@ -94,14 +94,12 @@ int meh_video_ffmpeg_open(Video* video) {
 
 	/* create our own context for the reading */
 
-	printf("%p %p\n", video->codec_ctx, video->stream_codec_ctx);
 	video->codec_ctx = avcodec_alloc_context3(video->codec);
 	if (avcodec_copy_context(video->codec_ctx, video->stream_codec_ctx)) {
 		g_critical("Can't create our codec reading context for file '%s'", video->filename);
 		meh_video_internal_destroy(video);
 		return 5;
 	}
-	printf("%p %p\n", video->codec_ctx, video->stream_codec_ctx);
 
 	/* open the codec */
 

@@ -698,23 +698,20 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 	/* adapt the executable description view. */
 	if (g_strcmp0(data->platform->type, "complete") == 0) {
 		meh_exec_desc_adapt_view(app, screen);
+
+		/*
+		 * do we need to refresh the executable widgets ?
+		 * only on page changes
+		 * TODO(remy): put this in the exec_selection part ?
+		 */
+
+		int page_new = data->selected_executable/MEH_EXEC_LIST_SIZE;
+		int page_old = prev_selected_exec/MEH_EXEC_LIST_SIZE;
+		if (prev_selected_exec == -1 || page_new != page_old) {
+			meh_complete_selec_refresh_executables_widgets(app, screen);
+		}
 	} else {
 		meh_cover_selec_adapt_view(app, screen, prev_selected);
-	}
-
-	/*
-	 * do we need to refresh the executable widgets ?
-	 * only on page changes
-	 * TODO(remy): put this in the exec_selection part ?
-	 */
-
-	int relative_new = data->selected_executable%MEH_EXEC_LIST_SIZE;
-	int relative_old = prev_selected_exec%MEH_EXEC_LIST_SIZE;
-	if ((relative_new == 0 && relative_old != 1) || /* Last -> First */
-		/* The two cases of First -> last */
-	    (relative_new == MEH_EXEC_LIST_SIZE-1 && relative_old == 0) ||
-		(data->selected_executable == data->executables_length-1))	{
-		meh_complete_selec_refresh_executables_widgets(app, screen);
 	}
 
 	/*
