@@ -3,6 +3,7 @@
 #include "view/video.h"
 
 static int meh_video_ffmpeg_open(Video* video);
+static void meh_video_internal_destroy(Video* video);
 
 Video* meh_video_new(Window* window, gchar* filename) {
 	g_assert(window != NULL);
@@ -54,11 +55,13 @@ int meh_video_ffmpeg_open(Video* video) {
 
 	if (avformat_open_input(&(video->fc), video->filename, NULL, NULL) != 0) {
 		g_critical("Error while opening the video '%s'", video->filename);
+		meh_video_internal_destroy(video);
 		return 1;
 	}
 
 	if(avformat_find_stream_info(video->fc, NULL) < 0) {
 		g_critical("Can't find any stream info for the video '%s'", video->filename);
+		meh_video_internal_destroy(video);
 		return 2;
 	}
 
@@ -73,6 +76,7 @@ int meh_video_ffmpeg_open(Video* video) {
 
 	if (video->stream_id == -1) {
 		g_critical("Didn't find any stream in the file '%s'", video->filename);
+		meh_video_internal_destroy(video);
 		return 3;
 	}
 
@@ -84,21 +88,26 @@ int meh_video_ffmpeg_open(Video* video) {
 	video->codec = avcodec_find_decoder(video->stream_codec_ctx->codec_id);
 	if (video->codec == NULL) {
 		g_critical("Unsupported codec for the file '%s'", video->filename);
+		meh_video_internal_destroy(video);
 		return 4;
 	}
 
 	/* create our own context for the reading */
 
+	printf("%p %p\n", video->codec_ctx, video->stream_codec_ctx);
 	video->codec_ctx = avcodec_alloc_context3(video->codec);
 	if (avcodec_copy_context(video->codec_ctx, video->stream_codec_ctx)) {
 		g_critical("Can't create our codec reading context for file '%s'", video->filename);
+		meh_video_internal_destroy(video);
 		return 5;
 	}
+	printf("%p %p\n", video->codec_ctx, video->stream_codec_ctx);
 
 	/* open the codec */
 
 	if (avcodec_open2(video->codec_ctx, video->codec, NULL) < 0) {
 		g_critical("Could not copy the context for the file '%s'", video->filename);
+		meh_video_internal_destroy(video);
 		return 6;
 	}
 
@@ -106,6 +115,7 @@ int meh_video_ffmpeg_open(Video* video) {
 	video->frame = av_frame_alloc();
 	if (video->frame == NULL) {
 		g_critical("Can't allocate a frame for the file '%s'", video->filename);
+		meh_video_internal_destroy(video);
 		return 7;
 	}
 
@@ -146,25 +156,36 @@ void meh_video_update(Video* video) {
 	}
 }
 
-void meh_video_destroy(Video* video) {
+void meh_video_internal_destroy(Video* video) {
 	g_assert(video != NULL);
 
 	if (video->frame != NULL) {
-		av_free(video->frame);
-	}
-	if (video->codec_ctx != NULL) {
-		avcodec_close(video->codec_ctx);
+		av_frame_free(&video->frame);
+		video->frame = NULL;
 	}
 	if (video->stream_codec_ctx != NULL) {
 		avcodec_close(video->stream_codec_ctx);
+		video->stream_codec_ctx = NULL;
+	}
+	if (video->codec_ctx != NULL) {
+		avcodec_free_context(&video->codec_ctx);
+		video->codec_ctx = NULL;
 	}
 	if (video->fc != NULL) {
 		avformat_close_input(&(video->fc));
+		video->fc = NULL;
 	}
 
 	if (video->texture != NULL) {
 		SDL_DestroyTexture(video->texture);
+		video->texture = NULL;
 	}
+}
+
+void meh_video_destroy(Video* video) {
+	g_assert(video != NULL);
+
+	meh_video_internal_destroy(video);
 
 	g_free(video->filename);
 	g_free(video);
