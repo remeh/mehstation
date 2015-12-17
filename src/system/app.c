@@ -533,7 +533,6 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 		parts[i] = g_queue_peek_nth(commands, i);
 	}
 	parts[g_queue_get_length(commands)] = NULL;
-	g_queue_free(commands);
 
 	g_message("Launching '%s' on '%s'", executable->display_name, platform->name);
 
@@ -590,6 +589,8 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	g_free(platform_name);
 	g_free(display_name);
 	g_free(command);
+	g_queue_free_full(commands, g_free);
+	g_free(parts);
 
 	/* reshow the window and here we go again */
 	SDL_ShowWindow(app->window->sdl_window);
