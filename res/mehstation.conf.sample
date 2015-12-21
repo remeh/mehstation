@@ -11,7 +11,7 @@ name=mehstation 1.0 - beta release
 # you should use a 16:9 resolution for the best result.
 width=1280
 height=720
-fullscreen=false
+fullscreen=true
 
 [input]
 input_repeat_delay=300
