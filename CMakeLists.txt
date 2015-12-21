@@ -1,6 +1,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 IF($ENV{MINGW_BUILD})
+  MESSAGE("Building the Windows binary.")
   SET(CMAKE_SYSTEM_NAME Generic)
 ENDIF()
 
@@ -94,7 +95,7 @@ CHECK_INCLUDE_FILE(/opt/vc/include/bcm_host.h RASPBERRY)
 IF($ENV{MINGW_BUILD})
   SET (CMAKE_C_COMPILER             "/usr/bin/i686-w64-mingw32-gcc")
   SET (CMAKE_C_FLAGS                "-Wall -std=c11")
-  SET (CMAKE_C_FLAGS_DEBUG          "-g")
+  #SET (CMAKE_C_FLAGS_DEBUG          "-g")
   ADD_DEFINITIONS(-DWINDOWS)
 ELSE(UNIX)
   ADD_DEFINITIONS(-DLINUX)

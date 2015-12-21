@@ -7,7 +7,7 @@ After having configured your platforms (Native, Emulators, ...) and the executab
 
 ## Video
 
-[![mehstation youtube video](http://img.youtube.com/vi/I3FjJBUrcwE/0.jpg)](https://www.youtube.com/watch?v=I3FjJBUrcwE)
+[![mehstation youtube video](http://img.youtube.com/vi/FxudzfhMTlU/0.jpg)](https://www.youtube.com/watch?v=FxudzfhMTlU)
 
 ## Screenshots
 
