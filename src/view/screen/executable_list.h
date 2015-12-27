@@ -80,7 +80,9 @@ typedef struct ExecutableListData {
 
 	/* Exec cover only */
 	WidgetText* prev_executable_widget;
+	WidgetText* prev_arrow_exec_widget;
 	WidgetText* next_executable_widget;
+	WidgetText* next_arrow_exec_widget;
 
 	WidgetText* executable_title_widget;
 

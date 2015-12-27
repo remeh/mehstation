@@ -39,8 +39,11 @@ void meh_cover_selec_create_widgets(App* app, Screen* screen) {
 	 * NOTE(remy): the next_executable_widget is repositioned each time it is generated
 	 * because we don't know this actual width and its necesarry to display aligned right. */
 
-	data->prev_executable_widget = meh_widget_text_new(app->small_bold_font, NULL, 20, MEH_FAKE_HEIGHT-50, (MEH_FAKE_WIDTH/2) - 20, 280, white, TRUE);
-	data->next_executable_widget = meh_widget_text_new(app->small_bold_font, NULL, MEH_FAKE_WIDTH-100, MEH_FAKE_HEIGHT-50, (MEH_FAKE_WIDTH/2) - 20, 200, white, TRUE);
+	data->prev_executable_widget = meh_widget_text_new(app->small_bold_font, NULL, 20, MEH_FAKE_HEIGHT-50, (MEH_FAKE_WIDTH/2) - 40, 280, white, TRUE);
+	data->next_executable_widget = meh_widget_text_new(app->small_bold_font, NULL, MEH_FAKE_WIDTH-100, MEH_FAKE_HEIGHT-50, (MEH_FAKE_WIDTH/2) - 40, 200, white, TRUE);
+
+	data->prev_arrow_exec_widget = meh_widget_text_new(app->small_bold_font, "<", 20, MEH_FAKE_HEIGHT-50, 20, 30, white, TRUE);
+	data->next_arrow_exec_widget = meh_widget_text_new(app->small_bold_font, ">", MEH_FAKE_WIDTH-30, MEH_FAKE_HEIGHT-50, 20, 30, white, TRUE);
 }
 
 void meh_cover_selec_destroy(Screen* screen) {
@@ -76,6 +79,16 @@ void meh_cover_selec_destroy(Screen* screen) {
 	if (data->next_executable_widget != NULL) {
 		meh_widget_text_destroy(data->next_executable_widget);
 		data->next_executable_widget = NULL;
+	}
+
+	if (data->next_arrow_exec_widget != NULL) {
+		meh_widget_text_destroy(data->next_arrow_exec_widget);
+		data->next_arrow_exec_widget = NULL;
+	}
+
+	if (data->prev_arrow_exec_widget != NULL) {
+		meh_widget_text_destroy(data->prev_arrow_exec_widget);
+		data->prev_arrow_exec_widget = NULL;
 	}
 
 	if (data->prev_executable_widget != NULL) {
@@ -133,19 +146,15 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 
 		/* pick the prev / next executable and render their label */
 		if (prev_executable != NULL && prev_executable->display_name != NULL) {
-			gchar* new_val = g_strdup_printf("< %s", prev_executable->display_name);
-			gchar* upper = g_utf8_strup(new_val, -1);
+			gchar* upper = g_utf8_strup(prev_executable->display_name, -1);
 			meh_widget_text_set_text(app->window, data->prev_executable_widget, upper);
 			g_free(upper);
-			g_free(new_val);
 		}
 
 		if (next_executable != NULL && next_executable->display_name != NULL) {
-			gchar* new_val = g_strdup_printf("%s >", next_executable->display_name);
-			gchar* upper = g_utf8_strup(new_val, -1);
+			gchar* upper = g_utf8_strup(next_executable->display_name, -1);
 			meh_widget_text_set_text(app->window, data->next_executable_widget, upper);
 			g_free(upper);
-			g_free(new_val);
 		}
 
 		if (data->cover != -1 && data->cover_widget->texture != NULL) {
@@ -169,10 +178,10 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 
 		/* animate prev/next executables text */
 		if (prev_selected_id > data->selected_executable) {
-			// previous
-			int right_pos = MEH_FAKE_WIDTH-20-data->next_executable_widget->tex_w;
-			if (right_pos < ((MEH_FAKE_WIDTH/2)+20)) {
-				right_pos = (MEH_FAKE_WIDTH/2)+20;
+			// direction: previous
+			int right_pos = MEH_FAKE_WIDTH-40-data->next_executable_widget->tex_w;
+			if (right_pos < ((MEH_FAKE_WIDTH/2))) {
+				right_pos = (MEH_FAKE_WIDTH/2);
 			}
 
 			data->next_executable_widget->x = meh_transition_start(
@@ -185,20 +194,20 @@ void meh_cover_selec_adapt_view(App* app, Screen* screen, int prev_selected_id) 
 			data->prev_executable_widget->x = meh_transition_start(
 					MEH_TRANSITION_CUBIC,
 					-200,
-					20,
+					40,
 					300);
 			meh_screen_add_text_transitions(screen, data->prev_executable_widget);
 		} else {
-			// next
-			int right_pos = MEH_FAKE_WIDTH-20-data->next_executable_widget->tex_w;
-			if (right_pos < ((MEH_FAKE_WIDTH/2)+20)) {
-				right_pos = (MEH_FAKE_WIDTH/2)+20;
+			// direction: next
+			int right_pos = MEH_FAKE_WIDTH-40-data->next_executable_widget->tex_w;
+			if (right_pos < ((MEH_FAKE_WIDTH/2))) {
+				right_pos = (MEH_FAKE_WIDTH/2);
 			}
 
 			data->prev_executable_widget->x = meh_transition_start(
 					MEH_TRANSITION_CUBIC,
 					data->next_executable_widget->x.value,
-					20,
+					40,
 					300);
 			meh_screen_add_text_transitions(screen, data->prev_executable_widget);
 
@@ -263,4 +272,6 @@ void meh_cover_selec_render(App* app, Screen* screen) {
 
 	meh_widget_text_render(app->window, data->prev_executable_widget);
 	meh_widget_text_render(app->window, data->next_executable_widget);
+	meh_widget_text_render(app->window, data->prev_arrow_exec_widget);
+	meh_widget_text_render(app->window, data->next_arrow_exec_widget);
 }
