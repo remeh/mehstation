@@ -82,6 +82,11 @@ include_directories(
     ${libavcodec_INCLUDE_DIRS}
     ${libavformat_INCLUDE_DIRS}
     ${libavutil_INCLUDE_DIRS}
+    src/
+    src/view
+    src/view/screen
+    src/system
+    src/db
 )
 
 include_directories(
