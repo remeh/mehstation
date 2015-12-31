@@ -44,7 +44,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	/* Title */
 	SDL_Color white = { 255, 255, 255, 255 };
 	SDL_Color black = { 0, 0, 0, 210 };
-	SDL_Color transparent_white = { 255, 255, 255, 35 };
+	SDL_Color gray = { 10, 10, 10, 0 };
 	data->title = meh_widget_text_new(app->big_font, app->settings.name, 50, 50, 1230, 50, white, FALSE);
 	data->title->x = meh_transition_start(MEH_TRANSITION_CUBIC, -200, 50, 1000);
 	meh_screen_add_text_transitions(screen, data->title);
@@ -89,7 +89,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	}
 
 	/* background hovers */
-	data->background_hover = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, transparent_white, TRUE);
+	data->background_hover = meh_widget_rect_new(0, 0, MEH_FAKE_WIDTH, MEH_FAKE_HEIGHT, gray, TRUE);
 	data->hover = meh_widget_rect_new(0, 260, MEH_FAKE_WIDTH, 200, black, TRUE);
 
 	/* misc */
@@ -340,6 +340,12 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	meh_widget_text_reload(app->window, data->executables_count);
 	data->executables_count->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 325, 550);
 	meh_screen_add_text_transitions(screen, data->executables_count);
+
+	/*
+	 * animate a fade on the background
+	 */
+	data->background_hover->a = meh_transition_start(MEH_TRANSITION_CUBIC, 255, 0, 300);
+	meh_screen_add_rect_transitions(screen, data->background_hover);
 
 	/* background image */
 	if (platform->background != NULL) {
