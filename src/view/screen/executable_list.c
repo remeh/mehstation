@@ -129,7 +129,7 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	g_assert(data != NULL);
 
 	SDL_Color white = { 255, 255, 255, 255 };
-	SDL_Color gray = { 10, 10, 10, 235 };
+	SDL_Color gray = { 10, 10, 10, 200 };
 
 	/* Background */
 	data->background_widget = meh_widget_image_new(NULL, -50, -50, MEH_FAKE_WIDTH+50, MEH_FAKE_HEIGHT+50);
@@ -719,6 +719,12 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 	 */
 
 	meh_exec_list_start_bg_anim(screen);
+
+	/*
+	 * animate a fade on the background
+	 */
+	data->bg_hover_widget->a = meh_transition_start(MEH_TRANSITION_CUBIC, 255, 200, 300);
+	meh_screen_add_rect_transitions(screen, data->bg_hover_widget);
 
 	/*
 	 * reset the move of the texts
