@@ -281,6 +281,35 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 			keyboard = FALSE;
 			sdl_button = sdl_event->jbutton.button;
 			break;
+		case SDL_JOYHATMOTION:
+			keyboard = FALSE;
+
+			switch (sdl_event->jhat.value) {
+				case SDL_HAT_CENTERED:
+					// back to center, reset the up down right and left directions.
+					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_UP);
+					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_DOWN);
+					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_LEFT);
+					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_RIGHT);
+				case SDL_HAT_UP:
+				case SDL_HAT_RIGHTUP:
+				case SDL_HAT_LEFTUP: // FIXME(remy): mehstation doesn't support diagonal
+					sdl_button = SDLK_UP;
+					break;
+				case SDL_HAT_RIGHT:
+					sdl_button = SDLK_RIGHT;
+					break;
+				case SDL_HAT_LEFT:
+					sdl_button = SDLK_LEFT;
+					break;
+				case SDL_HAT_LEFTDOWN:
+				case SDL_HAT_RIGHTDOWN:
+				case SDL_HAT_DOWN:
+					sdl_button = SDLK_DOWN;
+					break;
+			}
+
+			break;
 		case SDL_JOYAXISMOTION:
 			/* Converts the axis + value to a SDLK constant */
 			switch (sdl_event->jaxis.axis) {
@@ -338,6 +367,12 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 		case SDL_KEYDOWN:
 		case SDL_JOYBUTTONDOWN:
 		case SDL_JOYAXISMOTION:
+		case SDL_JOYHATMOTION:
+			// ignore on hat returned to center
+			if (sdl_event->type == SDL_JOYHATMOTION && sdl_event->jhat.value == SDL_HAT_CENTERED) {
+				break;
+			}
+
 			if (sdl_event->key.repeat == 0 || keyboard == FALSE) {
 				input_state->buttons_state[key_pressed] = MEH_INPUT_JUST_PRESSED;
 			}

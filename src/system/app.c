@@ -416,6 +416,7 @@ void meh_app_main_loop_event(App* app) {
 			case SDL_JOYBUTTONUP:
 			case SDL_JOYBUTTONDOWN:
 			case SDL_JOYAXISMOTION:
+			case SDL_JOYHATMOTION:
 				meh_input_manager_read_event(app->input_manager, event);
 				break;
 			case SDL_QUIT:
