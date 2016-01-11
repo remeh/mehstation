@@ -291,6 +291,7 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_DOWN);
 					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_LEFT);
 					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_RIGHT);
+					break;
 				case SDL_HAT_UP:
 				case SDL_HAT_RIGHTUP:
 				case SDL_HAT_LEFTUP: // FIXME(remy): mehstation doesn't support diagonal
