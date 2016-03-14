@@ -47,9 +47,9 @@ SDL_Texture* meh_font_render_on_texture(SDL_Renderer* renderer, const Font* font
 	SDL_Surface* surface = NULL;
 	/* either render on a single line or on multiple lines. */
 	if (max_width == -1.0f) {
-		surface = TTF_RenderText_Blended(font->sdl_font, text, color);
+		surface = TTF_RenderUTF8_Blended(font->sdl_font, text, color);
 	} else {
-		surface = TTF_RenderText_Blended_Wrapped(font->sdl_font, text, color, max_width);
+		surface = TTF_RenderUTF8_Blended_Wrapped(font->sdl_font, text, color, max_width);
 	}
 
 	SDL_Texture* texture = NULL;
