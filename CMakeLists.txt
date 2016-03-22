@@ -17,6 +17,7 @@ SET(
         MEHSTATION_SOURCES
         src/main.c
         src/system/app.c
+        src/system/audio.c
         src/system/db.c
         src/system/flags.c
         src/system/input.c
