@@ -5,6 +5,7 @@
  */
 
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <libavcodec/avcodec.h>
@@ -52,16 +53,27 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	}
 
 	if (TTF_Init() == -1) {
-		g_critical("TTF can't initialize: %s", TTF_GetError());
+		g_critical("SDL2_ttf2 can't initialize: %s", TTF_GetError());
 		return 1;
 	}
+
+	g_message("SDL2_ttf2 initialized.");
 
 	if ( !(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) ) {
-		g_critical("SDL_image can't initialize: %s", TTF_GetError());
+		g_critical("SDL2_image can't initialize: %s", TTF_GetError());
 		return 1;
 	}
 
-	g_message("SDL init OK.");
+	g_message("SDL2_image initialized.");
+
+	if (Mix_Init(MIX_INIT_OGG) != MIX_INIT_OGG) {
+		g_critical("SDL2_mixer can't initialize: %s", Mix_GetError());
+		return 1;
+	}
+
+	g_message("SDL2_mixer initialized.");
+
+	g_message("SDL2 init OK.");
 
 	/* ffmpeg */
 
