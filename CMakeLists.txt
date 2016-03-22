@@ -67,6 +67,7 @@ ENDIF()
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 PKG_SEARCH_MODULE(SDL2_ttf REQUIRED SDL2_ttf)
 PKG_SEARCH_MODULE(SDL2_image REQUIRED SDL2_image)
+PKG_SEARCH_MODULE(SDL2_mixer REQUIRED SDL2_mixer)
 PKG_SEARCH_MODULE(sqlite3 REQUIRED sqlite3)
 PKG_SEARCH_MODULE(libavcodec REQUIRED libavcodec)
 PKG_SEARCH_MODULE(libavformat REQUIRED libavformat)
@@ -77,6 +78,7 @@ include_directories(
     ${SDL2_INCLUDE_DIRS}
     ${SDL2_ttf_INCLUDE_DIRS}
     ${SDL2_image_INCLUDE_DIRS}
+    ${SDL2_mixer_INCLUDE_DIRS}
     ${GLIB_INCLUDE_DIRS}
     ${sqlite3_INCLUDE_DIRS}
     ${libavcodec_INCLUDE_DIRS}
@@ -126,6 +128,7 @@ TARGET_LINK_LIBRARIES(
     ${SDL2_LIBRARIES}
     ${SDL2_ttf_LIBRARIES}
     ${SDL2_image_LIBRARIES}
+    ${SDL2_mixer_LIBRARIES}
     ${libavcodec_LIBRARIES}
     ${libavformat_LIBRARIES}
     ${libavutil_LIBRARIES}
