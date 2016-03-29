@@ -41,8 +41,9 @@ Sound* meh_sound_new(gchar* filename) {
 void meh_sound_destroy(Sound* sound) {
 	g_assert(sound != NULL);
 
-	g_free(sound->filename);
+	meh_sound_internal_destroy(video);
 
+	g_free(sound->filename);
 	g_free(sound);
 }
 
