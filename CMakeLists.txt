@@ -18,6 +18,7 @@ SET(
         src/main.c
         src/system/app.c
         src/system/audio.c
+        src/system/sound.c
         src/system/db.c
         src/system/flags.c
         src/system/input.c
@@ -68,7 +69,6 @@ ENDIF()
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 PKG_SEARCH_MODULE(SDL2_ttf REQUIRED SDL2_ttf)
 PKG_SEARCH_MODULE(SDL2_image REQUIRED SDL2_image)
-PKG_SEARCH_MODULE(SDL2_mixer REQUIRED SDL2_mixer)
 PKG_SEARCH_MODULE(sqlite3 REQUIRED sqlite3)
 PKG_SEARCH_MODULE(libavcodec REQUIRED libavcodec)
 PKG_SEARCH_MODULE(libavformat REQUIRED libavformat)
