@@ -1,33 +1,32 @@
 /*
- * mehstation - Audio.
+ * mehstation - Audio engine.
  *
  * Copyright © 2016 Rémy Mathieu
  */
 
 #pragma once
 
+#include <SDL2/SDL.h>
 #include <glib-2.0/glib.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
+#include "system/settings.h"
+#include "system/sound.h"
+
 typedef struct {
-	gchar* filename;
+	/* sounds to play, entries in this queue is
+	 * owned by the audio engine. */
+	GQueue* sounds;
 
-	/* ffmpeg part */
+	SDL_mutex* mutex;
 
-	AVFormatContext* fc;
-	/* id of the stream in the format context */
-	int stream_id;
+	SDL_Thread* thread;
+	gboolean thread_running;
+} Audio;
 
-	/* codec context inside the stream */
-	AVCodecContext* stream_codec_ctx;
-	/* codec context we've created to use */
-	AVCodecContext* codec_ctx;
+Audio* meh_audio_new(Settings settings);
+void meh_audio_destroy(Audio* audio);
 
-	AVCodec* codec;
-
-	AVFrame* frame;
-} Sound;
-
-Sound* meh_sound_new();
-void meh_sound_destroy(Sound* sound);
+void meh_audio_play(Audio* audio, Sound* sound);
+int meh_audio_start(void* audio);

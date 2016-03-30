@@ -122,6 +122,14 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	InputManager* input_manager = meh_input_manager_new(app->db, app->settings);
 	app->input_manager = input_manager;
 
+	/* Audio engine */
+	app->audio = meh_audio_new(app->settings);
+	// TODO(remy): test the settings: do we activate sounds?
+	// TODO(remy): + message on startup
+	if (!app->audio) {
+		g_critical("Can't init the audio.");
+	}
+
 	/* Sets the starting screen as the current screen */
 	Screen* starting_screen = meh_screen_starting_new(app);
 	if (starting_screen == NULL) {
@@ -175,6 +183,11 @@ int meh_app_destroy(App* app) {
 	}
 
 	meh_input_manager_destroy(app->input_manager);
+
+	if (app->audio != NULL) {
+		meh_audio_destroy(app->audio);
+		app->audio = NULL;
+	}
 
 	SDL_Quit();
 	TTF_Quit();

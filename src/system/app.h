@@ -1,5 +1,6 @@
 #pragma once
 
+#include "system/audio.h"
 #include "system/db.h"
 #include "system/flags.h"
 #include "system/input.h"
@@ -31,6 +32,7 @@ typedef struct App {
 	Font* big_font;
 	DB* db;
 	Flags flags; /* cli params */
+	Audio* audio; /* audio engine */
 	InputManager* input_manager;
 	Settings settings;
 	Mainloop mainloop;
