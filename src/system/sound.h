@@ -29,5 +29,5 @@ typedef struct {
 	AVFrame* frame;
 } Sound;
 
-Sound* meh_sound_new();
+Sound* meh_sound_new(gchar* filename);
 void meh_sound_destroy(Sound* sound);

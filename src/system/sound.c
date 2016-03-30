@@ -108,6 +108,14 @@ int meh_sound_ffmpeg_open(Sound* sound) {
 		return 6;
 	}
 
+	/* allocate the frame */
+	sound->frame = av_frame_alloc();
+	if (sound->frame == NULL) {
+		g_critical("Can't allocate a frame for the file '%s'", sound->filename);
+		meh_sound_internal_destroy(sound);
+		return 7;
+	}
+
 	return 0;
 }
 

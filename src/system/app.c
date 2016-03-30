@@ -17,11 +17,13 @@
 #include "view/screen/executable_list.h"
 #include "view/screen/platform_list.h"
 #include "system/app.h"
+#include "system/audio.h"
 #include "system/consts.h"
 #include "system/flags.h"
 #include "system/input.h"
 #include "system/message.h"
 #include "system/settings.h"
+#include "system/sound.h" // XXX remove
 #include "system/transition.h"
 #include "system/db/models.h"
 
@@ -125,10 +127,18 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	/* Audio engine */
 	app->audio = meh_audio_new(app->settings);
 	// TODO(remy): test the settings: do we activate sounds?
-	// TODO(remy): + message on startup
+	g_message("Audio opened with: freq: %d, channels: %d, samples: %d",
+		app->audio->spec.freq,
+		app->audio->spec.channels,
+		app->audio->spec.samples
+	);
 	if (!app->audio) {
 		g_critical("Can't init the audio.");
 	}
+
+	// XXX
+	Sound* sound = meh_sound_new("/home/remy/rapsody.mp3");
+	meh_audio_play(app->audio, sound);
 
 	/* Sets the starting screen as the current screen */
 	Screen* starting_screen = meh_screen_starting_new(app);

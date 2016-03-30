@@ -21,6 +21,9 @@ typedef struct {
 
 	SDL_mutex* mutex;
 
+	SDL_AudioDeviceID device_id;
+	SDL_AudioSpec spec;
+
 	SDL_Thread* thread;
 	gboolean thread_running;
 } Audio;
