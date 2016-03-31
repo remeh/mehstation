@@ -23,11 +23,8 @@ Audio* meh_audio_new(Settings settings) {
 	/* open the audio device */
 
 	SDL_AudioSpec want;
-	want.freq = 48000;
 	want.channels = 2;
-	want.samples = 4096;
-	/*
-	*/
+	want.samples = 2048;
 	want.callback = NULL;
 
 	audio->device_id = SDL_OpenAudioDevice(
@@ -133,7 +130,7 @@ int meh_audio_start(void* audio) {
 		}
 
 
-		SDL_Delay(1);
+		SDL_Delay(16);
 	}
 
 	g_debug("audio engine is stopping.");
