@@ -4,13 +4,12 @@
  * Copyright © 2016 Rémy Mathieu
  */
 
-#include "system/settings.h"
 #include "system/audio.h"
 #include "system/sound.h"
 
 static void meh_audio_stop(Audio* audio, Sound* sound);
 
-Audio* meh_audio_new(Settings settings) {
+Audio* meh_audio_new() {
 	Audio* audio = g_new(Audio, 1);	
 
 	audio->sounds = g_queue_new();
@@ -23,8 +22,6 @@ Audio* meh_audio_new(Settings settings) {
 	/* open the audio device */
 
 	SDL_AudioSpec want;
-	want.channels = 2;
-	want.samples = 2048;
 	want.callback = NULL;
 
 	audio->device_id = SDL_OpenAudioDevice(
@@ -38,11 +35,27 @@ Audio* meh_audio_new(Settings settings) {
 	audio->thread_running = TRUE;
 	audio->thread = SDL_CreateThread(meh_audio_start, "audio", audio);
 
+	/* loads the sound bank */
+
+	audio->soundbank = g_new(Sound*, SFX_END);
+	audio->soundbank[0] = meh_sound_new("res/bip.mp3", TRUE);
+
 	return audio;
 }
 
 void meh_audio_destroy(Audio* audio) {
 	g_assert(audio != NULL);
+
+	/* free each sounds */
+	if (audio->soundbank != NULL) {
+		for (int i = 0; i < SFX_END; i++) {
+			if (audio->soundbank[i] != NULL) {
+				meh_sound_destroy(audio->soundbank[i]);
+			}
+		}
+		g_free(audio->soundbank);
+		audio->soundbank = NULL;
+	}
 
 	if (audio->thread) {
 		audio->thread_running = FALSE;
@@ -60,7 +73,7 @@ void meh_audio_destroy(Audio* audio) {
 	g_free(audio);
 }
 
-void meh_audio_play(Audio* audio, Sound* sound) {
+void meh_audio_play_sound(Audio* audio, Sound* sound) {
 	if (!sound) {
 		return;
 	}
@@ -88,6 +101,22 @@ void meh_audio_stop(Audio* audio, Sound* sound) {
 	SDL_UnlockMutex(audio->mutex);
 }
 
+void meh_audio_play(Audio* audio, guint sound) {
+	g_assert(audio != NULL);
+
+	if (sound >= SFX_END) {
+		return;
+	}
+
+	Sound* s = audio->soundbank[sound];
+
+	if (s == NULL) {
+		return;
+	}
+
+	meh_audio_play_sound(audio, s);
+}
+
 /* meh_audio_start starts the background threading
  * reading the sound to play on the sound card */
 int meh_audio_start(void* audio) {
@@ -99,36 +128,17 @@ int meh_audio_start(void* audio) {
 
 		/* for each sound */
 		for (int i = 0; i < g_queue_get_length(a->sounds); i++) {
-			Sound* sound = g_queue_peek_nth(a->sounds, i);
-
-			AVPacket packet;
-			gboolean frame_finished = FALSE;
-			gboolean stop_sound = TRUE;
-
-			while (av_read_frame(sound->fc, &packet) >= 0) {
-				stop_sound = FALSE;
-
-				/* ensure we're dealing with the good stream */
-				if (packet.stream_index == sound->stream_id) {
-					/* decode the audio frame */
-					avcodec_decode_audio4(sound->codec_ctx, sound->frame, &frame_finished, &packet);
-					if (frame_finished) {
-						/* play the frame */
-						SDL_QueueAudio(a->device_id, sound->frame->data[0], sound->frame->linesize[0]);
-
-						av_free_packet(&packet);
-						break;
-
-					}
-				}
-				av_free_packet(&packet);
-			}
-
-			if (stop_sound) {
-				meh_audio_stop(a, sound);
-			}
+			Sound* s = g_queue_peek_nth(a->sounds, i);
+			/* NOTE(remy): I think we'll need to copy
+			 * the bytes here and probably copy batch
+			 * per batch and not the full data at once.*/
+			SDL_QueueAudio(a->device_id, s->data->data, s->data->len);
 		}
 
+		Sound* sound = NULL;
+		while ((sound = g_queue_pop_tail(a->sounds)) != NULL) {
+			meh_audio_stop(a, sound);
+		}
 
 		SDL_Delay(16);
 	}

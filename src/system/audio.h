@@ -11,13 +11,17 @@
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
-#include "system/settings.h"
 #include "system/sound.h"
+
+#define SFX_BIP 0
+#define SFX_END 1
 
 typedef struct {
 	/* sounds to play, entries in this queue is
 	 * owned by the audio engine. */
 	GQueue* sounds;
+
+	Sound** soundbank; /* sounds bank */
 
 	SDL_mutex* mutex;
 
@@ -28,8 +32,9 @@ typedef struct {
 	gboolean thread_running;
 } Audio;
 
-Audio* meh_audio_new(Settings settings);
+Audio* meh_audio_new();
 void meh_audio_destroy(Audio* audio);
 
-void meh_audio_play(Audio* audio, Sound* sound);
+void meh_audio_play(Audio* audio, guint sound);
+void meh_audio_play_sound(Audio* audio, Sound* sound);
 int meh_audio_start(void* audio);

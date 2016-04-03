@@ -13,6 +13,9 @@
 typedef struct {
 	gchar* filename;
 
+	/* loaded data */
+	GByteArray* data;
+
 	/* ffmpeg part */
 
 	AVFormatContext* fc;
@@ -29,5 +32,6 @@ typedef struct {
 	AVFrame* frame;
 } Sound;
 
-Sound* meh_sound_new(gchar* filename);
+Sound* meh_sound_new(gchar* filename, gboolean load);
+void meh_sound_load(Sound* sound);
 void meh_sound_destroy(Sound* sound);

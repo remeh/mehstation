@@ -14,11 +14,12 @@
 static int meh_sound_ffmpeg_open(Sound* sound);
 static void meh_sound_internal_destroy(Sound* sound);
 
-Sound* meh_sound_new(gchar* filename) {
+Sound* meh_sound_new(gchar* filename, gboolean load) {
 	g_assert(filename != NULL);
 
 	Sound* sound = g_new(Sound, 1);
 
+	sound->data = NULL;
 	sound->fc = NULL;
 	sound->codec_ctx = NULL;
 	sound->stream_codec_ctx = NULL;
@@ -35,12 +36,49 @@ Sound* meh_sound_new(gchar* filename) {
 		return NULL;
 	}
 
+	/* load te file as bytes to store it in RAM uncompressed */
+	if (load == TRUE) {
+		meh_sound_load(sound);
+	}
+
 	return sound;
+}
+
+void meh_sound_load(Sound* sound) {
+	g_assert(sound != NULL);
+
+	sound->data = g_byte_array_new();
+
+	AVPacket packet;
+	gboolean frame_finished = FALSE;
+
+	while (av_read_frame(sound->fc, &packet) >= 0) {
+		frame_finished = FALSE;
+
+		/* ensure we're dealing with the good stream */
+		if (packet.stream_index == sound->stream_id) {
+			/* decode the audio frame */
+			avcodec_decode_audio4(sound->codec_ctx, sound->frame, &frame_finished, &packet);
+			if (frame_finished) {
+				/* store the bytes */
+				g_byte_array_append(sound->data, sound->frame->data[0], sound->frame->linesize[0]);
+			}
+		}
+		av_free_packet(&packet);
+	}
+
+	g_debug("load the sound %s in %d bytes", sound->filename, sound->data->len);
 }
 
 void meh_sound_destroy(Sound* sound) {
 	g_assert(sound != NULL);
 
+	if (sound->data != NULL) {
+		g_byte_array_free(sound->data, TRUE);
+		sound->data = NULL;
+	}
+
+	/* ffmpeg part */
 	meh_sound_internal_destroy(sound);
 
 	g_free(sound->filename);

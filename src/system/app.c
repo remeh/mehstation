@@ -30,6 +30,7 @@
 static void meh_settings_print_system_infos();
 static void meh_app_init_dir(App* app);
 static void meh_app_init_conf_path(App* app);
+static void meh_app_init_audio(App *app);
 static void meh_copy_file(const gchar* original, const gchar* copy);
 
 App* meh_app_create() {
@@ -125,20 +126,7 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	app->input_manager = input_manager;
 
 	/* Audio engine */
-	app->audio = meh_audio_new(app->settings);
-	// TODO(remy): test the settings: do we activate sounds?
-	g_message("Audio opened with: freq: %d, channels: %d, samples: %d",
-		app->audio->spec.freq,
-		app->audio->spec.channels,
-		app->audio->spec.samples
-	);
-	if (!app->audio) {
-		g_critical("Can't init the audio.");
-	}
-
-	// XXX
-	Sound* sound = meh_sound_new("/home/remy/rapsody.mp3");
-	meh_audio_play(app->audio, sound);
+	meh_app_init_audio(app);
 
 	/* Sets the starting screen as the current screen */
 	Screen* starting_screen = meh_screen_starting_new(app);
@@ -150,9 +138,28 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	/* Hides the mouse cursor */
 	SDL_ShowCursor(SDL_DISABLE);
 
+	meh_audio_play(app->audio, 0);
+
 	meh_app_set_current_screen(app, starting_screen, FALSE);
 
 	return 0;
+}
+
+void meh_app_init_audio(App* app) {
+	g_assert(app != NULL);
+
+	// TODO(remy): test the settings: do we activate sounds?
+
+	app->audio = meh_audio_new();
+	g_message("Audio opened with: freq: %d, channels: %d, samples: %d",
+		app->audio->spec.freq,
+		app->audio->spec.channels,
+		app->audio->spec.samples
+	);
+
+	if (!app->audio) {
+		g_critical("Can't init the audio.");
+	}
 }
 
 /*
@@ -194,6 +201,7 @@ int meh_app_destroy(App* app) {
 
 	meh_input_manager_destroy(app->input_manager);
 
+	/* close audio engine */
 	if (app->audio != NULL) {
 		meh_audio_destroy(app->audio);
 		app->audio = NULL;
