@@ -145,12 +145,12 @@ void meh_video_update(Video* video) {
 						video->frame->linesize[2]
 					);
 
-				av_free_packet(&packet);
+				av_packet_unref(&packet);
 				break;
 			}
 		}
 
-		av_free_packet(&packet);
+		av_packet_unref(&packet);
 	}
 }
 

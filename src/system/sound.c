@@ -64,7 +64,8 @@ void meh_sound_load(Sound* sound) {
 				g_byte_array_append(sound->data, sound->frame->data[0], sound->frame->linesize[0]);
 			}
 		}
-		av_free_packet(&packet);
+
+		av_packet_unref(&packet);
 	}
 
 	g_debug("load the sound %s in %d bytes", sound->filename, sound->data->len);
