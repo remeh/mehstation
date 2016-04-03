@@ -22,6 +22,8 @@ Audio* meh_audio_new() {
 	/* open the audio device */
 
 	SDL_AudioSpec want;
+	want.channels = 2;
+	want.samples = 128;
 	want.callback = NULL;
 
 	audio->device_id = SDL_OpenAudioDevice(
@@ -38,7 +40,7 @@ Audio* meh_audio_new() {
 	/* loads the sound bank */
 
 	audio->soundbank = g_new(Sound*, SFX_END);
-	audio->soundbank[0] = meh_sound_new("res/bip.mp3", TRUE);
+	audio->soundbank[0] = meh_sound_new("res/bip.wav", TRUE);
 
 	return audio;
 }
@@ -80,7 +82,7 @@ void meh_audio_play_sound(Audio* audio, Sound* sound) {
 
 	SDL_LockMutex(audio->mutex);
 
-	g_message("sound: start playing '%s'", sound->filename);
+	g_debug("sound: start playing '%s'", sound->filename);
 	g_queue_push_tail(audio->sounds, sound);
 
 	SDL_UnlockMutex(audio->mutex);
@@ -92,7 +94,6 @@ void meh_audio_stop(Audio* audio, Sound* sound) {
 
 	SDL_LockMutex(audio->mutex);
 
-	g_message("sound: stop playing '%s'", sound->filename);
 	gboolean removed = g_queue_remove(audio->sounds, sound);
 	if (removed) {
 		meh_sound_destroy(sound);
@@ -140,7 +141,8 @@ int meh_audio_start(void* audio) {
 			meh_audio_stop(a, sound);
 		}
 
-		SDL_Delay(16);
+		SDL_PauseAudioDevice(a->device_id, 0);
+		SDL_Delay(1);
 	}
 
 	g_debug("audio engine is stopping.");

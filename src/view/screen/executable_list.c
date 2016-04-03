@@ -11,6 +11,7 @@
 #include <glib.h>
 
 #include "system/app.h"
+#include "system/audio.h"
 #include "system/consts.h"
 #include "system/db.h"
 #include "system/input.h"
@@ -808,6 +809,7 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 			} else {
 				data->selected_executable -= 1;
 			}
+			meh_audio_play(app->audio, SFX_BIP);
 			meh_exec_list_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 		case MEH_INPUT_BUTTON_RIGHT:
@@ -817,6 +819,7 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 			} else {
 				data->selected_executable += 1;
 			}
+			meh_audio_play(app->audio, SFX_BIP);
 			meh_exec_list_after_cursor_move(app, screen, prev_selected_exec);
 			break;
 		case MEH_INPUT_BUTTON_L:
@@ -826,6 +829,7 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 				if (data->selected_executable < 0) {
 					data->selected_executable = data->executables_length-1;
 				}
+				meh_audio_play(app->audio, SFX_BIP);
 				meh_exec_list_after_cursor_move(app, screen, prev_selected_exec);
 			}
 			break;
@@ -836,6 +840,7 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 				if (data->selected_executable > data->executables_length) {
 					data->selected_executable = 0;
 				}
+				meh_audio_play(app->audio, SFX_BIP);
 				meh_exec_list_after_cursor_move(app, screen, prev_selected_exec);
 			}
 			break;

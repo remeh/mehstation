@@ -138,8 +138,6 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	/* Hides the mouse cursor */
 	SDL_ShowCursor(SDL_DISABLE);
 
-	meh_audio_play(app->audio, 0);
-
 	meh_app_set_current_screen(app, starting_screen, FALSE);
 
 	return 0;
