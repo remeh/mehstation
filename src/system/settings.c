@@ -49,7 +49,7 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 	settings->fade_duration = meh_settings_read_int(keyfile, "render", "fade_duration", 300);
 	settings->zoom_logo = meh_settings_read_bool(keyfile, "render", "zoom_logo", FALSE);
 
-	g_message("Zoom: %d", settings->zoom_logo);
+	settings->sfx = meh_settings_read_bool(keyfile, "audio", "sfx", TRUE);
 
 	g_key_file_free(keyfile);
 

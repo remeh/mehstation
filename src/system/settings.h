@@ -16,6 +16,8 @@ typedef struct {
 	guint max_frameskip;
 	guint fade_duration;
 	gboolean zoom_logo;
+	/* sound */
+	gboolean sfx;
 } Settings;
 
 gboolean meh_settings_read(Settings *settings, const gchar *filename);

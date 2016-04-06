@@ -23,7 +23,6 @@
 #include "system/input.h"
 #include "system/message.h"
 #include "system/settings.h"
-#include "system/sound.h" // XXX remove
 #include "system/transition.h"
 #include "system/db/models.h"
 
@@ -146,7 +145,9 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 void meh_app_init_audio(App* app) {
 	g_assert(app != NULL);
 
-	// TODO(remy): test the settings: do we activate sounds?
+	if (!app->settings.sfx) {
+		return;
+	}
 
 	app->audio = meh_audio_new();
 	g_message("Audio opened with: freq: %d, channels: %d, samples: %d",

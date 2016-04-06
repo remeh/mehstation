@@ -24,3 +24,7 @@ max_frameskip=5
 fade_duration=150
 # Do we want a zoom on the logo (when available) when launching a game
 zoom_logo=true
+
+[audio]
+# Sounds in menu
+sfx=false

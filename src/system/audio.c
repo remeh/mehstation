@@ -76,7 +76,11 @@ void meh_audio_destroy(Audio* audio) {
 }
 
 void meh_audio_play_sound(Audio* audio, Sound* sound) {
-	if (!sound) {
+	if (audio == NULL) {
+		return;
+	}
+
+	if (sound == NULL) {
 		return;
 	}
 
@@ -103,7 +107,9 @@ void meh_audio_stop(Audio* audio, Sound* sound) {
 }
 
 void meh_audio_play(Audio* audio, guint sound) {
-	g_assert(audio != NULL);
+	if (audio == NULL) {
+		return;
+	}
 
 	if (sound >= SFX_END) {
 		return;
