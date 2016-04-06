@@ -272,6 +272,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			meh_screen_platform_list_start_popup(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_A:
+			meh_audio_play(app->audio, SFX_BIP);
 			meh_screen_platform_list_start_platform(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_B:
@@ -288,6 +289,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform -= 1;
 			}
+			meh_audio_play(app->audio, SFX_BIP);
 			meh_screen_platform_change_platform(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
@@ -296,6 +298,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			} else {
 				data->selected_platform += 1;
 			}
+			meh_audio_play(app->audio, SFX_BIP);
 			meh_screen_platform_change_platform(app, screen);
 			break;
 	}
