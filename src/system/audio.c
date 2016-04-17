@@ -23,7 +23,7 @@ Audio* meh_audio_new() {
 
 	SDL_AudioSpec want;
 	want.channels = 2;
-	want.samples = 128;
+	want.samples = 64;
 	want.callback = NULL;
 
 	audio->device_id = SDL_OpenAudioDevice(
@@ -139,7 +139,25 @@ int meh_audio_start(void* audio) {
 			/* NOTE(remy): I think we'll need to copy
 			 * the bytes here and probably copy batch
 			 * per batch and not the full data at once.*/
-			SDL_QueueAudio(a->device_id, s->data->data, s->data->len);
+
+			/* NOTE(remy): lowering the volume could be costly
+			 * and could be remove in the sound loading if
+			 * necessary but I prefer to avoid the dependency
+			 * of sound -> audio format as long as I can. */
+			/* lower a bit the volume (to avoid saturation)
+			 * and push it to the audio card */
+			void* lowered = g_malloc0(s->data->len);
+			if (lowered != NULL) {
+				SDL_MixAudioFormat(
+						lowered,
+						s->data->data,
+						a->spec.format,
+						s->data->len,
+						SDL_MIX_MAXVOLUME * 0.80
+						);
+				SDL_QueueAudio(a->device_id, lowered, s->data->len);
+				g_free(lowered);
+			}
 		}
 
 		Sound* sound = NULL;
