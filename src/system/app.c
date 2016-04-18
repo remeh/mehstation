@@ -516,7 +516,7 @@ void meh_app_send_message(App* app, Message* message) {
 /*
  * meh_app_start_executable starts the given platform's executable.
  * WARNING: all the screen should have been destroyed before calling
- * this method has the OpenGL context is destroyed and recreated here.
+ * this method as the OpenGL context is destroyed and recreated here.
  * The caller has the responsability to destroy the screens and to restore
  * them.
  * In the same manner, the caller has the responsability to provide
@@ -610,6 +610,8 @@ void meh_app_start_executable(App* app, Platform* platform, Executable* executab
 	}
 
 	g_message("End of execution of '%s'", display_name);
+
+	meh_db_update_executable_last_played(app->db, executable);
 
 	/*
 	 * Recreate the video context

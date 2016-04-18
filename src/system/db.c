@@ -579,6 +579,29 @@ gboolean meh_db_set_executable_favorite(DB* db, const Executable* executable, gb
 	return FALSE;
 }
 
+gboolean meh_db_update_executable_last_played(DB* db, const struct Executable* executable) {
+	g_assert(db != NULL);
+	g_assert(executable != NULL);
+
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "UPDATE executable SET last_played = datetime('now') WHERE id = ?1";
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+
+	if (return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
+		return FALSE;
+	}
+
+	sqlite3_bind_int(statement, 1, executable->id);
+
+	if (sqlite3_step(statement) == SQLITE_DONE) {
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 /*
  * meh_db_get_executable_resources gets in  the SQLite3 database all the resources
  * available for the given executable.
