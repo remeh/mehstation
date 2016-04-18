@@ -27,6 +27,7 @@ After having configured your platforms (Native, Emulators, ...) and the executab
   * Import configuration from EmulationStation
   * Favorite your executables, launch random executables, etc.
   * Automatic detection and visual mapping of gamepads.
+  * Sounds (can be disabled in settings)
 
 ## Configuration
 
