@@ -8,6 +8,8 @@ typedef struct {
 	gint width;
 	gint height;
 	gboolean fullscreen;
+	gboolean suggest;
+	gboolean recent;
 	/* input */
 	guint input_repeat_delay;
 	guint input_repeat_frequency;

@@ -40,6 +40,8 @@ gboolean meh_settings_read(Settings *settings, const char *filename) {
 	settings->width = meh_settings_read_int(keyfile, "mehstation", "width", 640);
 	settings->height = meh_settings_read_int(keyfile, "mehstation", "height", 480);
 	settings->fullscreen = meh_settings_read_bool(keyfile, "mehstation", "fullscreen", FALSE);
+	settings->suggest = meh_settings_read_bool(keyfile, "mehstation", "suggest", TRUE);
+	settings->recent = meh_settings_read_bool(keyfile, "mehstation", "recent", TRUE);
 
 	settings->input_repeat_delay = meh_settings_read_int(keyfile, "input", "input_repeat_delay", 300);
 	settings->input_repeat_frequency = meh_settings_read_int(keyfile, "input", "input_repeat_frequency", 50);
