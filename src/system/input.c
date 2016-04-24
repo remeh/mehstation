@@ -65,6 +65,7 @@ InputManager* meh_input_manager_new(DB* db, Settings settings) {
 
 		g_queue_push_tail(input_manager->gamepads, gamepad);
 		g_message("Using gamepad: %s", SDL_JoystickNameForIndex(i));
+		g_debug("Has %d hats", SDL_JoystickNumHats(gamepad->joystick));
 		g_queue_push_tail(input_manager->input_states, gamepad_state);
 		g_debug("Adding gamepad %d with id : %s", i, gamepad_state->id);
 	}
@@ -213,16 +214,22 @@ static InputState* meh_input_manager_get_input_state(InputManager* input_manager
 	/* if it's a joystick */
 	gchar* guid = NULL;
 	if (sdl_event->type == SDL_JOYBUTTONDOWN || sdl_event->type == SDL_JOYBUTTONUP ||
-			sdl_event->type == SDL_JOYAXISMOTION) {
+			sdl_event->type == SDL_JOYAXISMOTION || sdl_event->type == SDL_JOYHATMOTION) {
 		/* looks which gamepad has done the event */
 		for (unsigned int i = 0; i < g_queue_get_length(input_manager->gamepads); i++) {
 			Gamepad* gamepad = g_queue_peek_nth(input_manager->gamepads, i);
 
 			SDL_JoystickID gamepad_event_id;
-			if (sdl_event->type == SDL_JOYAXISMOTION) {
-				gamepad_event_id = sdl_event->jaxis.which;	
-			} else {
-				gamepad_event_id = sdl_event->jbutton.which;	
+			switch (sdl_event->type) {
+				case SDL_JOYAXISMOTION:
+					gamepad_event_id = sdl_event->jaxis.which;
+					break;
+				case SDL_JOYHATMOTION:
+					gamepad_event_id = sdl_event->jhat.which;
+					break;
+				default:
+					gamepad_event_id = sdl_event->jbutton.which;
+					break;
 			}
 
 			/* if this this joystick having done the event ? */
@@ -284,6 +291,8 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 		case SDL_JOYHATMOTION:
 			keyboard = FALSE;
 
+
+			/* DPAD support */
 			switch (sdl_event->jhat.value) {
 				case SDL_HAT_CENTERED:
 					// back to center, reset the up down right and left directions.
@@ -323,8 +332,10 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 						/* A bit harsh : we there was a motion axis but no value, 
 						 * it means that the axis has returned to 0 and so we need
 						 * to reset the direction values. */
-						meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_LEFT);
-						meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_RIGHT);
+						if (sdl_event->jhat.value == 0) {
+							meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_LEFT);
+							meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_RIGHT);
+						}
 					}
 					break;
 
@@ -337,8 +348,10 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 						/* A bit harsh : we there was a motion axis but no value, 
 						 * it means that the axis has returned to 0 and so we need
 						 * to reset the direction values. */
-						meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_UP);
-						meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_DOWN);
+						if (sdl_event->jhat.value == 0) {
+							meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_UP);
+							meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_DOWN);
+						}
 					}
 					break;
 			}
@@ -362,6 +375,10 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 	}
 
 	input_state->last_sdl_key = sdl_button;
+
+	if (key_pressed == MEH_INPUT_SPECIAL_UNKNOWN) {
+		return;
+	}
 
 	/* This is a known key set it as pressed / unpressed */
 	switch (sdl_event->type) {
@@ -394,12 +411,10 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 	g_assert(input_manager != NULL);
 
 	GSList* list = NULL;
-	int i = 0;
-
 	for (unsigned int j = 0; j < g_queue_get_length(input_manager->input_states); j++) {
 		InputState* input_state = g_queue_peek_nth(input_manager->input_states, j);
 
-		for (i = 0; i < MEH_INPUT_END; i++) {
+		for (int i = 0; i < MEH_INPUT_END; i++) {
 			switch (input_state->buttons_state[i]) {
 				case MEH_INPUT_JUST_PRESSED:
 					/* Just pressed, we'll immediatly send a message */
@@ -419,6 +434,7 @@ GSList* meh_input_manager_generate_messages(InputManager* input_manager) {
 			}
 		}
 	}
+
 
 	return list;
 }

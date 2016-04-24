@@ -121,7 +121,7 @@ void meh_screen_debug_input_update(App* app, Screen* screen) {
 					data->states[j]->b.value = blue.b;
 					data->states[j]->a.value = blue.a;
 					break;
-				case MEH_INPUT_JUST_PRESSED:
+				case MEH_INPUT_JUST_PRESSED: // should never been displayed
 					data->states[j]->r.value = green.r;
 					data->states[j]->g.value = green.g;
 					data->states[j]->b.value = green.b;
