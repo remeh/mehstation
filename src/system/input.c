@@ -198,7 +198,7 @@ static void meh_input_manager_reset_button_state(InputManager* input_manager, in
 	for (unsigned int j = 0; j < g_queue_get_length(input_manager->input_states); j++) {
 		InputState* input_state = g_queue_peek_nth(input_manager->input_states, j);
 		input_state->buttons_state[button] = MEH_INPUT_NOT_PRESSED;
-		input_state->buttons_next_message[button] = MEH_INPUT_NOT_PRESSED;
+		input_state->buttons_next_message[button] = 0;
 	}
 }
 

@@ -53,6 +53,7 @@ SET(
         src/view/screen/main_popup.c
         src/view/screen/exec_popup.c
         src/view/screen/simple_popup.c
+        src/view/screen/debug_input.c
 )
 
 ADD_EXECUTABLE(

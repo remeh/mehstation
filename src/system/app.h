@@ -54,4 +54,5 @@ void meh_app_main_loop_render(App* app);
 void meh_app_send_message(App* app, Message* message);
 gboolean meh_app_open_or_create_db(App*  app);
 void meh_app_start_executable(App* app, Platform* platform, Executable* executable);
+void meh_app_run_first_screen(App* app);
 gchar* meh_app_init_create_dir_conf(App* app);

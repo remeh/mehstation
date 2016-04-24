@@ -13,6 +13,7 @@
 #include "view/image.h"
 #include "view/video.h"
 #include "view/screen.h"
+#include "view/screen/debug_input.h"
 #include "view/screen/starting.h"
 #include "view/screen/executable_list.h"
 #include "view/screen/platform_list.h"
@@ -127,19 +128,33 @@ int meh_app_init(App* app, int argc, char* argv[]) {
 	/* Audio engine */
 	meh_app_init_audio(app);
 
-	/* Sets the starting screen as the current screen */
-	Screen* starting_screen = meh_screen_starting_new(app);
-	if (starting_screen == NULL) {
-		g_critical("Can't init the starting screen.");
-		return 1;
-	} 
-
 	/* Hides the mouse cursor */
 	SDL_ShowCursor(SDL_DISABLE);
 
-	meh_app_set_current_screen(app, starting_screen, FALSE);
+	/* Let's go for the first screen. */
+	meh_app_run_first_screen(app);
 
 	return 0;
+}
+
+void meh_app_run_first_screen(App* app) {
+	g_assert(app != NULL);
+
+	Screen* screen = NULL;
+
+	if (app->flags.debug_input) {
+		screen = (Screen*)meh_screen_debug_input_new(app);
+	} else {
+		/* Sets the starting screen as the current screen */
+		screen = (Screen*)meh_screen_starting_new(app);
+	}
+
+	if (screen == NULL) {
+		g_critical("can't init the starting screen.");
+		return;
+	}
+
+	meh_app_set_current_screen(app, screen, FALSE);
 }
 
 void meh_app_init_audio(App* app) {
@@ -445,8 +460,6 @@ void meh_app_main_loop_event(App* app) {
 				break;
 			case SDL_KEYUP:
 			case SDL_KEYDOWN:
-				meh_input_manager_read_event(app->input_manager, event);
-				break;
 			case SDL_JOYBUTTONUP:
 			case SDL_JOYBUTTONDOWN:
 			case SDL_JOYAXISMOTION:

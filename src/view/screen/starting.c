@@ -3,7 +3,7 @@
  *
  * Copyright © 2015 Rémy Mathieu
  */
-#include "glib-2.0/glib.h"
+#include <glib-2.0/glib.h>
 
 #include "system/app.h"
 #include "system/consts.h"
