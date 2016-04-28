@@ -110,30 +110,46 @@ void meh_screen_debug_input_update(App* app, Screen* screen) {
 
 	DebugInputData* data = meh_screen_debug_input_get_data(screen);
 
+	int pressed[10];
+	for (unsigned int i = 0; i < 10; i++) {
+		pressed[i] = MEH_INPUT_NOT_PRESSED;
+	}
+
 	for (unsigned int i = 0; i < g_queue_get_length(app->input_manager->input_states); i++) {
 		InputState* is = g_queue_peek_nth(app->input_manager->input_states, i);
 
-		for (int j = 0; j < 10; j++) {
+		for (unsigned int j = 0; j < 10; j++) {
 			switch (is->buttons_state[j]) {
+				case MEH_INPUT_JUST_PRESSED:
+					pressed[j] = MEH_INPUT_JUST_PRESSED;
+					break;
 				case MEH_INPUT_HOLD:
-					data->states[j]->r.value = blue.r;
-					data->states[j]->g.value = blue.g;
-					data->states[j]->b.value = blue.b;
-					data->states[j]->a.value = blue.a;
-					break;
-				case MEH_INPUT_JUST_PRESSED: // should never been displayed
-					data->states[j]->r.value = green.r;
-					data->states[j]->g.value = green.g;
-					data->states[j]->b.value = green.b;
-					data->states[j]->a.value = green.a;
-					break;
-				case MEH_INPUT_NOT_PRESSED:
-					data->states[j]->r.value = red.r;
-					data->states[j]->g.value = red.g;
-					data->states[j]->b.value = red.b;
-					data->states[j]->a.value = red.a;
+					pressed[j] = MEH_INPUT_HOLD;
 					break;
 			}
+		}
+	}
+
+	for (unsigned int i = 0; i < 10; i++) {
+		switch (pressed[i]) {
+			case MEH_INPUT_HOLD:
+				data->states[i]->r.value = blue.r;
+				data->states[i]->g.value = blue.g;
+				data->states[i]->b.value = blue.b;
+				data->states[i]->a.value = blue.a;
+				break;
+			case MEH_INPUT_JUST_PRESSED: // should never been displayed
+				data->states[i]->r.value = green.r;
+				data->states[i]->g.value = green.g;
+				data->states[i]->b.value = green.b;
+				data->states[i]->a.value = green.a;
+				break;
+			case MEH_INPUT_NOT_PRESSED:
+				data->states[i]->r.value = red.r;
+				data->states[i]->g.value = red.g;
+				data->states[i]->b.value = red.b;
+				data->states[i]->a.value = red.a;
+				break;
 		}
 	}
 }
