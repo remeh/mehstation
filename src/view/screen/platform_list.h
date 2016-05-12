@@ -11,8 +11,15 @@
 /* cross-reference */
 struct App;
 
+struct lastPlayed {
+	Executable* executable;
+	Platform* platform;
+	SDL_Texture* icon;
+};
+
 typedef struct PlatformListData {
 	GQueue* platforms;
+	struct lastPlayed last_played;
 	unsigned int selected_platform;
 
 	/*

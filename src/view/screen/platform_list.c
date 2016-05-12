@@ -21,6 +21,8 @@
 #include "view/screen/main_popup.h"
 
 static Platform* meh_screen_platform_get_current(Screen* screen);
+static void meh_screen_platform_last_played_load(App* app, Screen* screen);
+static void meh_screen_platform_last_played_destroy(Screen* screen);
 
 Screen* meh_screen_platform_list_new(App* app) {
 	Screen* screen = meh_screen_new(app->window);
@@ -29,7 +31,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	screen->messages_handler = &meh_screen_platform_list_messages_handler;
 	screen->destroy_data = &meh_screen_platform_list_destroy_data;
 
-	/* init the custom data. */
+	/* init the screen data. */
 	PlatformListData* data = g_new(PlatformListData, 1);	
 	data->platforms = meh_db_get_platforms(app->db);
 	data->selected_platform = 0;
@@ -102,9 +104,81 @@ Screen* meh_screen_platform_list_new(App* app) {
 
 	screen->data = data;
 
+	/* last played */
+	data->last_played.executable = NULL;
+	data->last_played.platform = NULL;
+	data->last_played.icon = NULL;
+	meh_screen_platform_last_played_load(app, screen);
+
+	/* go to the platform 0 */
 	meh_screen_platform_change_platform(app, screen);
 
 	return screen;
+}
+
+static void meh_screen_platform_last_played_load(App* app, Screen* screen) {
+	g_assert(app != NULL);
+	g_assert(screen != NULL);
+
+	PlatformListData* data = meh_screen_platform_list_get_data(screen);
+	if (data == NULL) {
+		return;
+	}
+
+	/* executable */
+	int platform_id = -1;
+	Executable* executable = meh_db_get_last_played_executable(app->db, &platform_id);
+
+	/* didn't find any */
+	if (platform_id < 0) {
+		return;
+	}
+
+	/* platform */
+	Platform* platform = meh_db_get_platform(app->db, platform_id);
+	if (platform == NULL) {
+		meh_model_executable_destroy(executable);
+		return;
+	}
+
+	/* icon */
+	// TODO(remy): load something else than the platform icon
+	// a good idea would obviously be the executable cover
+	SDL_Texture* icon = meh_image_load_file(app->window->sdl_renderer, platform->icon);
+
+	if (icon == NULL) {
+		g_critical("Can't load the file '%s' for the last played executable.", platform->icon);
+		meh_model_executable_destroy(executable);
+		meh_model_platform_destroy(platform);
+		return;
+	}
+
+	data->last_played.platform = platform;
+	data->last_played.executable = executable;
+	data->last_played.icon = icon;
+}
+
+static void meh_screen_platform_last_played_destroy(Screen* screen) {
+	g_assert(screen != NULL);
+
+	PlatformListData* data = meh_screen_platform_list_get_data(screen);
+	if (data == NULL) {
+		return;
+	}
+
+	/* last played */
+	if (data->last_played.executable != NULL) {
+		meh_model_executable_destroy(data->last_played.executable);
+		data->last_played.executable = NULL;
+	}
+	if (data->last_played.platform != NULL) {
+		meh_model_platform_destroy(data->last_played.platform);
+		data->last_played.platform = NULL;
+	}
+	if (data->last_played.icon != NULL) {
+		SDL_DestroyTexture(data->last_played.icon);
+		data->last_played.icon = NULL;
+	}
 }
 
 /*
@@ -114,39 +188,44 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 	g_assert(screen != NULL);
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
-	if (data != NULL) {
-		/* free platforms icons texture */
-		for (unsigned int i = 0; i < g_queue_get_length(data->platforms_icons); i++) {
-			SDL_Texture* text = g_queue_peek_nth(data->platforms_icons, i);
-			SDL_DestroyTexture(text);
-		}
-		g_queue_free(data->platforms_icons);
-
-		/* free platforms widget */
-		for (unsigned int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
-			WidgetImage* widget = g_queue_peek_nth(data->icons_widgets, i);
-			meh_widget_image_destroy(widget);
-		}
-		g_queue_free(data->icons_widgets);
-
-		/* free platform models */
-		meh_model_platforms_destroy(data->platforms);
-
-		/* various widgets */
-		meh_widget_text_destroy(data->executables_count);
-		meh_widget_text_destroy(data->title);
-		meh_widget_text_destroy(data->no_platforms_widget);
-
-		/* background */
-		if (data->background != NULL) {
-			SDL_DestroyTexture(data->background);
-		}
-		meh_widget_image_destroy(data->background_widget);
-
-		meh_widget_rect_destroy(data->background_hover);
-		meh_widget_rect_destroy(data->hover);
-		meh_widget_text_destroy(data->platform_name);
+	if (data == NULL) {
+		return;
 	}
+
+	/* free platforms icons texture */
+	for (unsigned int i = 0; i < g_queue_get_length(data->platforms_icons); i++) {
+		SDL_Texture* text = g_queue_peek_nth(data->platforms_icons, i);
+		SDL_DestroyTexture(text);
+	}
+	g_queue_free(data->platforms_icons);
+
+	/* free platforms widget */
+	for (unsigned int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
+		WidgetImage* widget = g_queue_peek_nth(data->icons_widgets, i);
+		meh_widget_image_destroy(widget);
+	}
+	g_queue_free(data->icons_widgets);
+
+	/* last played */
+	meh_screen_platform_last_played_destroy(screen);
+
+	/* free platform models */
+	meh_model_platforms_destroy(data->platforms);
+
+	/* various widgets */
+	meh_widget_text_destroy(data->executables_count);
+	meh_widget_text_destroy(data->title);
+	meh_widget_text_destroy(data->no_platforms_widget);
+
+	/* background */
+	if (data->background != NULL) {
+		SDL_DestroyTexture(data->background);
+	}
+	meh_widget_image_destroy(data->background_widget);
+
+	meh_widget_rect_destroy(data->background_hover);
+	meh_widget_rect_destroy(data->hover);
+	meh_widget_text_destroy(data->platform_name);
 }
 
 /*
