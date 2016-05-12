@@ -514,6 +514,36 @@ Executable* meh_db_get_random_executable(DB* db, int* platform_id) {
 }
 
 /*
+ * meh_db_get_last_played_executable returns the lastly played executable.
+ * platform_id will be set to the id of the executable's platform allowing
+ * to retrieve it later.
+ */
+Executable* meh_db_get_last_played_executable(DB* db, int* platform_id) {
+	g_assert(db != NULL);
+
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "SELECT \"e1\".\"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\",\"extra_parameter\", \"favorite\", \"last_played\", \"platform_id\" FROM \"executable\" AS \"e1\" JOIN \"platform\" ON \"platform\".\"id\" = \"e1\".\"platform_id\" ORDER BY \"last_played\" LIMIT 1;";
+
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	if (return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
+		return NULL;
+	}
+
+	/* read the value */
+	Executable* executable = NULL;
+	if (sqlite3_step(statement) == SQLITE_ROW) {
+		executable = meh_db_read_executable(statement);
+		*platform_id = sqlite3_column_int(statement, 13);
+	}
+
+	sqlite3_finalize(statement);
+
+	return executable;
+}
+
+/*
  * meh_db_get_platform_executables gets in  the SQLite3 database all the executables
  * available for the given platform.
  */
