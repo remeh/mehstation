@@ -1,6 +1,9 @@
 /*
  * mehstation - Platform list screen.
  *
+ * TODO(remy): refactor the platform/extra part
+ * to use the same indexes, queues, etc.
+ *
  * Copyright © 2015 Rémy Mathieu
  */
 #include <glib.h>
@@ -107,6 +110,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	/* last played */
 	data->last_played.executable = NULL;
 	data->last_played.platform = NULL;
+	data->last_played.widget_icon = NULL;
 	data->last_played.icon = NULL;
 	meh_screen_platform_last_played_load(app, screen);
 
@@ -130,13 +134,15 @@ static void meh_screen_platform_last_played_load(App* app, Screen* screen) {
 	Executable* executable = meh_db_get_last_played_executable(app->db, &platform_id);
 
 	/* didn't find any */
-	if (platform_id < 0) {
+	if (platform_id < 0 || executable == NULL) {
+		g_critical("Can't find the last played executable.");
 		return;
 	}
 
 	/* platform */
 	Platform* platform = meh_db_get_platform(app->db, platform_id);
 	if (platform == NULL) {
+		g_critical("Can't find the platform %d to load the last played executable.", platform_id);
 		meh_model_executable_destroy(executable);
 		return;
 	}
@@ -153,6 +159,11 @@ static void meh_screen_platform_last_played_load(App* app, Screen* screen) {
 		return;
 	}
 
+
+	/* widget */
+	WidgetImage* widget_icon = meh_widget_image_new(icon, 100, 285 - 200, 150, 150);
+
+	data->last_played.widget_icon = widget_icon;
 	data->last_played.platform = platform;
 	data->last_played.executable = executable;
 	data->last_played.icon = icon;
@@ -180,6 +191,10 @@ static void meh_screen_platform_last_played_destroy(Screen* screen) {
 	if (data->last_played.icon != NULL) {
 		SDL_DestroyTexture(data->last_played.icon);
 		data->last_played.icon = NULL;
+	}
+	if (data->last_played.widget_icon != NULL) {
+		meh_widget_image_destroy(data->last_played.widget_icon);
+		data->last_played.widget_icon = NULL;
 	}
 }
 
@@ -241,7 +256,6 @@ PlatformListData* meh_screen_platform_list_get_data(Screen* screen) {
 static Platform* meh_screen_platform_get_current(Screen* screen) {
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
 	Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
-	g_assert(platform != NULL);
 	return platform;
 }
 
@@ -285,9 +299,7 @@ static void meh_screen_platform_list_start_popup(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
-	/* create the child screen */
-	Platform* platform = meh_screen_platform_get_current(screen);
-	Screen* popup_screen = meh_simple_popup_new(app, screen, platform, NULL);
+	Screen* popup_screen = meh_simple_popup_new(app, screen, NULL, NULL);
 	meh_simple_popup_add_action(
 			app,
 			popup_screen,
@@ -365,8 +377,8 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			}
 			break;
 		case MEH_INPUT_BUTTON_UP:
-			if (data->selected_platform == 0) {
-				data->selected_platform = g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1;
+			if (data->selected_platform == -1) {
+				data->selected_platform = g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1; // TODO(remy): what if no last played executable ?
 			} else {
 				data->selected_platform -= 1;
 			}
@@ -375,7 +387,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 			if (data->selected_platform == g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1) {
-				data->selected_platform = 0;
+				data->selected_platform = -1; // TODO(remy): what if no last played executable ?
 			} else {
 				data->selected_platform += 1;
 			}
@@ -395,9 +407,15 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	}
 
 	Platform* platform = g_queue_peek_nth(data->platforms, data->selected_platform);
-	g_assert(platform != NULL);
 
-	/* animate icons */
+	/* destroys the background */
+	if (data->background != NULL) {
+		SDL_DestroyTexture(data->background);
+		data->background = NULL;
+	}
+
+	/* icons */
+
 	for (unsigned int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
 		int y = 285;
 		if (i < data->selected_platform) {
@@ -411,32 +429,37 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 		meh_screen_add_image_transitions(screen, image);
 	}
 
-	/* platform name */
-	data->platform_name->text = platform->name;
-	meh_widget_text_reload(app->window, data->platform_name);
-	data->platform_name->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
-	meh_screen_add_text_transitions(screen, data->platform_name);
+	/* extra icons */
 
-	/* executables count */
-	int count_exec = meh_db_count_platform_executables(app->db, platform);
-	g_free(data->subtext->text);
-	data->subtext->text = g_strdup_printf("%d executable%s", count_exec, count_exec > 1 ? "s": "");
-	meh_widget_text_reload(app->window, data->subtext);
-	data->subtext->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 325, 550);
-	meh_screen_add_text_transitions(screen, data->subtext);
+	if (data->last_played.widget_icon != NULL) {
+		int new_y = 85 - (data->selected_platform) * 200;
+		WidgetImage* image = data->last_played.widget_icon;
+		image->y = meh_transition_start(MEH_TRANSITION_CUBIC, image->y.value, new_y, 200);
+		meh_screen_add_image_transitions(screen, image);
+	}
 
-	/*
-	 * animate a fade on the background
-	 */
-	data->background_hover->a = meh_transition_start(MEH_TRANSITION_CUBIC, 255, 0, 300);
-	meh_screen_add_rect_transitions(screen, data->background_hover);
+	if (platform != NULL) {
+		/* platform name */
+		data->platform_name->text = platform->name;
+		meh_widget_text_reload(app->window, data->platform_name);
+		data->platform_name->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
+		meh_screen_add_text_transitions(screen, data->platform_name);
 
-	/* background image */
-	if (platform->background != NULL) {
-		/* start by destroying the last one if any */
-		if (data->background != NULL) {
-			SDL_DestroyTexture(data->background);
-		}
+		/* executables count */
+		int count_exec = meh_db_count_platform_executables(app->db, platform);
+		g_free(data->subtext->text);
+		data->subtext->text = g_strdup_printf("%d executable%s", count_exec, count_exec > 1 ? "s": "");
+		meh_widget_text_reload(app->window, data->subtext);
+		data->subtext->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 325, 550);
+		meh_screen_add_text_transitions(screen, data->subtext);
+
+		/*
+		 * animate a fade on the background
+		 */
+		data->background_hover->a = meh_transition_start(MEH_TRANSITION_CUBIC, 255, 0, 300);
+		meh_screen_add_rect_transitions(screen, data->background_hover);
+
+		/* background image */
 		if (platform->background != NULL && strlen(platform->background) != 0) {
 			data->background = meh_image_load_file(app->window->sdl_renderer, platform->background);
 			data->background_widget->texture = data->background;
@@ -479,7 +502,6 @@ int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 	/* selection hover */
 	meh_widget_rect_render(app->window, data->hover);
 
-	meh_widget_text_render(app->window, data->title);
 	meh_widget_text_render(app->window, data->platform_name);
 	meh_widget_text_render(app->window, data->subtext);
 	
@@ -492,6 +514,13 @@ int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 		WidgetImage* widget = g_queue_peek_nth(data->icons_widgets, i);
 		meh_widget_image_render(app->window, widget);
 	}
+
+	/* extra icons */
+	if (data->last_played.widget_icon != NULL) {
+		meh_widget_image_render(app->window, data->last_played.widget_icon);
+	}
+
+	meh_widget_text_render(app->window, data->title);
 	
 	if (flip == TRUE) {
 		meh_window_render(app->window);

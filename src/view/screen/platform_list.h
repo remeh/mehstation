@@ -14,6 +14,7 @@ struct App;
 struct lastPlayed {
 	Executable* executable;
 	Platform* platform;
+	WidgetImage* widget_icon;
 	SDL_Texture* icon;
 };
 
