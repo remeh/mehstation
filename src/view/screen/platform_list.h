@@ -11,7 +11,7 @@
 /* cross-reference */
 struct App;
 
-struct lastPlayed {
+struct lastStarted {
 	Executable* executable;
 	Platform* platform;
 	WidgetImage* widget_icon;
@@ -20,7 +20,7 @@ struct lastPlayed {
 
 typedef struct PlatformListData {
 	GQueue* platforms;
-	struct lastPlayed last_played;
+	struct lastStarted last_started;
 	int selected_platform;
 
 	/*

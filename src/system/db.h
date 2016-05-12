@@ -23,7 +23,7 @@ struct Platform* meh_db_get_platform(DB* db, int platform_id);
 struct Executable* meh_db_read_executable(sqlite3_stmt* statement);
 struct Executable* meh_db_get_platform_random_executable(DB* db, int platform_id);
 struct Executable* meh_db_get_random_executable(DB* db, int* platform_id);
-struct Executable* meh_db_get_last_played_executable(DB* db, int *platform_id);;
+struct Executable* meh_db_get_last_started_executable(DB* db, int *platform_id);;
 GQueue* meh_db_get_platform_executables(DB* db, const struct Platform* platform, gboolean get_resources);
 int meh_db_count_platform_executables(DB* db, const struct Platform* platform);
 struct Executable* meh_db_get_executable(DB* db, int executable_id);

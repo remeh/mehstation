@@ -514,11 +514,11 @@ Executable* meh_db_get_random_executable(DB* db, int* platform_id) {
 }
 
 /*
- * meh_db_get_last_played_executable returns the lastly played executable.
+ * meh_db_get_last_started_executable returns the lastly played executable.
  * platform_id will be set to the id of the executable's platform allowing
  * to retrieve it later.
  */
-Executable* meh_db_get_last_played_executable(DB* db, int* platform_id) {
+Executable* meh_db_get_last_started_executable(DB* db, int* platform_id) {
 	g_assert(db != NULL);
 
 	sqlite3_stmt *statement = NULL;

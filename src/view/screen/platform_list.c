@@ -24,8 +24,8 @@
 #include "view/screen/main_popup.h"
 
 static Platform* meh_screen_platform_get_current(Screen* screen);
-static void meh_screen_platform_last_played_load(App* app, Screen* screen);
-static void meh_screen_platform_last_played_destroy(Screen* screen);
+static void meh_screen_platform_last_started_load(App* app, Screen* screen);
+static void meh_screen_platform_last_started_destroy(Screen* screen);
 static void meh_screen_platform_start_executable(App* app, Screen* screen);
 
 Screen* meh_screen_platform_list_new(App* app) {
@@ -109,11 +109,11 @@ Screen* meh_screen_platform_list_new(App* app) {
 	screen->data = data;
 
 	/* last played */
-	data->last_played.executable = NULL;
-	data->last_played.platform = NULL;
-	data->last_played.widget_icon = NULL;
-	data->last_played.icon = NULL;
-	meh_screen_platform_last_played_load(app, screen);
+	data->last_started.executable = NULL;
+	data->last_started.platform = NULL;
+	data->last_started.widget_icon = NULL;
+	data->last_started.icon = NULL;
+	meh_screen_platform_last_started_load(app, screen);
 
 	/* go to the platform 0 */
 	meh_screen_platform_change_platform(app, screen);
@@ -121,7 +121,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	return screen;
 }
 
-static void meh_screen_platform_last_played_load(App* app, Screen* screen) {
+static void meh_screen_platform_last_started_load(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
@@ -132,7 +132,7 @@ static void meh_screen_platform_last_played_load(App* app, Screen* screen) {
 
 	/* executable */
 	int platform_id = -1;
-	Executable* executable = meh_db_get_last_played_executable(app->db, &platform_id);
+	Executable* executable = meh_db_get_last_started_executable(app->db, &platform_id);
 
 	/* didn't find any */
 	if (platform_id < 0 || executable == NULL) {
@@ -164,15 +164,15 @@ static void meh_screen_platform_last_played_load(App* app, Screen* screen) {
 	/* widget */
 	WidgetImage* widget_icon = meh_widget_image_new(icon, 100, 285 - 200, 150, 150);
 
-	data->last_played.widget_icon = widget_icon;
-	data->last_played.platform = platform;
-	data->last_played.executable = executable;
-	data->last_played.icon = icon;
+	data->last_started.widget_icon = widget_icon;
+	data->last_started.platform = platform;
+	data->last_started.executable = executable;
+	data->last_started.icon = icon;
 
 	g_debug("Last played executable loaded: %s", executable->display_name);
 }
 
-static void meh_screen_platform_last_played_destroy(Screen* screen) {
+static void meh_screen_platform_last_started_destroy(Screen* screen) {
 	g_assert(screen != NULL);
 
 	PlatformListData* data = meh_screen_platform_list_get_data(screen);
@@ -181,21 +181,21 @@ static void meh_screen_platform_last_played_destroy(Screen* screen) {
 	}
 
 	/* last played */
-	if (data->last_played.executable != NULL) {
-		meh_model_executable_destroy(data->last_played.executable);
-		data->last_played.executable = NULL;
+	if (data->last_started.executable != NULL) {
+		meh_model_executable_destroy(data->last_started.executable);
+		data->last_started.executable = NULL;
 	}
-	if (data->last_played.platform != NULL) {
-		meh_model_platform_destroy(data->last_played.platform);
-		data->last_played.platform = NULL;
+	if (data->last_started.platform != NULL) {
+		meh_model_platform_destroy(data->last_started.platform);
+		data->last_started.platform = NULL;
 	}
-	if (data->last_played.icon != NULL) {
-		SDL_DestroyTexture(data->last_played.icon);
-		data->last_played.icon = NULL;
+	if (data->last_started.icon != NULL) {
+		SDL_DestroyTexture(data->last_started.icon);
+		data->last_started.icon = NULL;
 	}
-	if (data->last_played.widget_icon != NULL) {
-		meh_widget_image_destroy(data->last_played.widget_icon);
-		data->last_played.widget_icon = NULL;
+	if (data->last_started.widget_icon != NULL) {
+		meh_widget_image_destroy(data->last_started.widget_icon);
+		data->last_started.widget_icon = NULL;
 	}
 }
 
@@ -225,7 +225,7 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 	g_queue_free(data->icons_widgets);
 
 	/* last played */
-	meh_screen_platform_last_played_destroy(screen);
+	meh_screen_platform_last_started_destroy(screen);
 
 	/* free platform models */
 	meh_model_platforms_destroy(data->platforms);
@@ -352,10 +352,10 @@ static void meh_screen_platform_start_executable(App* app, Screen* screen) {
 
 	/* take the ownership of the executable and the platform
 	 * and recopy the selected platform to reselect */
-	Executable* executable = platform_list_data->last_played.executable;
-	platform_list_data->last_played.executable = NULL;
-	Platform* platform = platform_list_data->last_played.platform;
-	platform_list_data->last_played.platform = NULL;
+	Executable* executable = platform_list_data->last_started.executable;
+	platform_list_data->last_started.executable = NULL;
+	Platform* platform = platform_list_data->last_started.platform;
+	platform_list_data->last_started.platform = NULL;
 	int selected_platform = platform_list_data->selected_platform;
 
 	meh_screen_destroy(screen);
@@ -420,7 +420,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			break;
 		case MEH_INPUT_BUTTON_UP:
 			if (data->selected_platform == -1 ||
-				(data->last_played.executable == NULL && data->selected_platform == 0)) {
+				(data->last_started.executable == NULL && data->selected_platform == 0)) {
 				data->selected_platform = g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1; // TODO(remy): what if no last played executable ?
 			} else {
 				data->selected_platform -= 1;
@@ -430,7 +430,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 			if (data->selected_platform == g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1) {
-				if (data->last_played.executable != NULL) {
+				if (data->last_started.executable != NULL) {
 					data->selected_platform = -1;
 				} else {
 					data->selected_platform = 0;
@@ -476,9 +476,9 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	}
 
 	/* extra icons */
-	if (data->last_played.widget_icon != NULL) {
+	if (data->last_started.widget_icon != NULL) {
 		int new_y = 85 - (data->selected_platform) * 200;
-		WidgetImage* image = data->last_played.widget_icon;
+		WidgetImage* image = data->last_started.widget_icon;
 		image->y = meh_transition_start(MEH_TRANSITION_CUBIC, image->y.value, new_y, 200);
 		meh_screen_add_image_transitions(screen, image);
 	}
@@ -502,10 +502,10 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 			data->background_widget->texture = data->background;
 		}
 	} else if (data->selected_platform == -1 &&
-			data->last_played.executable != NULL && data->last_played.platform != NULL) {
+			data->last_started.executable != NULL && data->last_started.platform != NULL) {
 		g_free(data->maintext->text);
 		g_free(data->subtext->text);
-		data->maintext->text = g_strdup_printf("%s", data->last_played.executable->display_name);
+		data->maintext->text = g_strdup_printf("%s", data->last_started.executable->display_name);
 		data->subtext->text = g_strdup("Last started executable");
 	}
 
@@ -566,8 +566,8 @@ int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 	}
 
 	/* extra icons */
-	if (data->last_played.widget_icon != NULL) {
-		meh_widget_image_render(app->window, data->last_played.widget_icon);
+	if (data->last_started.widget_icon != NULL) {
+		meh_widget_image_render(app->window, data->last_started.widget_icon);
 	}
 
 	meh_widget_text_render(app->window, data->title);
