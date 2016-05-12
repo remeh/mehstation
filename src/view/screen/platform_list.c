@@ -156,6 +156,8 @@ static void meh_screen_platform_last_played_load(App* app, Screen* screen) {
 	data->last_played.platform = platform;
 	data->last_played.executable = executable;
 	data->last_played.icon = icon;
+
+	g_debug("Last played executable loaded: %s", executable->display_name);
 }
 
 static void meh_screen_platform_last_played_destroy(Screen* screen) {
