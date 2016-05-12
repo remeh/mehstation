@@ -98,9 +98,9 @@ Screen* meh_screen_platform_list_new(App* app) {
 	data->platform_name = meh_widget_text_new(app->big_font, "", 320, 315, 500, 100, white, FALSE);
 	data->platform_name->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
 	meh_screen_add_text_transitions(screen, data->platform_name);
-	data->executables_count = meh_widget_text_new(app->small_font, "", 325, 365, 500, 100, white, FALSE);
-	data->executables_count->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 360, 300);
-	meh_screen_add_text_transitions(screen, data->executables_count);
+	data->subtext = meh_widget_text_new(app->small_font, "", 325, 365, 500, 100, white, FALSE);
+	data->subtext->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 360, 300);
+	meh_screen_add_text_transitions(screen, data->subtext);
 
 	screen->data = data;
 
@@ -215,7 +215,7 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 	meh_model_platforms_destroy(data->platforms);
 
 	/* various widgets */
-	meh_widget_text_destroy(data->executables_count);
+	meh_widget_text_destroy(data->subtext);
 	meh_widget_text_destroy(data->title);
 	meh_widget_text_destroy(data->no_platforms_widget);
 
@@ -419,11 +419,11 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 
 	/* executables count */
 	int count_exec = meh_db_count_platform_executables(app->db, platform);
-	g_free(data->executables_count->text);
-	data->executables_count->text = g_strdup_printf("%d executable%s", count_exec, count_exec > 1 ? "s": "");
-	meh_widget_text_reload(app->window, data->executables_count);
-	data->executables_count->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 325, 550);
-	meh_screen_add_text_transitions(screen, data->executables_count);
+	g_free(data->subtext->text);
+	data->subtext->text = g_strdup_printf("%d executable%s", count_exec, count_exec > 1 ? "s": "");
+	meh_widget_text_reload(app->window, data->subtext);
+	data->subtext->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 325, 550);
+	meh_screen_add_text_transitions(screen, data->subtext);
 
 	/*
 	 * animate a fade on the background
@@ -481,7 +481,7 @@ int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 
 	meh_widget_text_render(app->window, data->title);
 	meh_widget_text_render(app->window, data->platform_name);
-	meh_widget_text_render(app->window, data->executables_count);
+	meh_widget_text_render(app->window, data->subtext);
 	
 	if (platform_count == 0) {
 		meh_widget_text_render(app->window, data->no_platforms_widget);
