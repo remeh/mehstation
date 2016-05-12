@@ -523,7 +523,7 @@ Executable* meh_db_get_last_played_executable(DB* db, int* platform_id) {
 
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"e1\".\"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\",\"extra_parameter\", \"favorite\", \"last_played\", \"platform_id\" FROM \"executable\" AS \"e1\" JOIN \"platform\" ON \"platform\".\"id\" = \"e1\".\"platform_id\" ORDER BY \"last_played\" LIMIT 1;";
+	const char* sql = "SELECT \"e1\".\"id\", \"display_name\", \"filepath\", \"description\", \"genres\", \"publisher\", \"developer\", \"release_date\", \"rating\", \"players\",\"extra_parameter\", \"favorite\", \"last_played\", \"platform_id\" FROM \"executable\" AS \"e1\" JOIN \"platform\" ON \"platform\".\"id\" = \"e1\".\"platform_id\" WHERE \"e1\".\"last_played\" != 0 AND \"e1\".\"last_played\" IS NOT NULL ORDER BY \"last_played\" DESC LIMIT 1;";
 
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
