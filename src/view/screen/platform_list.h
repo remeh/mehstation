@@ -21,7 +21,7 @@ struct lastPlayed {
 typedef struct PlatformListData {
 	GQueue* platforms;
 	struct lastPlayed last_played;
-	unsigned int selected_platform;
+	int selected_platform;
 
 	/*
 	 * Widgets
@@ -34,7 +34,7 @@ typedef struct PlatformListData {
 
 	WidgetRect* background_hover;
 	WidgetRect* hover;
-	WidgetText* platform_name;
+	WidgetText* maintext;
 	WidgetText* subtext;
 
 	GQueue* platforms_icons; /* Queue of SDL_Texture*, memory must be freed */

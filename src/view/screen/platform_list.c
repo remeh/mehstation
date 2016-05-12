@@ -26,6 +26,7 @@
 static Platform* meh_screen_platform_get_current(Screen* screen);
 static void meh_screen_platform_last_played_load(App* app, Screen* screen);
 static void meh_screen_platform_last_played_destroy(Screen* screen);
+static void meh_screen_platform_start_executable(App* app, Screen* screen);
 
 Screen* meh_screen_platform_list_new(App* app) {
 	Screen* screen = meh_screen_new(app->window);
@@ -98,9 +99,9 @@ Screen* meh_screen_platform_list_new(App* app) {
 	data->hover = meh_widget_rect_new(0, 260, MEH_FAKE_WIDTH, 200, black, TRUE);
 
 	/* misc */
-	data->platform_name = meh_widget_text_new(app->big_font, "", 320, 315, 500, 100, white, FALSE);
-	data->platform_name->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
-	meh_screen_add_text_transitions(screen, data->platform_name);
+	data->maintext = meh_widget_text_new(app->big_font, "", 320, 315, 500, 100, white, FALSE);
+	data->maintext->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
+	meh_screen_add_text_transitions(screen, data->maintext);
 	data->subtext = meh_widget_text_new(app->small_font, "", 325, 365, 500, 100, white, FALSE);
 	data->subtext->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 360, 300);
 	meh_screen_add_text_transitions(screen, data->subtext);
@@ -230,6 +231,7 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 	meh_model_platforms_destroy(data->platforms);
 
 	/* various widgets */
+	meh_widget_text_destroy(data->maintext);
 	meh_widget_text_destroy(data->subtext);
 	meh_widget_text_destroy(data->title);
 	meh_widget_text_destroy(data->no_platforms_widget);
@@ -242,7 +244,6 @@ void meh_screen_platform_list_destroy_data(Screen* screen) {
 
 	meh_widget_rect_destroy(data->background_hover);
 	meh_widget_rect_destroy(data->hover);
-	meh_widget_text_destroy(data->platform_name);
 }
 
 /*
@@ -341,6 +342,40 @@ static void meh_screen_platform_list_start_platform(App* app, Screen* screen) {
 }
 
 /*
+ * meh_screen_platform_start_executable destroys the current
+ * platform list screen after having saved some needed resources,
+ * starts the executable and then re-creates a platform list
+ * screen.
+ */
+static void meh_screen_platform_start_executable(App* app, Screen* screen) {
+	PlatformListData* platform_list_data = meh_screen_platform_list_get_data(screen);
+
+	/* take the ownership of the executable and the platform
+	 * and recopy the selected platform to reselect */
+	Executable* executable = platform_list_data->last_played.executable;
+	platform_list_data->last_played.executable = NULL;
+	Platform* platform = platform_list_data->last_played.platform;
+	platform_list_data->last_played.platform = NULL;
+	int selected_platform = platform_list_data->selected_platform;
+
+	meh_screen_destroy(screen);
+
+	meh_app_start_executable(app, platform, executable);
+
+	meh_model_executable_destroy(executable);
+	meh_model_platform_destroy(platform);
+
+	/* recreate the platform screen */
+	screen = meh_screen_platform_list_new(app);
+	platform_list_data = meh_screen_platform_list_get_data(screen);
+	platform_list_data->selected_platform = selected_platform;
+
+	meh_screen_platform_change_platform(app, screen);
+
+	meh_app_set_current_screen(app, screen, FALSE);
+}
+
+/*
  * meh_screen_platform_list_button_pressed is called when we received a button pressed
  * message.
  */
@@ -366,7 +401,14 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			break;
 		case MEH_INPUT_BUTTON_A:
 			meh_audio_play(app->audio, SFX_BIP);
-			meh_screen_platform_list_start_platform(app, screen);
+			if (data->selected_platform >= 0) {
+				/* enter the platform */
+				meh_screen_platform_list_start_platform(app, screen);
+			} else if (data->selected_platform == -1) {
+				/* last played */
+				meh_screen_platform_start_executable(app, screen);
+				return;
+			}
 			break;
 		case MEH_INPUT_BUTTON_B:
 			/* Switch the current_screen to the parent screen if any */
@@ -377,7 +419,8 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			}
 			break;
 		case MEH_INPUT_BUTTON_UP:
-			if (data->selected_platform == -1) {
+			if (data->selected_platform == -1 ||
+				(data->last_played.executable == NULL && data->selected_platform == 0)) {
 				data->selected_platform = g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1; // TODO(remy): what if no last played executable ?
 			} else {
 				data->selected_platform -= 1;
@@ -387,7 +430,11 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
 			if (data->selected_platform == g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1) {
-				data->selected_platform = -1; // TODO(remy): what if no last played executable ?
+				if (data->last_played.executable != NULL) {
+					data->selected_platform = -1;
+				} else {
+					data->selected_platform = 0;
+				}
 			} else {
 				data->selected_platform += 1;
 			}
@@ -415,7 +462,6 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	}
 
 	/* icons */
-
 	for (unsigned int i = 0; i < g_queue_get_length(data->icons_widgets); i++) {
 		int y = 285;
 		if (i < data->selected_platform) {
@@ -430,7 +476,6 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	}
 
 	/* extra icons */
-
 	if (data->last_played.widget_icon != NULL) {
 		int new_y = 85 - (data->selected_platform) * 200;
 		WidgetImage* image = data->last_played.widget_icon;
@@ -440,22 +485,14 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 
 	if (platform != NULL) {
 		/* platform name */
-		data->platform_name->text = platform->name;
-		meh_widget_text_reload(app->window, data->platform_name);
-		data->platform_name->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
-		meh_screen_add_text_transitions(screen, data->platform_name);
+		data->maintext->text = g_strdup(platform->name);
 
 		/* executables count */
 		int count_exec = meh_db_count_platform_executables(app->db, platform);
 		g_free(data->subtext->text);
 		data->subtext->text = g_strdup_printf("%d executable%s", count_exec, count_exec > 1 ? "s": "");
-		meh_widget_text_reload(app->window, data->subtext);
-		data->subtext->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 325, 550);
-		meh_screen_add_text_transitions(screen, data->subtext);
 
-		/*
-		 * animate a fade on the background
-		 */
+		/* animate a fade on the background */
 		data->background_hover->a = meh_transition_start(MEH_TRANSITION_CUBIC, 255, 0, 300);
 		meh_screen_add_rect_transitions(screen, data->background_hover);
 
@@ -464,7 +501,20 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 			data->background = meh_image_load_file(app->window->sdl_renderer, platform->background);
 			data->background_widget->texture = data->background;
 		}
+	} else if (data->selected_platform == -1 &&
+			data->last_played.executable != NULL && data->last_played.platform != NULL) {
+		g_free(data->maintext->text);
+		g_free(data->subtext->text);
+		data->maintext->text = g_strdup_printf("%s", data->last_played.executable->display_name);
+		data->subtext->text = g_strdup("Last started executable");
 	}
+
+	meh_widget_text_reload(app->window, data->maintext);
+	meh_widget_text_reload(app->window, data->subtext);
+	data->maintext->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 320, 300);
+	meh_screen_add_text_transitions(screen, data->maintext);
+	data->subtext->x = meh_transition_start(MEH_TRANSITION_CUBIC, MEH_FAKE_WIDTH+200, 325, 550);
+	meh_screen_add_text_transitions(screen, data->subtext);
 }
 
 int meh_screen_platform_list_update(Screen* screen) {
@@ -502,7 +552,7 @@ int meh_screen_platform_list_render(App* app, Screen* screen, gboolean flip) {
 	/* selection hover */
 	meh_widget_rect_render(app->window, data->hover);
 
-	meh_widget_text_render(app->window, data->platform_name);
+	meh_widget_text_render(app->window, data->maintext);
 	meh_widget_text_render(app->window, data->subtext);
 	
 	if (platform_count == 0) {
