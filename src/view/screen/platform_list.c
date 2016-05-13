@@ -156,12 +156,19 @@ static void meh_screen_platform_last_started_load(App* app, Screen* screen) {
 	}
 
 	/* icon */
-	// TODO(remy): load something else than the platform icon
-	// a good idea would obviously be the executable cover
-	SDL_Texture* icon = meh_image_load_file(app->window->sdl_renderer, platform->icon);
+	SDL_Texture* icon = NULL;
+	gchar* cover_filepath = meh_db_get_executable_cover_path(app->db, executable);
+	if (cover_filepath != NULL) {
+		icon = meh_image_load_file(app->window->sdl_renderer, cover_filepath);
+		g_free(cover_filepath); cover_filepath = NULL;
+	} else {
+		/* no filepath, fallback on the platform icon */
+		// TODO(remy): we could use a placeholder image instead.
+		icon = meh_image_load_file(app->window->sdl_renderer, platform->icon);
+	}
 
 	if (icon == NULL) {
-		g_critical("Can't load the file '%s' for the last played executable.", platform->icon);
+		g_critical("Can't load the file for the last played executable.");
 		meh_model_executable_destroy(executable);
 		meh_model_platform_destroy(platform);
 		return;
