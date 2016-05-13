@@ -615,7 +615,7 @@ gboolean meh_db_update_executable_last_played(DB* db, const struct Executable* e
 
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "UPDATE executable SET last_played = datetime('now') WHERE id = ?1";
+	const char* sql = "UPDATE executable SET last_played = strftime('%s','now') WHERE id = ?1";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 
 	if (return_code != SQLITE_OK) {
