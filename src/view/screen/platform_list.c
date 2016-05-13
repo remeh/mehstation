@@ -163,7 +163,9 @@ static void meh_screen_platform_last_started_load(App* app, Screen* screen) {
 		g_free(cover_filepath); cover_filepath = NULL;
 	} else {
 		/* no filepath, fallback on the platform icon */
-		// TODO(remy): we could use a placeholder image instead.
+		// TODO(remy): we should use a placeholder image instead,
+		//             because the platform don't necessarily have
+		//             an icon.
 		icon = meh_image_load_file(app->window->sdl_renderer, platform->icon);
 	}
 
