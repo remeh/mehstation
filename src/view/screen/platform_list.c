@@ -1,8 +1,15 @@
 /*
  * mehstation - Platform list screen.
  *
- * TODO(remy): refactor the platform/extra part
- * to use the same indexes, queues, etc.
+ * TODO(remy):
+ * - refactor the platform/extra part
+ *   to use the same indexes, queues, etc.
+ *   Should use a struct looking similar
+ *   to the current lastPlayed one, probably
+ *   called menuEntry or something else.
+ * - the start executable code is a bit
+ *   duplicated with other screens/popups.
+ *
  *
  * Copyright © 2015 Rémy Mathieu
  */
