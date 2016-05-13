@@ -544,6 +544,42 @@ Executable* meh_db_get_last_started_executable(DB* db, int* platform_id) {
 }
 
 /*
+ * meh_db_get_executable_cover_path returns the path of the cover of the given executable
+ * if any, otherwise a NULL gchar* is returned.
+ */
+gchar* meh_db_get_executable_cover_path(DB* db, const struct Executable* executable) {
+	g_assert(db != NULL);
+	g_assert(executable != NULL);
+
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "SELECT \"filepath\" FROM \"executable_resource\" WHERE \"executable_id\" = ?1 AND \"type\" = 'cover' LIMIT 1";
+
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	if (return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
+		return NULL;
+	}
+
+	sqlite3_bind_int(statement, 1, executable->id);
+
+	/* read the value */
+	const char* filepath = NULL;
+	if (sqlite3_step(statement) == SQLITE_ROW) {
+		filepath = (const char*)sqlite3_column_text(statement, 0);
+	}
+
+	gchar* cover = NULL;
+	if (filepath != NULL) {
+		cover = g_strdup(filepath);
+	}
+
+	sqlite3_finalize(statement);
+
+	return cover;
+}
+
+/*
  * meh_db_get_platform_executables gets in  the SQLite3 database all the executables
  * available for the given platform.
  */
