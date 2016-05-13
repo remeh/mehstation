@@ -483,13 +483,17 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 		meh_screen_add_image_transitions(screen, image);
 	}
 
+	/* clear the previous text */
+	g_free(data->maintext->text);
+	g_free(data->subtext->text);
+
+
 	if (platform != NULL) {
 		/* platform name */
 		data->maintext->text = g_strdup(platform->name);
 
 		/* executables count */
 		int count_exec = meh_db_count_platform_executables(app->db, platform);
-		g_free(data->subtext->text);
 		data->subtext->text = g_strdup_printf("%d executable%s", count_exec, count_exec > 1 ? "s": "");
 
 		/* animate a fade on the background */
@@ -503,10 +507,15 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 		}
 	} else if (data->selected_platform == -1 &&
 			data->last_started.executable != NULL && data->last_started.platform != NULL) {
-		g_free(data->maintext->text);
-		g_free(data->subtext->text);
-		data->maintext->text = g_strdup_printf("%s", data->last_started.executable->display_name);
-		data->subtext->text = g_strdup("Last started executable");
+		Executable* executable = data->last_started.executable;
+		data->maintext->text = g_strdup_printf("%s", executable->display_name);
+		data->subtext->text = g_strdup_printf("Last started on %d-%d-%d %d:%d",
+				g_date_time_get_year(executable->last_played),
+				g_date_time_get_month(executable->last_played),
+				g_date_time_get_day_of_month(executable->last_played),
+				g_date_time_get_hour(executable->last_played),
+				g_date_time_get_minute(executable->last_played)
+		);
 	}
 
 	meh_widget_text_reload(app->window, data->maintext);
