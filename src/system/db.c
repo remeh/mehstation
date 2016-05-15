@@ -544,16 +544,17 @@ Executable* meh_db_get_last_started_executable(DB* db, int* platform_id) {
 }
 
 /*
- * meh_db_get_executable_cover_path returns the path of the cover of the given executable
+ * meh_db_get_executable_resource_path returns the path of the resource of the given executable
  * if any, otherwise a NULL gchar* is returned.
+ * If many resources of the same type is available, one randomly is returned.
  */
-gchar* meh_db_get_executable_cover_path(DB* db, const struct Executable* executable) {
+gchar* meh_db_get_executable_resource_path(DB* db, const struct Executable* executable, const char* type) {
 	g_assert(db != NULL);
 	g_assert(executable != NULL);
 
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"filepath\" FROM \"executable_resource\" WHERE \"executable_id\" = ?1 AND \"type\" = 'cover' LIMIT 1";
+	const char* sql = "SELECT \"filepath\" FROM \"executable_resource\" WHERE \"executable_id\" = ?1 AND \"type\" = ?2 ORDER BY RANDOM() LIMIT 1";
 
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
@@ -562,6 +563,7 @@ gchar* meh_db_get_executable_cover_path(DB* db, const struct Executable* executa
 	}
 
 	sqlite3_bind_int(statement, 1, executable->id);
+	sqlite3_bind_text(statement, 2, type, -1, NULL);
 
 	/* read the value */
 	const char* filepath = NULL;

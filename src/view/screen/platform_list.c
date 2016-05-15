@@ -157,7 +157,7 @@ static void meh_screen_platform_last_started_load(App* app, Screen* screen) {
 
 	/* icon */
 	SDL_Texture* icon = NULL;
-	gchar* cover_filepath = meh_db_get_executable_cover_path(app->db, executable);
+	gchar* cover_filepath = meh_db_get_executable_resource_path(app->db, executable, MEH_EXEC_RES_COVER);
 	if (cover_filepath != NULL) {
 		icon = meh_image_load_file(app->window->sdl_renderer, cover_filepath);
 		g_free(cover_filepath); cover_filepath = NULL;

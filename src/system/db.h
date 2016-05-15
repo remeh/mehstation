@@ -29,7 +29,7 @@ int meh_db_count_platform_executables(DB* db, const struct Platform* platform);
 struct Executable* meh_db_get_executable(DB* db, int executable_id);
 gboolean meh_db_update_executable_last_played(DB* db, const struct Executable* executable);
 GQueue* meh_db_get_executable_resources(DB* db, const struct Executable* executable);
-gchar* meh_db_get_executable_cover_path(DB* db, const struct Executable* executable);
+gchar* meh_db_get_executable_resource_path(DB* db, const struct Executable* executable, const char* type);
 gboolean meh_db_set_executable_favorite(DB* db, const struct Executable* executable, gboolean favorite);
 void meh_db_delete_mapping(DB* db, gchar* id);
 struct Mapping* meh_db_get_mapping(DB* db, const gchar* id);
