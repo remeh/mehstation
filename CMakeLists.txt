@@ -27,6 +27,7 @@ SET(
         src/system/os_windows.c
         src/system/settings.c
         src/system/transition.c
+        src/system/utils.c
         src/system/db/executable.c
         src/system/db/executable_resource.c
         src/system/db/mapping.c
