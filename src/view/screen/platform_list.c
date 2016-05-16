@@ -436,9 +436,10 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			}
 			break;
 		case MEH_INPUT_BUTTON_UP:
+			/* last started entry or loop to the bottom of the list */
 			if (data->selected_platform == -1 ||
 				(data->last_started.executable == NULL && data->selected_platform == 0)) {
-				data->selected_platform = g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1; // TODO(remy): what if no last played executable ?
+				data->selected_platform = g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1;
 			} else {
 				data->selected_platform -= 1;
 			}
@@ -446,6 +447,8 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 			meh_screen_platform_change_platform(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_DOWN:
+			/* go to either the last started entry if any
+			 * or directly to the first available platform */
 			if (data->selected_platform == g_queue_get_length(meh_screen_platform_list_get_data(screen)->platforms)-1) {
 				if (data->last_started.executable != NULL) {
 					data->selected_platform = -1;
@@ -504,6 +507,9 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 	g_free(data->maintext->text);
 	g_free(data->subtext->text);
 
+	/* animate a fade on the background */
+	data->background_hover->a = meh_transition_start(MEH_TRANSITION_CUBIC, 255, 0, 300);
+	meh_screen_add_rect_transitions(screen, data->background_hover);
 
 	if (platform != NULL) {
 		/* platform name */
@@ -512,10 +518,6 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 		/* executables count */
 		int count_exec = meh_db_count_platform_executables(app->db, platform);
 		data->subtext->text = g_strdup_printf("%d executable%s", count_exec, count_exec > 1 ? "s": "");
-
-		/* animate a fade on the background */
-		data->background_hover->a = meh_transition_start(MEH_TRANSITION_CUBIC, 255, 0, 300);
-		meh_screen_add_rect_transitions(screen, data->background_hover);
 
 		/* background image */
 		if (platform->background != NULL && strlen(platform->background) != 0) {
@@ -526,6 +528,16 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 			data->last_started.executable != NULL && data->last_started.platform != NULL) {
 		Executable* executable = data->last_started.executable;
 		data->maintext->text = g_strdup_printf("%s", executable->display_name);
+
+		/* select a background */
+		gchar* filepath = meh_db_get_executable_resource_path(app->db, executable, "screenshot");
+		if (filepath == NULL) { /* try fanarts if no screenshots available */
+			meh_db_get_executable_resource_path(app->db, executable, "fanart");
+		}
+		if (filepath != NULL) {
+			data->background = meh_image_load_file(app->window->sdl_renderer, filepath);
+			data->background_widget->texture = data->background;
+		}
 
 		gchar* dt = meh_displayable_datetime(executable->last_played);
 		data->subtext->text = g_strdup_printf("Last started on %s", dt);

@@ -571,14 +571,14 @@ gchar* meh_db_get_executable_resource_path(DB* db, const struct Executable* exec
 		filepath = (const char*)sqlite3_column_text(statement, 0);
 	}
 
-	gchar* cover = NULL;
+	gchar* rv = NULL;
 	if (filepath != NULL) {
-		cover = g_strdup(filepath);
+		rv = g_strdup(filepath);
 	}
 
 	sqlite3_finalize(statement);
 
-	return cover;
+	return rv;
 }
 
 /*
