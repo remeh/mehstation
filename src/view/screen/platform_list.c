@@ -21,6 +21,7 @@
 #include "system/input.h"
 #include "system/message.h"
 #include "system/transition.h"
+#include "system/utils.h"
 #include "system/db/models.h"
 #include "view/screen.h"
 #include "view/widget_text.h"
@@ -525,13 +526,10 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 			data->last_started.executable != NULL && data->last_started.platform != NULL) {
 		Executable* executable = data->last_started.executable;
 		data->maintext->text = g_strdup_printf("%s", executable->display_name);
-		data->subtext->text = g_strdup_printf("Last started on %d-%d-%d %d:%d",
-				g_date_time_get_year(executable->last_played),
-				g_date_time_get_month(executable->last_played),
-				g_date_time_get_day_of_month(executable->last_played),
-				g_date_time_get_hour(executable->last_played),
-				g_date_time_get_minute(executable->last_played)
-		);
+
+		gchar* dt = meh_displayable_datetime(executable->last_played);
+		data->subtext->text = g_strdup_printf("Last started on %s", dt);
+		g_free(dt);
 	}
 
 	meh_widget_text_reload(app->window, data->maintext);
