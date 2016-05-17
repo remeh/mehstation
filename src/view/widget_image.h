@@ -23,6 +23,9 @@ typedef struct {
 
 	/* On which texture this widget is pointing. Do not free this pointer. */
 	SDL_Texture* texture;
+
+	int tex_w;
+	int tex_h;
 } WidgetImage;
 
 WidgetImage* meh_widget_image_new(SDL_Texture* texture, float x, float y, float w, float h);

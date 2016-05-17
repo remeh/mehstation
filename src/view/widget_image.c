@@ -26,6 +26,8 @@ WidgetImage* meh_widget_image_new(SDL_Texture* texture, float x, float y, float 
 
 	i->texture = texture;
 
+	SDL_QueryTexture(texture, NULL, NULL, &i->tex_w, &i->tex_h);
+
 	return i;
 }
 
