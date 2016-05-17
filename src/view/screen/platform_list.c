@@ -45,7 +45,6 @@ Screen* meh_screen_platform_list_new(App* app) {
 
 	/* init the screen data. */
 	PlatformListData* data = g_new(PlatformListData, 1);	
-	data->platforms = meh_db_get_platforms(app->db);
 	data->selected_platform = 0;
 
 	data->background = NULL;
@@ -67,6 +66,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured. Use mehstation-config", 150, 330, MEH_FAKE_WIDTH-150, 50, white, FALSE);
 
 	/* Platforms */
+	data->platforms = meh_db_get_platforms(app->db);
 	data->icons_widgets = g_queue_new();
 	data->platforms_icons = g_queue_new();
 
@@ -138,7 +138,7 @@ static void meh_screen_platform_last_started_load(App* app, Screen* screen) {
 		return;
 	}
 
-	/* executable */
+	/* find last started executable */
 	int platform_id = -1;
 	Executable* executable = meh_db_get_last_started_executable(app->db, &platform_id);
 
@@ -176,7 +176,6 @@ static void meh_screen_platform_last_started_load(App* app, Screen* screen) {
 		meh_model_platform_destroy(platform);
 		return;
 	}
-
 
 	/* widget */
 	WidgetImage* widget_icon = meh_widget_image_new(icon, 100, 285 - 200, 150, 150);

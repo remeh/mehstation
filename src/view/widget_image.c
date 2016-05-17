@@ -1,6 +1,14 @@
 /*
  * mehstation - Image widget.
  *
+ * NOTE(remy): to implements the feature "keep aspect ratio",
+ *             a method called meh_widget_image_set_texture will
+ *             be needed as some calls to meh_widget_image_new
+ *             contains a NULL texture to allow to set the texture
+ *             after the creation of the widget.
+ *             It's on this set_texture call that the aspect ratio
+ *             should be computed.
+ *
  * Copyright © 2015 Rémy Mathieu
  */
 
@@ -25,8 +33,6 @@ WidgetImage* meh_widget_image_new(SDL_Texture* texture, float x, float y, float 
 	meh_transition_end(&i->h);
 
 	i->texture = texture;
-
-	SDL_QueryTexture(texture, NULL, NULL, &i->tex_w, &i->tex_h);
 
 	return i;
 }
