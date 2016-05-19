@@ -886,7 +886,7 @@ static void meh_exec_list_resolve_tex(Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	if (data->background > -1 && data->background_widget != NULL) {
-		meh_widget_image_set_texture(data->background_widget, g_hash_table_lookup(data->textures, &(data->background)), TRUE);
+		meh_widget_image_set_texture(data->background_widget, g_hash_table_lookup(data->textures, &(data->background)), FALSE);
 	}
 	if (data->cover > -1 && data->cover_widget != NULL) {
 		meh_widget_image_set_texture(data->cover_widget, g_hash_table_lookup(data->textures, &(data->cover)), TRUE);
