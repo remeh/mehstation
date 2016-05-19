@@ -39,3 +39,4 @@ WidgetImage* meh_widget_image_new(SDL_Texture* texture, float x, float y, float 
 void meh_widget_image_destroy(WidgetImage* image);
 void meh_widget_image_render(Window* window, const WidgetImage* image);
 void meh_widget_image_compute_aspect_ratio(WidgetImage* image);
+void meh_widget_image_set_texture(WidgetImage* image, SDL_Texture* texture, gboolean keep_ratio);
