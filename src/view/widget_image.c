@@ -32,7 +32,7 @@ WidgetImage* meh_widget_image_new(SDL_Texture* texture, float x, float y, float 
 	i->h = meh_transition_start(MEH_TRANSITION_NONE, h, h, 0);
 	meh_transition_end(&i->h);
 
-	meh_widget_image_set_texture(i, texture, TRUE); /* TODO(remy): turn diiis ON! */
+	meh_widget_image_set_texture(i, texture, TRUE);
 
 	return i;
 }
@@ -89,7 +89,9 @@ void meh_widget_image_compute_aspect_ratio(WidgetImage* image) {
 
 	SDL_QueryTexture(image->texture, NULL, NULL, &image->tex_w, &image->tex_h);
 
-	/* compute the size */
+	/* compute the size
+	 * NOTE(remy): I don't know if the order has an impact here.
+	 */
 
 	image->display_w = image->tex_w;
 	image->display_h = image->tex_h;
@@ -104,8 +106,6 @@ void meh_widget_image_compute_aspect_ratio(WidgetImage* image) {
 		image->display_w = (image->h.value / (float)image->tex_h) * (float)image->tex_w;
 	}
 
-	/* TODO(remy): what if h > tex_h ? */
-
 	/* compute the position inside the target rect */
 
 	image->offset_x = 0;
@@ -113,12 +113,8 @@ void meh_widget_image_compute_aspect_ratio(WidgetImage* image) {
 		image->offset_x = (image->w.value - image->display_w)/2;
 	}
 
-	g_debug("offset_x: %d", image->offset_x);
-
 	image->offset_y = 0;
 	if (image->h.value - image->display_h > 0.01) {
 		image->offset_y = (image->h.value - image->display_h)/2;
 	}
-
-	g_debug("offset_y: %d", image->offset_y);
 }

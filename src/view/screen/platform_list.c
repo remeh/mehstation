@@ -521,7 +521,7 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 		/* background image */
 		if (platform->background != NULL && strlen(platform->background) != 0) {
 			data->background = meh_image_load_file(app->window->sdl_renderer, platform->background);
-			data->background_widget->texture = data->background;
+			meh_widget_image_set_texture(data->background_widget, data->background, FALSE);
 		}
 	} else if (data->selected_platform == -1 &&
 			data->last_started.executable != NULL && data->last_started.platform != NULL) {
@@ -535,7 +535,7 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 		}
 		if (filepath != NULL) {
 			data->background = meh_image_load_file(app->window->sdl_renderer, filepath);
-			data->background_widget->texture = data->background;
+			meh_widget_image_set_texture(data->background_widget, data->background, FALSE);
 		}
 
 		gchar* dt = meh_displayable_datetime(executable->last_played);
