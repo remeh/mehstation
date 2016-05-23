@@ -83,7 +83,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 							app->small_font,
 							platform->name,
 							white,
-							TRUE
+							150.0f	
 						);
 		} else {
 			/* load the icon */
