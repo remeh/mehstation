@@ -7,7 +7,9 @@ If some of you want to contribute but don't know what to start with, that's a go
 
 ## Screens
 
-  * platform_list: better placeholder for platform with icons ?
+  * mapping: needs a big overhaul, this screen works but is the strict minimum for the needs.
+  * popup: entry to start the mapping configuration?
+  * platform_list: better placeholder for platform without icons?
   * platform_list: add a random executable launcher (same as "last started" but with a random exec)
   * executable_list: gray colors for the 'Unknown' metadata.
 
