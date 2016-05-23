@@ -31,6 +31,7 @@ void meh_complete_selec_create_widgets(App* app, Screen* screen) {
 	if (data->favorite_widget != NULL) {
 		data->favorite_widget->w.value = 20;
 		data->favorite_widget->h.value = 20;
+		meh_widget_image_compute_aspect_ratio(data->favorite_widget);
 	}
 }
 

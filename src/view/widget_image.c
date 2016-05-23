@@ -32,9 +32,24 @@ WidgetImage* meh_widget_image_new(SDL_Texture* texture, float x, float y, float 
 	i->h = meh_transition_start(MEH_TRANSITION_NONE, h, h, 0);
 	meh_transition_end(&i->h);
 
-	i->texture = texture;
+	meh_widget_image_set_texture(i, texture, TRUE);
 
 	return i;
+}
+
+void meh_widget_image_set_texture(WidgetImage* image, SDL_Texture* texture, gboolean keep_ratio) {
+	g_assert(image != NULL);
+
+	image->texture = texture;
+
+	image->offset_x = 0;
+	image->offset_y = 0;
+	image->display_w = image->w.value;
+	image->display_h = image->h.value;
+
+	if (texture != NULL && keep_ratio) {
+		meh_widget_image_compute_aspect_ratio(image);
+	}
 }
 
 /*
@@ -55,11 +70,51 @@ void meh_widget_image_render(Window* window, const WidgetImage* image) {
 
 	// Convert the normalized position to the window position.
 	SDL_Rect rect = {
-		meh_window_convert_width(window, image->x.value),
-		meh_window_convert_height(window, image->y.value),
-		meh_window_convert_width(window, image->w.value),
-		meh_window_convert_height(window, image->h.value)
+		meh_window_convert_width(window, image->x.value + image->offset_x),
+		meh_window_convert_height(window, image->y.value + image->offset_y),
+		meh_window_convert_width(window, image->display_w), /* TODO must be transition? */
+		meh_window_convert_height(window, image->display_h)
 	};
 
 	meh_window_render_texture(window, image->texture, NULL, &rect);
+}
+
+void meh_widget_image_compute_aspect_ratio(WidgetImage* image) {
+	g_assert(image != NULL);
+
+	if (image->texture == NULL) {
+		g_critical("meh_widget_image_compute_aspect_ratio called with NULL texture.");
+		return;
+	}
+
+	SDL_QueryTexture(image->texture, NULL, NULL, &image->tex_w, &image->tex_h);
+
+	/* compute the size
+	 * NOTE(remy): I don't know if the order has an impact here.
+	 */
+
+	image->display_w = image->tex_w;
+	image->display_h = image->tex_h;
+
+	if (image->tex_w > image->w.value) {
+		image->display_w = image->w.value;
+		image->display_h = (image->w.value / (float)image->tex_w) * (float)image->tex_h;
+	}
+
+	if (image->display_h > image->h.value) {
+		image->display_h = image->h.value;
+		image->display_w = (image->h.value / (float)image->tex_h) * (float)image->tex_w;
+	}
+
+	/* compute the position inside the target rect */
+
+	image->offset_x = 0;
+	if (image->w.value - image->display_w > 0.01) {
+		image->offset_x = (image->w.value - image->display_w)/2;
+	}
+
+	image->offset_y = 0;
+	if (image->h.value - image->display_h > 0.01) {
+		image->offset_y = (image->h.value - image->display_h)/2;
+	}
 }

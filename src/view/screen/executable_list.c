@@ -886,18 +886,18 @@ static void meh_exec_list_resolve_tex(Screen* screen) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	if (data->background > -1 && data->background_widget != NULL) {
-		data->background_widget->texture = g_hash_table_lookup(data->textures, &(data->background));
+		meh_widget_image_set_texture(data->background_widget, g_hash_table_lookup(data->textures, &(data->background)), FALSE);
 	}
 	if (data->cover > -1 && data->cover_widget != NULL) {
-		data->cover_widget->texture = g_hash_table_lookup(data->textures, &(data->cover));
+		meh_widget_image_set_texture(data->cover_widget, g_hash_table_lookup(data->textures, &(data->cover)), TRUE);
 	}
 	if (data->logo > -1 && data->logo_widget != NULL) {
-		data->logo_widget->texture = g_hash_table_lookup(data->textures, &(data->logo));
+		meh_widget_image_set_texture(data->logo_widget, g_hash_table_lookup(data->textures, &(data->logo)), TRUE);
 	}
 	for (int i = 0; i < 3; i++) {
 		if (data->screenshots[i] > -1) {
 			if (data->screenshots_widget[i] != NULL) {
-				data->screenshots_widget[i]->texture = g_hash_table_lookup(data->textures, &(data->screenshots[i]));
+				meh_widget_image_set_texture(data->screenshots_widget[i], g_hash_table_lookup(data->textures, &(data->screenshots[i])), TRUE);
 			}
 		}
 	}
