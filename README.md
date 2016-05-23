@@ -38,6 +38,8 @@ To configure your mehstation, the easiest solution is to use the dedicated tool 
 mehstation is developed in C with SDL2, glib, ffmpeg and SQLite3.
 Please free to contribute and to send any pull requests, comments or issues.
 
+If some of you want to contribute but don't know what to start with, [TODO](https://github.com/remeh/mehstation/blob/master/TODO.md) is a good start.
+
 ## How to compile
 
 The dependencies are:
