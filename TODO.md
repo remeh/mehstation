@@ -20,6 +20,7 @@ If some of you want to contribute but don't know what to start with, that's a go
   * audio: finish audio sound playing implementation
   * general: stronger method to shutdown the system?
   * app: the algorithm replacing the flags in the executable string could definitely be better
+  * general: flag -d to generate a diagnostic on the system for debug purpose
 
 ## View
 
