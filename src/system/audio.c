@@ -155,7 +155,7 @@ int meh_audio_start(void* audio) {
 						s->data->len,
 						SDL_MIX_MAXVOLUME * 0.80
 						);
-				SDL_QueueAudio(a->device_id, lowered, s->data->len);
+				//SDL_QueueAudio(a->device_id, lowered, s->data->len);
 				g_free(lowered);
 			}
 		}
