@@ -16,6 +16,9 @@ typedef struct {
 	/* loaded data */
 	GByteArray* data;
 
+	int sample_rate;
+	int channels;
+
 	/* ffmpeg part */
 
 	AVFormatContext* fc;

@@ -75,6 +75,7 @@ PKG_SEARCH_MODULE(sqlite3 REQUIRED sqlite3)
 PKG_SEARCH_MODULE(libavcodec REQUIRED libavcodec)
 PKG_SEARCH_MODULE(libavformat REQUIRED libavformat)
 PKG_SEARCH_MODULE(libavutil REQUIRED libavutil)
+PKG_SEARCH_MODULE(openal REQUIRED openal)
 PKG_CHECK_MODULES(GLIB REQUIRED glib-2.0>=2.0.0)
 
 include_directories(
@@ -87,7 +88,8 @@ include_directories(
     ${libavcodec_INCLUDE_DIRS}
     ${libavformat_INCLUDE_DIRS}
     ${libavutil_INCLUDE_DIRS}
-    src/
+    ${openal_INCLUDE_DIRS}
+    src
     src/view
     src/view/screen
     src/system
@@ -135,6 +137,7 @@ TARGET_LINK_LIBRARIES(
     ${libavcodec_LIBRARIES}
     ${libavformat_LIBRARIES}
     ${libavutil_LIBRARIES}
+    ${openal_LIBRARIES}
 )
 
 INSTALL(DIRECTORY res DESTINATION /usr/share/mehstation)

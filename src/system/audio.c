@@ -7,40 +7,56 @@
 #include "system/audio.h"
 #include "system/sound.h"
 
-static void meh_audio_stop(Audio* audio, Sound* sound);
+static int meh_audio_source_play(void* param);
 
 Audio* meh_audio_new() {
 	Audio* audio = g_new(Audio, 1);	
 
 	audio->sounds = g_queue_new();
-	audio->mutex = SDL_CreateMutex();
 
-	if (!audio->mutex) {
-		g_critical("can't create the audio mutex.");
+	for (int i = 0; i < MEH_AUDIO_SOURCES_COUNT; i++) {
+		audio->sources[i] = NULL;
 	}
 
 	/* open the audio device */
 
-	SDL_AudioSpec want;
-	want.channels = 2;
-	want.samples = 64;
-	want.callback = NULL;
+	g_debug("audio: initialization.");
+	audio->device = alcOpenDevice(NULL);
+	if (audio->device == NULL) {
+		g_critical("can't open any audio device.");
+		return audio;
+	}
 
-	audio->device_id = SDL_OpenAudioDevice(
-		NULL, 0, &want, &(audio->spec), SDL_AUDIO_ALLOW_FORMAT_CHANGE
-	);
+	/* create the openal context */
 
-	SDL_PauseAudioDevice(audio->device_id, 0);
+	audio->context = alcCreateContext(audio->device, NULL);
+	alcMakeContextCurrent(audio->context);
+	alcProcessContext(audio->context);
 
-	/* start the playing thread */
+	if (alGetError() != AL_NO_ERROR) {
+		g_critical("error while creating the audio context.");
+		return audio;
+	}
 
-	audio->thread_running = TRUE;
-	audio->thread = SDL_CreateThread(meh_audio_start, "audio", audio);
+	g_debug("audio: device+context init ok.");
+
+	/* create the sources */
+
+	for (int i = 0; i < MEH_AUDIO_SOURCES_COUNT; i++) {
+		audio->sources[i] = meh_audio_source_new();
+	}
+
+	/* listener position to default 0,0,0 */
+	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
+
+	if (alGetError() != AL_NO_ERROR) {
+		g_critical("audio: unable to set the listener position.");
+	}
 
 	/* loads the sound bank */
 
 	audio->soundbank = g_new(Sound*, SFX_END);
-	audio->soundbank[0] = meh_sound_new("res/bip.wav", TRUE);
+	audio->soundbank[0] = meh_sound_new("res/bip.ogg", TRUE);
 
 	return audio;
 }
@@ -59,51 +75,37 @@ void meh_audio_destroy(Audio* audio) {
 		audio->soundbank = NULL;
 	}
 
-	if (audio->thread) {
-		audio->thread_running = FALSE;
-		SDL_WaitThread(audio->thread, NULL);
-		audio->thread = NULL;
+	/* close the OpenAL device and context */
+	if (audio->context != NULL) {
+		alcDestroyContext(audio->context);
+		audio->context = NULL;
 	}
-
-	if (audio->mutex) {
-		SDL_DestroyMutex(audio->mutex);
-		audio->mutex = NULL;
+	if (audio->device != NULL) {
+		alcCloseDevice(audio->device);
+		audio->device = NULL;
 	}
 
 	// TODO(remy): test the GDestroyNotify cast
 	g_queue_free_full(audio->sounds, (GDestroyNotify)meh_sound_destroy);
+
+	/* delete the sources */
+	for (int i = 0; i < MEH_AUDIO_SOURCES_COUNT; i++) {
+		meh_audio_source_destroy(audio->sources[i]);
+	}
+
 	g_free(audio);
 }
 
 void meh_audio_play_sound(Audio* audio, Sound* sound) {
-	if (audio == NULL) {
-		return;
-	}
-
-	if (sound == NULL) {
-		return;
-	}
-
-	SDL_LockMutex(audio->mutex);
-
-	g_debug("sound: start playing '%s'", sound->filename);
-	g_queue_push_tail(audio->sounds, sound);
-
-	SDL_UnlockMutex(audio->mutex);
-}
-
-void meh_audio_stop(Audio* audio, Sound* sound) {
 	g_assert(audio != NULL);
 	g_assert(sound != NULL);
 
-	SDL_LockMutex(audio->mutex);
-
-	gboolean removed = g_queue_remove(audio->sounds, sound);
-	if (removed) {
-		meh_sound_destroy(sound);
+	for (int i = 0; i < MEH_AUDIO_SOURCES_COUNT; i++) {
+		if (!audio->sources[i]->playing) {
+			meh_audio_source_play_sound(audio->sources[i], sound);
+			break;
+		}
 	}
-
-	SDL_UnlockMutex(audio->mutex);
 }
 
 void meh_audio_play(Audio* audio, guint sound) {
@@ -124,51 +126,90 @@ void meh_audio_play(Audio* audio, guint sound) {
 	meh_audio_play_sound(audio, s);
 }
 
-/* meh_audio_start starts the background threading
- * reading the sound to play on the sound card */
-int meh_audio_start(void* audio) {
-	g_assert(audio != NULL);
+AudioSource* meh_audio_source_new() {
+	AudioSource* source = g_new(AudioSource, 1);
 
-	Audio* a = (Audio*)audio;
+	source->id = 0;
+	source->buffer_id = 0;
+	source->playing = FALSE;
 
-	while (a->thread_running) {
-
-		/* for each sound */
-		for (int i = 0; i < g_queue_get_length(a->sounds); i++) {
-			Sound* s = g_queue_peek_nth(a->sounds, i);
-			/* NOTE(remy): I think we'll need to copy
-			 * the bytes here and probably copy batch
-			 * per batch and not the full data at once.*/
-
-			/* NOTE(remy): lowering the volume could be costly
-			 * and could be remove in the sound loading if
-			 * necessary but I prefer to avoid the dependency
-			 * of sound -> audio format as long as I can. */
-			/* lower a bit the volume (to avoid saturation)
-			 * and push it to the audio card */
-			void* lowered = g_malloc0(s->data->len);
-			if (lowered != NULL) {
-				SDL_MixAudioFormat(
-						lowered,
-						s->data->data,
-						a->spec.format,
-						s->data->len,
-						SDL_MIX_MAXVOLUME * 0.80
-						);
-				//SDL_QueueAudio(a->device_id, lowered, s->data->len);
-				g_free(lowered);
-			}
-		}
-
-		Sound* sound = NULL;
-		while ((sound = g_queue_pop_tail(a->sounds)) != NULL) {
-			meh_audio_stop(a, sound);
-		}
-
-		SDL_PauseAudioDevice(a->device_id, 0);
-		SDL_Delay(1);
+	alGenSources(1, &source->id); 
+	if (alGetError() != AL_NO_ERROR) {
+		g_critical("audio: unable to generate an audio source.");
 	}
 
-	g_debug("audio engine is stopping.");
+	alGenBuffers(1, &source->buffer_id);
+	if (alGetError() != AL_NO_ERROR) {
+		g_critical("audio: unable to generate an audio buffer.");
+	}
+
+	g_debug("new source %d, bufid: %d", source->id, source->buffer_id);
+
+	alSource3f(source->id, AL_POSITION, 0.0f, 0.0f, 0.0f);
+	return source;
+}
+
+void meh_audio_source_destroy(AudioSource* source) {
+	g_assert(source != NULL);
+	
+	if (source->buffer_id > 0) {
+		alDeleteBuffers(1, &source->buffer_id);
+	}
+
+	if (source->id > 0) {
+		alDeleteSources(1, &source->id);
+	}
+
+	g_free(source);
+}
+
+static int meh_audio_source_play(void* param) {
+	AudioSource* source = (AudioSource*)param;
+
+	int state = AL_PLAYING;
+	while (state == AL_PLAYING) {
+		alGetSourcei(source->id, AL_SOURCE_STATE, &state);
+		SDL_Delay(50); // NOTE(remy): arbitrary value
+	}
+
+	source->playing = FALSE;
+
 	return 0;
+}
+
+void meh_audio_source_play_sound(AudioSource* source, Sound* sound) {
+	g_assert(source != NULL);
+	g_assert(sound != NULL);
+	g_assert(source->playing != TRUE);
+
+	g_debug("audio: source %d playing sound %s", source->id, sound->filename);
+
+	source->playing = TRUE;
+
+	int format = AL_FORMAT_MONO16;
+	if (sound->channels > 1) {
+		format = AL_FORMAT_STEREO16;
+	}
+
+	// put the sound data into the buffer
+	if (source->sound != sound) {
+		alBufferData(source->buffer_id, format, sound->data, sound->data->len, sound->sample_rate);
+	}
+
+	/* remember which sound this source is playing */
+	source->sound = sound;
+
+	int error = alGetError();
+	if (error != AL_NO_ERROR) {
+		g_critical("error on alBufferData() call: %d", error);
+	}
+
+	// attach the buffer to the source
+	alSourcei(source->id, AL_BUFFER, source->buffer_id);
+
+	// play
+	alSourcePlay(source->id); 
+
+	// launch the thread actually reading the sound
+	SDL_CreateThread(&meh_audio_source_play, "source_play", source);
 }

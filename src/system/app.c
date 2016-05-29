@@ -165,11 +165,6 @@ void meh_app_init_audio(App* app) {
 	}
 
 	app->audio = meh_audio_new();
-	g_message("Audio opened with: freq: %d, channels: %d, samples: %d",
-		app->audio->spec.freq,
-		app->audio->spec.channels,
-		app->audio->spec.samples
-	);
 
 	if (!app->audio) {
 		g_critical("Can't init the audio.");
