@@ -31,7 +31,6 @@ Audio* meh_audio_new() {
 
 	audio->context = alcCreateContext(audio->device, NULL);
 	alcMakeContextCurrent(audio->context);
-	alcProcessContext(audio->context);
 
 	if (alGetError() != AL_NO_ERROR) {
 		g_critical("error while creating the audio context.");
@@ -56,7 +55,7 @@ Audio* meh_audio_new() {
 	/* loads the sound bank */
 
 	audio->soundbank = g_new(Sound*, SFX_END);
-	audio->soundbank[0] = meh_sound_new("res/bip.ogg", TRUE);
+	audio->soundbank[0] = meh_sound_new("res/bip.wav", TRUE);
 
 	return audio;
 }
@@ -132,6 +131,7 @@ AudioSource* meh_audio_source_new() {
 	source->id = 0;
 	source->buffer_id = 0;
 	source->playing = FALSE;
+	source->sound = NULL;
 
 	alGenSources(1, &source->id); 
 	if (alGetError() != AL_NO_ERROR) {
@@ -143,9 +143,13 @@ AudioSource* meh_audio_source_new() {
 		g_critical("audio: unable to generate an audio buffer.");
 	}
 
+	/* unbind this source */
+
+	alSourcei(source->id, AL_BUFFER, 0);
+
 	g_debug("new source %d, bufid: %d", source->id, source->buffer_id);
 
-	alSource3f(source->id, AL_POSITION, 0.0f, 0.0f, 0.0f);
+	alSource3f(source->id, AL_POSITION, 0.0f, 0.0f, 1.0f);
 	return source;
 }
 
@@ -172,6 +176,9 @@ static int meh_audio_source_play(void* param) {
 		SDL_Delay(50); // NOTE(remy): arbitrary value
 	}
 
+	if (source != NULL && source->sound != NULL) {
+		g_debug("source %d stop playing %s", source->id, source->sound->filename);
+	}
 	source->playing = FALSE;
 
 	return 0;
@@ -186,9 +193,9 @@ void meh_audio_source_play_sound(AudioSource* source, Sound* sound) {
 
 	source->playing = TRUE;
 
-	int format = AL_FORMAT_MONO16;
-	if (sound->channels > 1) {
-		format = AL_FORMAT_STEREO16;
+	int format = AL_FORMAT_STEREO16;
+	if (sound->channels < 2) {
+		format = AL_FORMAT_MONO16;
 	}
 
 	/* we need to rebind the buffer to the new sound */
@@ -197,7 +204,7 @@ void meh_audio_source_play_sound(AudioSource* source, Sound* sound) {
 		alSourcei(source->id, AL_BUFFER, 0);
 
 		/* put the sound data into the buffer */
-		alBufferData(source->buffer_id, format, sound->data, sound->data->len, sound->sample_rate);
+		alBufferData(source->buffer_id, format, sound->data->data, sound->data->len, sound->sample_rate);
 
 		/* remember which sound this source is playing */
 		source->sound = sound;

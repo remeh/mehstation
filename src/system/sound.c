@@ -46,6 +46,7 @@ Sound* meh_sound_new(gchar* filename, gboolean load) {
 	return sound;
 }
 
+/* FIXME(remy): this works with WAV and MP3 but bug (noise+correct sound) with OGG?! */
 void meh_sound_load(Sound* sound) {
 	g_assert(sound != NULL);
 
