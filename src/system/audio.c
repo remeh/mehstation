@@ -191,21 +191,25 @@ void meh_audio_source_play_sound(AudioSource* source, Sound* sound) {
 		format = AL_FORMAT_STEREO16;
 	}
 
-	// put the sound data into the buffer
+	/* we need to rebind the buffer to the new sound */
 	if (source->sound != sound) {
+		/* we need to unbind the last used buffer on this source. */
+		alSourcei(source->id, AL_BUFFER, 0);
+
+		/* put the sound data into the buffer */
 		alBufferData(source->buffer_id, format, sound->data, sound->data->len, sound->sample_rate);
+
+		/* remember which sound this source is playing */
+		source->sound = sound;
+
+		int error = alGetError();
+		if (error != AL_NO_ERROR) {
+			g_critical("error on alBufferData() call: %d", error);
+		}
+
+		// attach the buffer to the source
+		alSourcei(source->id, AL_BUFFER, source->buffer_id);
 	}
-
-	/* remember which sound this source is playing */
-	source->sound = sound;
-
-	int error = alGetError();
-	if (error != AL_NO_ERROR) {
-		g_critical("error on alBufferData() call: %d", error);
-	}
-
-	// attach the buffer to the source
-	alSourcei(source->id, AL_BUFFER, source->buffer_id);
 
 	// play
 	alSourcePlay(source->id); 
