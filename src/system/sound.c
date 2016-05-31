@@ -53,6 +53,8 @@ void meh_sound_load(Sound* sound) {
 	sound->data = g_byte_array_new();
 
 	AVPacket packet;
+	av_init_packet(&packet);
+
 	gboolean frame_finished = FALSE;
 
 	while (av_read_frame(sound->fc, &packet) >= 0) {
@@ -62,22 +64,24 @@ void meh_sound_load(Sound* sound) {
 		if (sound->frame->sample_rate > 0) {
 			sound->sample_rate = sound->frame->sample_rate;
 		}
+		sound->channels = sound->codec_ctx->channels;
 		if (sound->frame->channels > 0) {
 			sound->channels = sound->frame->channels;
-			sound->channels = sound->codec_ctx->channels;
 		}
 
 		/* ensure we're dealing with the good stream */
 		if (packet.stream_index == sound->stream_id) {
 			/* decode the audio frame */
 			avcodec_decode_audio4(sound->codec_ctx, sound->frame, &frame_finished, &packet);
+
 			if (frame_finished) {
 				int data_size = av_get_bytes_per_sample(sound->codec_ctx->sample_fmt);
 
 				if (data_size > 0) {
 					for (int i = 0; i < sound->frame->nb_samples; i++) {
 						for (int ch = 0; ch < sound->codec_ctx->channels; ch++) {
-							g_byte_array_append(sound->data, sound->frame->data[ch] + data_size*i, data_size);
+							//g_byte_array_append(sound->data, sound->frame->data[ch] + data_size*i, data_size);
+							g_byte_array_append(sound->data, sound->frame->data[0] + data_size*i, data_size);
 						}
 					}
 				}
@@ -86,7 +90,6 @@ void meh_sound_load(Sound* sound) {
 
 		av_packet_unref(&packet);
 	}
-
 	g_debug("load the sound %s in %d bytes (channels: %d, sample rate: %d)", sound->filename, sound->data->len, sound->channels, sound->sample_rate);
 }
 

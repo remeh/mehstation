@@ -56,6 +56,7 @@ Audio* meh_audio_new() {
 
 	audio->soundbank = g_new(Sound*, SFX_END);
 	audio->soundbank[0] = meh_sound_new("res/bip.wav", TRUE);
+	audio->soundbank[1] = meh_sound_new("res/back.wav", TRUE);
 
 	return audio;
 }

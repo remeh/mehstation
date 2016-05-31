@@ -22,7 +22,8 @@
 #include "system/sound.h"
 
 #define SFX_BIP 0
-#define SFX_END 1
+#define SFX_BACK 1
+#define SFX_END 2
 
 #define MEH_AUDIO_SOURCES_COUNT 8
 

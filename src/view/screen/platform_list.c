@@ -413,6 +413,7 @@ void meh_screen_platform_list_button_pressed(App* app, Screen* screen, int press
 	switch (pressed_button) {
 		case MEH_INPUT_SPECIAL_ESCAPE:
 		case MEH_INPUT_BUTTON_START:
+			meh_audio_play(app->audio, SFX_BACK);
 			meh_screen_platform_list_start_popup(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_A:
