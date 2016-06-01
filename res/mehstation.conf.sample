@@ -27,4 +27,4 @@ zoom_logo=true
 
 [audio]
 # Sounds in menu
-sfx=false
+sfx=true
