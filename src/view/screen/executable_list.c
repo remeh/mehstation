@@ -786,6 +786,7 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 		case MEH_INPUT_SPECIAL_ESCAPE:
 		case MEH_INPUT_BUTTON_B:
 			if (screen->parent_screen != NULL) {
+				meh_audio_play(app->audio, SFX_BACK);
 				/* back to the platform screen using a fade
 				 * screen for the transition */
 				Screen* fade_screen = meh_screen_fade_new(app, screen, screen->parent_screen);
@@ -796,6 +797,7 @@ void meh_exec_list_button_pressed(App* app, Screen* screen, int pressed_button) 
 			break;
 		case MEH_INPUT_BUTTON_START:
 			/* start the popup */
+			meh_audio_play(app->audio, SFX_BACK);
 			meh_exec_list_open_popup(app, screen);
 			break;
 		case MEH_INPUT_BUTTON_A:
