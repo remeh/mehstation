@@ -65,9 +65,6 @@ void meh_sound_load(Sound* sound) {
 			sound->sample_rate = sound->frame->sample_rate;
 		}
 		sound->channels = sound->codec_ctx->channels;
-		if (sound->frame->channels > 0) {
-			sound->channels = sound->frame->channels;
-		}
 
 		/* ensure we're dealing with the good stream */
 		if (packet.stream_index == sound->stream_id) {
