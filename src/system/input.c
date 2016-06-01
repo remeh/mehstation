@@ -376,10 +376,6 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 
 	input_state->last_sdl_key = sdl_button;
 
-	if (key_pressed == MEH_INPUT_SPECIAL_UNKNOWN) {
-		return;
-	}
-
 	/* This is a known key set it as pressed / unpressed */
 	switch (sdl_event->type) {
 		case SDL_KEYDOWN:
