@@ -7,8 +7,9 @@
 #include <glib.h>
 #include <string.h>
 
-#include "system/db/models.h"
 #include "system/discover.h"
+#include "system/utils.h"
+#include "system/db/models.h"
 
 static gboolean meh_discover_ext_is_valid(gchar* filename, gchar* extension);
 static GQueue* meh_discover_read_filenames(gchar* directory);
@@ -32,8 +33,8 @@ GQueue* meh_discover_scan_directory(gchar* directory, gchar* extensions) {
 		if (meh_discover_ext_is_valid(filename, extensions)) {
 
 			Executable* executable = meh_model_executable_new(
-				0,
-				g_strdup(filename),
+				-1,
+				meh_clean_filename(filename),
 				g_strdup(filename),
 				NULL,
 				NULL,
@@ -44,10 +45,9 @@ GQueue* meh_discover_scan_directory(gchar* directory, gchar* extensions) {
 				NULL,
 				NULL,
 				FALSE,
-				0
+				0 /* FIXME(remy): 0 is not a valid value. */
 			);
 
-			g_message("append: %s", executable->display_name);
 			g_queue_push_tail(executables, executable);
 		}
 	}
