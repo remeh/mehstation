@@ -35,7 +35,7 @@ GQueue* meh_discover_scan_directory(gchar* directory, gchar* extensions) {
 			Executable* executable = meh_model_executable_new(
 				-1,
 				meh_clean_filename(filename),
-				g_strdup(filename),
+				g_strdup_printf("%s/%s", directory, filename),
 				NULL,
 				NULL,
 				NULL,
@@ -45,7 +45,7 @@ GQueue* meh_discover_scan_directory(gchar* directory, gchar* extensions) {
 				NULL,
 				NULL,
 				FALSE,
-				0 /* FIXME(remy): 0 is not a valid value. */
+				g_date_time_new_now_local() /* FIXME(remy): 0 is not a valid value. */
 			);
 
 			g_queue_push_tail(executables, executable);
