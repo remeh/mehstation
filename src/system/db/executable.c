@@ -43,6 +43,26 @@ Executable* meh_model_executable_new(int id, const gchar* display_name, const gc
 	return executable;
 }
 
+Executable* meh_model_executable_copy(Executable* executable) {
+	g_assert(executable != NULL);
+
+	return meh_model_executable_new(
+		executable->id,
+		executable->display_name,
+		executable->filepath,
+		executable->description,
+		executable->genres,
+		executable->publisher,
+		executable->developer,
+		executable->release_date,
+		executable->rating,
+		executable->players,
+		executable->extra_parameter,
+		executable->favorite,
+		executable->last_played
+	);
+}
+
 /*
  * meh_string_copy copies the string or fallback to the given value.
  */
