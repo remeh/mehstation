@@ -43,7 +43,7 @@ Executable* meh_model_executable_new(int id, const gchar* display_name, const gc
 	return executable;
 }
 
-Executable* meh_model_executable_copy(Executable* executable) {
+Executable* meh_model_executable_copy(const Executable* executable) {
 	g_assert(executable != NULL);
 
 	return meh_model_executable_new(

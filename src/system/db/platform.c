@@ -15,6 +15,19 @@ Platform* meh_model_platform_new(int id, const char* name, const char* command, 
 	return platform;
 }
 
+Platform* meh_model_platform_copy(const Platform* platform) {
+	g_assert(platform != NULL);
+
+	return meh_model_platform_new(
+		platform->id,
+		platform->name,
+		platform->command,
+		platform->icon,
+		platform->background,
+		platform->type
+	);
+}
+
 void meh_model_platform_destroy(Platform* platform) {
 	g_assert(platform != NULL);
 
