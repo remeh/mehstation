@@ -20,6 +20,7 @@ SET(
         src/system/audio.c
         src/system/sound.c
         src/system/db.c
+        src/system/discover.c
         src/system/flags.c
         src/system/input.c
         src/system/message.c
