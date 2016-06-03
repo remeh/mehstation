@@ -48,7 +48,8 @@ gchar* meh_clean_filename(gchar* filename) {
 		}
 	}
 
-	return g_strndup(filename, end_offset);
+	gchar* cleaned = g_strndup(filename, end_offset);
+	return g_strchomp(cleaned);
 }
 
 static gchar* meh_prepend_zero(gint value) {
