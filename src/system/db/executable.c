@@ -59,7 +59,7 @@ Executable* meh_model_executable_copy(const Executable* executable) {
 		executable->players,
 		executable->extra_parameter,
 		executable->favorite,
-		executable->last_played
+		g_date_time_new_from_unix_local(g_date_time_to_unix(executable->last_played))
 	);
 }
 
