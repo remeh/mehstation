@@ -631,8 +631,8 @@ static void meh_exec_list_start_executable(App* app, Screen* screen) {
 	int cursor_exec = data->selected_executable;
 
 	/* Copy the models */
-	Platform* platform = meh_db_get_platform(app->db, data->platform->id);
-	Executable* executable = meh_db_get_executable(app->db, exec->id);
+	Platform* platform = meh_model_platform_copy(data->platform);
+	Executable* executable = meh_model_executable_copy(exec);
 
 	/* destroy screens view */
 	meh_screen_destroy(screen->parent_screen);
@@ -641,7 +641,6 @@ static void meh_exec_list_start_executable(App* app, Screen* screen) {
 	meh_screen_destroy(screen);
 	app->current_screen = NULL;
 	data = NULL;
-
 
 	/* starts the executable */
 
@@ -666,7 +665,7 @@ static void meh_exec_list_start_executable(App* app, Screen* screen) {
 	platform_list_data->selected_platform = cursor_platform;
 	meh_screen_platform_change_platform(app, platform_screen);
 
-	/* Free the models */
+	/* free the copied models */
 	meh_model_executable_destroy(executable);
 	meh_model_platform_destroy(platform);
 }
