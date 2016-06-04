@@ -5,7 +5,7 @@
 
 /* this const should be set to the latest
  * schema version. */
-#define MEH_DB_LATEST_VERSION 1
+#define MEH_DB_LATEST_VERSION 2
 
 struct Platform;
 struct Executable;
