@@ -8,8 +8,9 @@
 #include "system/input.h"
 #include "system/db/models.h"
 
-static gboolean meh_db_check_schema(DB* db);
-static gboolean meh_db_initialize(App* app, DB* db);
+static guint meh_db_get_schema_version(DB* db);
+static gboolean meh_db_migrate_to(App* app, DB* db, guint from, guint to);
+static gboolean meh_db_run_sqlfile(App* app, DB* db, gchar* filename);
 
 /*
  * meh_db_open_or_create uses the given filename to open
@@ -31,10 +32,12 @@ DB* meh_db_open_or_create(App* app) {
 	}
 
 	/* Initialize the database if needed. */
-	if (!meh_db_check_schema(db)) {
-		g_message("Creating the initial schema in database at: %s", db->filename);
+	guint schema_version = meh_db_get_schema_version(db);
 
-		gboolean creation_success = meh_db_initialize(app, db);
+	if (schema_version < MEH_DB_LATEST_VERSION) {
+		g_message("Updating the database '%s' from version %d to version %d", db->filename, schema_version, MEH_DB_LATEST_VERSION);
+
+		gboolean creation_success = meh_db_migrate_to(app, db, schema_version, MEH_DB_LATEST_VERSION);
 		if (creation_success == FALSE) {
 			g_critical("Can't initialize the mehstation database.");
 			return NULL;
@@ -63,19 +66,48 @@ void meh_db_close(DB* db) {
 }
 
 /*
- * meh_db_initialize initialize the mehstation database.
+ * meh_db_initialize_or_migrate initialize the mehstation database.
+ * It runs migration files if necessary.
  */
-static gboolean meh_db_initialize(App* app, DB* db) {
+static gboolean meh_db_migrate_to(App* app, DB* db, guint version_from, guint version_to) {
+	g_assert(app != NULL);
 	g_assert(db != NULL);
-	sqlite3_stmt *statement = NULL;
 
-	/* Test for the existence of the file. */
-	gchar* path = g_strdup_printf("%s/schema.sql", app->res_dir);
-	gboolean exists = g_file_test(path, G_FILE_TEST_EXISTS);
-	if (!exists) {
-		g_critical("The schema file doesn't exist.");
+	/* NOTE(remy): we count from 1 not 0 */
+	for (int i = version_from+1; i < version_to+1; i++) {
+		/* Test for the existence of the file. */
+		gchar* path = g_strdup_printf("%s/%d.sql", app->res_dir, i);
+
+		if (!meh_db_run_sqlfile(app, db, path)) {
+			g_free(path);
+			path = NULL;
+			return FALSE;
+		}
+
 		g_free(path);
 		path = NULL;
+	}
+
+	g_message("Database migrated.");
+	return TRUE;
+}
+
+static gboolean meh_db_run_sqlfile(App* app, DB* db, gchar* filename) {
+	g_assert(app != NULL);
+	g_assert(db != NULL);
+	g_assert(filename != NULL);
+
+	g_message("Executing sql file: %s", filename);
+
+	if (g_utf8_strlen(filename, -1) == 0) {
+		return FALSE;
+	}
+
+	sqlite3_stmt *statement = NULL;
+
+	gboolean exists = g_file_test(filename, G_FILE_TEST_EXISTS);
+	if (!exists) {
+		g_critical("The schema file '%s' doesn't exist.", filename);
 		return FALSE;
 	}
 
@@ -85,10 +117,7 @@ static gboolean meh_db_initialize(App* app, DB* db) {
 	GError* error = NULL;
 
 	/* read the queries file */
-	g_file_get_contents(path, &content, &length, &error);
-
-	g_free(path);
-	path = NULL;
+	g_file_get_contents(filename, &content, &length, &error);
 
 	if (error != NULL) {
 		g_critical("Error while reading the schema file : %s", error->message);
@@ -125,14 +154,14 @@ static gboolean meh_db_initialize(App* app, DB* db) {
 	g_strfreev(queries);
 	g_free(content);
 	sqlite3_finalize(statement);
-	g_message("Database initialized.");
+	
 	return TRUE;
 }
 
 /*
- * meh_db_check_schema checks that the schema is created in the DB.
+ * meh_db_get_schema_version checks that the schema is created in the DB.
  */
-static gboolean meh_db_check_schema(DB* db) {
+static guint meh_db_get_schema_version(DB* db) {
 	g_assert(db != NULL);
 
 	sqlite3_stmt *statement = NULL;
@@ -140,13 +169,21 @@ static gboolean meh_db_check_schema(DB* db) {
 	const char* sql = "SELECT \"value\" FROM mehstation WHERE \"name\" = \"schema\"";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 
+	/* TODO(remy): check the latest schema available (compare to MEH_DB_LATEST_VERSION) */
+
 	if (return_code != SQLITE_OK) {
+		/* we must setup from the start. */
 		sqlite3_finalize(statement);
-		return FALSE;
+		return 0;
+	}
+
+	guint schema_version = 0;
+	if (sqlite3_step(statement) == SQLITE_ROW) {
+		schema_version = sqlite3_column_int(statement, 0);
 	}
 
 	sqlite3_finalize(statement);
-	return TRUE;
+	return schema_version;
 }
 
 /*
@@ -307,6 +344,8 @@ void meh_db_save_mapping(DB* db, Mapping* mapping) {
 	if (sqlite3_step(statement) != SQLITE_ROW) {
 		return;
 	}
+
+	sqlite3_finalize(statement);
 
 	g_debug("Stored the mapping: %s", mapping->id);
 }
@@ -513,6 +552,68 @@ Executable* meh_db_get_random_executable(DB* db, int* platform_id) {
 	return executable;
 }
 
+gboolean meh_db_platform_executable_exists(DB* db, int platform_id, gchar* display_name) {
+	g_assert(db != NULL);
+
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "SELECT 1 FROM \"executable\" JOIN \"platform\" ON \"platform\".\"id\" = ?1 AND \"executable\".\"platform_id\" = \"platform\".\"id\" WHERE \"executable\".\"display_name\" LIKE ?2;";
+
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+	if (return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
+		return FALSE;
+	}
+
+	sqlite3_bind_int(statement, 1, platform_id);
+	sqlite3_bind_text(statement, 2, display_name, -1, NULL);
+
+	gboolean found = FALSE;
+	if (sqlite3_step(statement) == SQLITE_ROW) {
+		found = TRUE;
+	}
+
+	sqlite3_finalize(statement);
+
+	return found;
+}
+
+gboolean meh_db_executable_insert(DB* db, Executable* executable, int platform_id) {
+	g_assert(db != NULL);
+
+	sqlite3_stmt *statement = NULL;
+
+	const char* sql = "INSERT INTO executable (display_name, filepath, platform_id, description, genres, publisher, developer, release_date, players, rating, extra_parameter, favorite, last_played) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, 0, strftime('%s','now'))";
+
+	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
+
+	if (return_code != SQLITE_OK) {
+		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
+		return FALSE;
+	}
+
+	sqlite3_bind_text(statement, 1, executable->display_name, -1, NULL);
+	sqlite3_bind_text(statement, 2, executable->filepath, -1, NULL);
+	sqlite3_bind_int(statement, 3, platform_id);
+	sqlite3_bind_text(statement, 4, executable->description, -1, NULL);
+	sqlite3_bind_text(statement, 5, executable->genres, -1, NULL);
+	sqlite3_bind_text(statement, 6, executable->publisher, -1, NULL);
+	sqlite3_bind_text(statement, 7, executable->developer, -1, NULL);
+	sqlite3_bind_text(statement, 8, executable->release_date, -1, NULL);
+	sqlite3_bind_text(statement, 9, executable->players, -1, NULL);
+	sqlite3_bind_text(statement, 10, executable->rating, -1, NULL);
+	sqlite3_bind_text(statement, 11, executable->extra_parameter, -1, NULL);
+
+	gboolean done = FALSE;
+	if (sqlite3_step(statement) == SQLITE_ROW) {
+		done = TRUE;
+	}
+
+	sqlite3_finalize(statement);
+
+	return done;
+}
+
 /*
  * meh_db_get_last_started_executable returns the lastly played executable.
  * platform_id will be set to the id of the executable's platform allowing
@@ -640,11 +741,14 @@ gboolean meh_db_set_executable_favorite(DB* db, const Executable* executable, gb
 	sqlite3_bind_int(statement, 1, favorite == TRUE ? 1 : 0);
 	sqlite3_bind_int(statement, 2, executable->id);
 
+	gboolean done = FALSE;
 	if (sqlite3_step(statement) == SQLITE_DONE) {
-		return TRUE;
+		done = TRUE;
 	}
 
-	return FALSE;
+	sqlite3_finalize(statement);
+
+	return done;
 }
 
 gboolean meh_db_update_executable_last_played(DB* db, const struct Executable* executable) {

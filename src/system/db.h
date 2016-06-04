@@ -3,6 +3,10 @@
 #include <glib.h>
 #include <sqlite3.h>
 
+/* this const should be set to the latest
+ * schema version. */
+#define MEH_DB_LATEST_VERSION 1
+
 struct Platform;
 struct Executable;
 struct Mapping;
@@ -22,6 +26,8 @@ GQueue* meh_db_get_platforms(DB* db);
 struct Platform* meh_db_get_platform(DB* db, int platform_id);
 struct Executable* meh_db_read_executable(sqlite3_stmt* statement);
 struct Executable* meh_db_get_platform_random_executable(DB* db, int platform_id);
+gboolean meh_db_executable_insert(DB* db, struct Executable* executable, int platform_id);
+gboolean meh_db_platform_executable_exists(DB* db, int platform_id, gchar* display_name);
 struct Executable* meh_db_get_random_executable(DB* db, int* platform_id);
 struct Executable* meh_db_get_last_started_executable(DB* db, int *platform_id);;
 GQueue* meh_db_get_platform_executables(DB* db, const struct Platform* platform, gboolean get_resources);
