@@ -14,6 +14,7 @@
 #include "system/audio.h"
 #include "system/consts.h"
 #include "system/db.h"
+#include "system/discover.h"
 #include "system/input.h"
 #include "system/message.h"
 #include "system/transition.h"
@@ -57,6 +58,16 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 	/* get the platform */
 	data->platform = meh_db_get_platform(app->db, platform_id);
 	g_assert(data->platform != NULL);
+
+	/* maybe we need to automatically discover some executables ? */
+	if (data->platform->discover_dir != NULL &&
+			g_utf8_strlen(data->platform->discover_dir, -1) > 0) {
+		g_debug("Starting directory scan for platform %s (in directory '%s' with ext '%s')",
+				data->platform->name,
+				data->platform->discover_dir,
+				data->platform->discover_ext);
+		meh_discover_scan_directory(app, data->platform, data->platform->discover_dir, data->platform->discover_ext);
+	}
 
 	/* get the executables */
 	data->executables = meh_db_get_platform_executables(app->db, data->platform, TRUE);

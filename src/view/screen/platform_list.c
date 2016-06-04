@@ -144,7 +144,7 @@ static void meh_screen_platform_last_started_load(App* app, Screen* screen) {
 
 	/* didn't find any */
 	if (platform_id < 0 || executable == NULL) {
-		g_critical("Can't find the last played executable.");
+		g_message("Can't find the last played executable.");
 		return;
 	}
 
@@ -171,7 +171,7 @@ static void meh_screen_platform_last_started_load(App* app, Screen* screen) {
 	}
 
 	if (icon == NULL) {
-		g_critical("Can't load the file for the last played executable.");
+		g_message("Can't load the file for the last played executable.");
 		meh_model_executable_destroy(executable);
 		meh_model_platform_destroy(platform);
 		return;
