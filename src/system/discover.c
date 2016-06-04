@@ -7,21 +7,23 @@
 #include <glib.h>
 #include <string.h>
 
+#include "system/app.h"
 #include "system/discover.h"
 #include "system/utils.h"
 #include "system/db/models.h"
 
 static gboolean meh_discover_ext_is_valid(gchar* filename, gchar* extension);
 static GQueue* meh_discover_read_filenames(gchar* directory);
+static void meh_discover_update_platform_executables(App* app, const Platform* platform, GQueue* executables);
 
 /* TODO(remy): split the extensions per comma */
-GQueue* meh_discover_scan_directory(gchar* directory, gchar* extensions) {
+void meh_discover_scan_directory(App* app, const Platform* platform, gchar* directory, gchar* extensions) {
 	g_assert(directory != NULL);
 
 	GQueue *executables = g_queue_new();
 
 	if (g_utf8_strlen(directory, 1) <= 0) {
-		return executables;
+		return;
 	}
 
 	/* look for all files in the given directory */
@@ -53,7 +55,43 @@ GQueue* meh_discover_scan_directory(gchar* directory, gchar* extensions) {
 	}
 
 	g_queue_free_full(filenames, (GDestroyNotify)g_free);
-	return executables;
+
+	/* updates the platform executables list in db. */
+	meh_discover_update_platform_executables(app, platform, executables);
+
+	/* free everything */
+	meh_model_executables_destroy(executables);
+}
+
+static void meh_discover_update_platform_executables(App* app, const Platform* platform, GQueue* executables) {
+	g_assert(app != NULL);
+	g_assert(platform != NULL);
+	g_assert(executables != NULL);
+
+	gboolean exists = FALSE;
+	Executable* executable = NULL;
+
+	/* TODO(remy): test for error ? */
+	sqlite3_exec(app->db->sqlite, "BEGIN TRANSACTION", NULL, NULL, NULL);
+
+	for (int i = 0; i < g_queue_get_length(executables); i++) {
+		executable = g_queue_peek_nth(executables, i);
+
+		/* check for existence */
+		exists = meh_db_platform_executable_exists(app->db, platform->id, executable->display_name);
+
+		if (!exists) {
+			g_debug("Platform '%s' doesn't have executable '%s', insertion.", platform->name, executable->display_name);
+			meh_db_executable_insert(app->db, executable, platform->id);
+			/* TODO(remy): abort transaction on error */
+		}
+
+		/* next */
+		exists = FALSE;
+		executable = NULL;
+	}
+
+	sqlite3_exec(app->db->sqlite, "COMMIT", NULL, NULL, NULL);
 }
 
 static GQueue* meh_discover_read_filenames(gchar* directory) {
