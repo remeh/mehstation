@@ -194,7 +194,7 @@ GQueue* meh_db_get_platforms(DB* db) {
 
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"name\", \"command\", \"icon\", \"background\", \"type\" FROM platform ORDER BY name";
+	const char* sql = "SELECT \"id\", \"name\", \"command\", \"icon\", \"background\", \"type\", \"discover_dir\", \"discover_ext\" FROM platform ORDER BY name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
@@ -219,8 +219,10 @@ GQueue* meh_db_get_platforms(DB* db) {
 		const char* icon = (const char*)sqlite3_column_text(statement, 3);
 		const char* background = (const char*)sqlite3_column_text(statement, 4);
 		const char* type = (const char*)sqlite3_column_text(statement, 5);
+		const char* discover_dir = (const char*)sqlite3_column_text(statement, 6);
+		const char* discover_ext = (const char*)sqlite3_column_text(statement, 7);
 		/* build the object */
-		Platform* platform = meh_model_platform_new(id, name, command, icon, background, type);
+		Platform* platform = meh_model_platform_new(id, name, command, icon, background, type, discover_dir, discover_ext);
 		/* append in the list */
 		g_queue_push_tail(list, platform);
 	}
@@ -403,7 +405,7 @@ Platform* meh_db_get_platform(DB* db, int platform_id) {
 	Platform* platform = NULL;
 	sqlite3_stmt *statement = NULL;
 
-	const char* sql = "SELECT \"id\", \"name\", \"command\", \"icon\", \"background\", \"type\" FROM platform WHERE id = ?1 ORDER BY name";
+	const char* sql = "SELECT \"id\", \"name\", \"command\", \"icon\", \"background\", \"type\", \"discover_dir\", \"discover_ext\" FROM platform WHERE id = ?1 ORDER BY name";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 	if (statement == NULL || return_code != SQLITE_OK) {
 		g_critical("Can't execute the query: %s\nError: %s", sql, sqlite3_errstr(return_code));
@@ -428,8 +430,10 @@ Platform* meh_db_get_platform(DB* db, int platform_id) {
 		const char* icon = (const char*)sqlite3_column_text(statement, 3);
 		const char* background = (const char*)sqlite3_column_text(statement, 4);
 		const char* type = (const char*)sqlite3_column_text(statement, 5);
+		const char* discover_dir = (const char*)sqlite3_column_text(statement, 6);
+		const char* discover_ext = (const char*)sqlite3_column_text(statement, 7);
 		/* build the object */
-		platform = meh_model_platform_new(id, name, command, icon, background, type);
+		platform = meh_model_platform_new(id, name, command, icon, background, type, discover_dir, discover_ext);
 	}
 
 	sqlite3_finalize(statement);
