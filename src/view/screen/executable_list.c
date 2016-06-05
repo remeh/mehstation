@@ -401,6 +401,7 @@ static void meh_exec_list_select_resources(Screen* screen) {
 
 	data->cover = -1;
 	data->logo = -1;
+	data->background = -1;
 	data->screenshots[0] = data->screenshots[1] = data->screenshots[2] = -1;
 	if (data->cover_widget != NULL) {
 		data->cover_widget->texture = NULL;
@@ -929,7 +930,9 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	/* background */
-	meh_widget_image_render(app->window, data->background_widget);
+	if (data->background > -1) {
+		meh_widget_image_render(app->window, data->background_widget);
+	}
 
 	/* background hover */
 	meh_widget_rect_render(app->window, data->bg_hover_widget);
