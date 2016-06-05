@@ -12,7 +12,7 @@
 #include "system/utils.h"
 #include "system/db/models.h"
 
-static gboolean meh_discover_ext_is_valid(gchar* filename, gchar* extension);
+static gboolean meh_discover_ext_is_valid(gchar* filename, gchar** extension);
 static GQueue* meh_discover_read_filenames(gchar* directory);
 static void meh_discover_update_platform_executables(App* app, const Platform* platform, GQueue* executables);
 
@@ -29,10 +29,13 @@ void meh_discover_scan_directory(App* app, const Platform* platform, gchar* dire
 	/* look for all files in the given directory */
 	GQueue* filenames = meh_discover_read_filenames(directory);
 
+	/* split extensions */
+	gchar** exts = g_strsplit(extensions, ",", -1);
+
 	for (int i = 0; i < g_queue_get_length(filenames); i++) {
 		gchar* filename = g_queue_peek_nth(filenames, i);
 
-		if (meh_discover_ext_is_valid(filename, extensions)) {
+		if (meh_discover_ext_is_valid(filename, exts)) {
 
 			Executable* executable = meh_model_executable_new(
 				-1,
@@ -55,6 +58,7 @@ void meh_discover_scan_directory(App* app, const Platform* platform, gchar* dire
 	}
 
 	g_queue_free_full(filenames, (GDestroyNotify)g_free);
+	g_strfreev(exts);
 
 	/* updates the platform executables list in db. */
 	meh_discover_update_platform_executables(app, platform, executables);
@@ -121,27 +125,37 @@ static GQueue* meh_discover_read_filenames(gchar* directory) {
 }
 
 /* meh_discover_ext_is_valid checks whether the given filename ends
- * with the given extension */
-static gboolean meh_discover_ext_is_valid(gchar* filename, gchar* extension) {
+ * with one of the given extensions */
+static gboolean meh_discover_ext_is_valid(gchar* filename, gchar** extensions) {
 	g_assert(filename != NULL);
-	g_assert(extension != NULL);
+	g_assert(extensions != NULL);
 
-	glong ext_len = g_utf8_strlen(extension, -1);
-	glong file_len = g_utf8_strlen(filename, -1);
+	gchar* extension = NULL;
+	gboolean valid = FALSE;
+	guint i = 0;
 
-	if (file_len < ext_len) {
-		return FALSE;
+	while ((extension = extensions[i]) != NULL && valid != TRUE) {
+		extension = g_strstrip(extension);
+
+		glong ext_len = g_utf8_strlen(extension, -1);
+		glong file_len = g_utf8_strlen(filename, -1);
+
+		if (file_len < ext_len) {
+			return FALSE;
+		}
+
+		gchar* end = g_utf8_substring(filename, file_len - ext_len, file_len);
+		gchar* low = g_utf8_strdown(end, -1);
+
+		if (g_utf8_collate(low, extension) == 0) {
+			valid = TRUE;
+		}
+
+		g_free(low);
+		g_free(end);
+
+		i++;
 	}
 
-	gchar* end = g_utf8_substring(filename, file_len - 3, file_len);
-	gchar* low = g_utf8_strdown(end, -1);
-
-	gboolean rv = FALSE;
-	if (!g_utf8_collate(low, extension)) {
-		rv = TRUE;
-	}
-
-	g_free(low);
-	g_free(end);
-	return rv;
+	return valid;
 }
