@@ -89,6 +89,7 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 	data->executable_widgets = g_queue_new();
 
 	data->exec_list_video = NULL;
+	data->show_descriptions = TRUE;
 
 	screen->data = data;
 
@@ -937,7 +938,9 @@ int meh_exec_list_render(App* app, Screen* screen, gboolean flip) {
 	meh_widget_text_render(app->window, data->header_text_widget);
 
 	if (g_strcmp0(data->platform->type, "complete") == 0) {
-		meh_exec_desc_render(app, screen);
+		if (data->show_descriptions) {
+			meh_exec_desc_render(app, screen);
+		}
 		meh_complete_selec_render(app, screen);
 	} else {
 		meh_cover_selec_render(app, screen);

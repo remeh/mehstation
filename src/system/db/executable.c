@@ -16,26 +16,26 @@ Executable* meh_model_executable_new(int id, const gchar* display_name, const gc
 	executable->display_name = g_strdup(display_name);
 	executable->filepath = g_strdup(filepath);
 
-	executable->description = meh_string_copy(description, "No description.");
-	executable->genres = meh_string_copy(genres, "Unknown");
-	executable->publisher = meh_string_copy(publisher, "Unknown");
-	executable->developer = meh_string_copy(developer, "Unknown");
-	executable->release_date = meh_string_copy(release_date, "Unknown");
+	executable->description = meh_string_copy(description, MEH_META_NO_DESCRIPTION);
+	executable->genres = meh_string_copy(genres, MEH_META_UNKNOWN);
+	executable->publisher = meh_string_copy(publisher, MEH_META_UNKNOWN);
+	executable->developer = meh_string_copy(developer, MEH_META_UNKNOWN);
+	executable->release_date = meh_string_copy(release_date, MEH_META_UNKNOWN);
 
 	executable->extra_parameter = meh_string_copy(extra_parameter, "");
 	executable->favorite = favorite;
 	executable->last_played = last_played;
 
 	if (g_strcmp0(rating, "0.0") == 0) {
-		executable->rating = g_strdup("No rating");
+		executable->rating = g_strdup(MEH_META_NO_RATING);
 	} else {
-		executable->rating = meh_string_copy(rating, "No rating");
+		executable->rating = meh_string_copy(rating, MEH_META_NO_RATING);
 	}
 
 	if (g_strcmp0(players, "0")  == 0) {
-		executable->players = g_strdup("Unknown");
+		executable->players = g_strdup(MEH_META_UNKNOWN);
 	} else {
-		executable->players = meh_string_copy(players, "Unknown");
+		executable->players = meh_string_copy(players, MEH_META_UNKNOWN);
 	}
 
 	executable->resources = g_queue_new();

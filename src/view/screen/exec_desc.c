@@ -5,8 +5,11 @@
  */
 
 #include "system/app.h"
+#include "system/db/models.h"
 #include "view/screen.h"
 #include "view/screen/executable_list.h"
+
+static gboolean meh_exec_desc_is_useful(Executable* executable);
 
 static void meh_exec_desc_metadata_init(App* app, Screen* screen,
 										WidgetText** label, WidgetText** value, gchar* title, int delay,
@@ -133,20 +136,73 @@ void meh_exec_desc_destroy(Screen* screen) {
 	}
 }
 
+/* meh_exec_desc_is_useful checks if any useful information
+ * is available for the currently selected executable. */
+static gboolean meh_exec_desc_is_useful(Executable* executable) {
+	if (executable == NULL) {
+		return FALSE;
+	}
+
+	if (g_queue_get_length(executable->resources) > 0) {
+		return TRUE;
+	}
+
+	if (g_strcmp0(executable->description, MEH_META_NO_DESCRIPTION) != 0) {
+		return TRUE;
+	}
+
+	if (g_strcmp0(executable->genres, MEH_META_UNKNOWN) != 0) {
+		return TRUE;
+	}
+
+	if (g_strcmp0(executable->players, MEH_META_UNKNOWN) != 0) {
+		return TRUE;
+	}
+
+	if (g_strcmp0(executable->publisher, MEH_META_UNKNOWN) != 0) {
+		return TRUE;
+	}
+
+	if (g_strcmp0(executable->developer, MEH_META_UNKNOWN) != 0) {
+		return TRUE;
+	}
+
+	if (g_strcmp0(executable->release_date, MEH_META_UNKNOWN) != 0) {
+		return TRUE;
+	}
+
+	if (g_strcmp0(executable->rating, MEH_META_NO_RATING) != 0) {
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 /*
  * meh_exec_desc_adapt_view adapts the view to the currently
  * selected executable.
+ * If nothing useful has to be shown (Unknown in each fields, no screenshots,
+ * etc.), the executable description will hide himself.
  */
 void meh_exec_desc_adapt_view(App* app, Screen* screen) {
 	g_assert(app != NULL);
 	g_assert(screen != NULL);
 
+	ExecutableListData* data = meh_exec_list_get_data(screen);
+	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
+
+	/* do we have anything at all to show for this executable ? */
+	if (meh_exec_desc_is_useful(current_executable) == FALSE) {
+		data->show_descriptions = FALSE;
+		return;
+	} else {
+		data->show_descriptions = TRUE;
+	}
+
 	/*
 	 * look whether the image is a portrait / landscape image
 	 * and change the size of the description / cover in function
 	 */
-
-	ExecutableListData* data = meh_exec_list_get_data(screen);
 
 	if (data->logo == -1) {
 		/* no logo, use the full height for the description */
@@ -189,7 +245,6 @@ void meh_exec_desc_adapt_view(App* app, Screen* screen) {
 	 * refreshes the text widgets about game info.
 	 */
 
-	Executable* current_executable = g_queue_peek_nth(data->executables, data->selected_executable);
 	if (current_executable != NULL) {
 		meh_widget_text_set_text(app->window, data->genres_widget, current_executable->genres);
 		meh_widget_text_set_text(app->window, data->players_widget, current_executable->players);

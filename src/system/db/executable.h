@@ -2,6 +2,10 @@
 
 #include <glib.h>
 
+#define MEH_META_NO_DESCRIPTION "No description."
+#define MEH_META_NO_RATING "No rating"
+#define MEH_META_UNKNOWN "Unknown"
+
 typedef struct Executable {
 	int id;
 	gchar* display_name;

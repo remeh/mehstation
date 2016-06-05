@@ -78,6 +78,8 @@ typedef struct ExecutableListData {
 	WidgetText* release_date_widget;
 	WidgetText* release_date_l_widget;
 
+	gboolean show_descriptions;
+
 	/* Exec cover only */
 	WidgetText* prev_executable_widget;
 	WidgetText* prev_arrow_exec_widget;
