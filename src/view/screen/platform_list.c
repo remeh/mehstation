@@ -517,7 +517,11 @@ void meh_screen_platform_change_platform(App* app, Screen* screen) {
 
 		/* executables count */
 		int count_exec = meh_db_count_platform_executables(app->db, platform);
-		data->subtext->text = g_strdup_printf("%d executable%s", count_exec, count_exec > 1 ? "s": "");
+		if (count_exec != 0) {
+			data->subtext->text = g_strdup_printf("%d executable%s", count_exec, count_exec > 1 ? "s": "");
+		} else {
+			data->subtext->text = g_strdup(""); /* don't display anything if zero executable configured */
+		}
 
 		/* background image */
 		if (platform->background != NULL && strlen(platform->background) != 0) {
