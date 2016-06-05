@@ -40,6 +40,8 @@ static void meh_exec_list_start_bg_anim(Screen* screen);
 static void meh_exec_list_resolve_tex(Screen* screen);
 static void meh_exec_list_init_widgets_to_null(ExecutableListData* data);
 
+#define MEH_PLATFORM_BG_ID ((2^31)-2)
+
 Screen* meh_exec_list_new(App* app, int platform_id) {
 	g_assert(app != NULL);
 
@@ -80,7 +82,6 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 
 	/* display resources */
 
-	data->textures = NULL;
 	data->background = -1;
 	data->cover = -1;
 	data->logo = -1;
@@ -92,6 +93,17 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 	data->show_descriptions = TRUE;
 
 	screen->data = data;
+
+	data->textures = g_hash_table_new_full(g_int_hash, g_int_equal, (GDestroyNotify)g_free, NULL);
+
+	/* adds the platform texture if any with the special ID MEH_PLATFORM_BG_ID */
+	if (g_utf8_strlen(data->platform->background, 2) > 0) {
+		SDL_Texture* platform_tex = meh_image_load_file(app->window->sdl_renderer, data->platform->background);
+		if (platform_tex != NULL) {
+			int *id = g_new(int, 1); *id = MEH_PLATFORM_BG_ID;
+			g_hash_table_insert(data->textures, id, platform_tex);
+		}
+	}
 
 	/* create widgets */
 	meh_exec_create_widgets(app, screen, data);
@@ -426,6 +438,12 @@ static void meh_exec_list_select_resources(Screen* screen) {
 	 */
 	int length = g_queue_get_length(executable->resources);
 	if (length == 0) {
+		/* no resources are available for this executable,
+		 * try to fallback on the platform background. */
+		if (g_utf8_strlen(data->platform->background, 2) > 0) {
+			data->background = MEH_PLATFORM_BG_ID; /* use the special platform background ID: -1 */
+			g_debug("Selected background : platform background.");
+		}
 		return;
 	}
 
@@ -561,11 +579,6 @@ static void meh_exec_list_load_resources(App* app, Screen* screen) {
 	Executable* executable = g_queue_peek_nth(data->executables, data->selected_executable);
 	if (executable == NULL || executable->resources == NULL) {
 		return;
-	}
-
-	/* Create the hash table if not existing */
-	if (data->textures == NULL) {
-		data->textures = g_hash_table_new_full(g_int_hash, g_int_equal, (GDestroyNotify)g_free, NULL);
 	}
 
 	/* Loads the textures described in the executable resources
@@ -731,13 +744,18 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 	 * anim the bg
 	 */
 
-	meh_exec_list_start_bg_anim(screen);
+	if (data->background > -1 && data->background != MEH_PLATFORM_BG_ID) {
+		meh_exec_list_start_bg_anim(screen);
+	}
 
 	/*
 	 * animate a fade on the background
 	 */
-	data->bg_hover_widget->a = meh_transition_start(MEH_TRANSITION_CUBIC, 255, 200, 300);
-	meh_screen_add_rect_transitions(screen, data->bg_hover_widget);
+
+	if (data->background > -1 && data->background != MEH_PLATFORM_BG_ID) {
+		data->bg_hover_widget->a = meh_transition_start(MEH_TRANSITION_CUBIC, 255, 200, 300);
+		meh_screen_add_rect_transitions(screen, data->bg_hover_widget);
+	}
 
 	/*
 	 * reset the move of the texts

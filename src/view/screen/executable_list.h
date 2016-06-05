@@ -32,8 +32,10 @@ typedef struct ExecutableListData {
 	GQueue* executables; /* List of Executable*, must be freed. */
 	int executables_length;
 	int selected_executable;
-	GHashTable* textures; /* Hash int->SDL_Texture*, each SDL_Texture* must be freed. */
-
+	GHashTable* textures; /* Hash int->SDL_Texture*, each SDL_Texture* must be freed.
+							 Not that if any is available, textures will contains a
+							 texture at key -1 which will be the platform background
+							 texture. */
 	GQueue *cache_executables_id; /* Contains the executables for which we have load the resources
 									 The first loaded is the first in the queue. */
 	int background; /* Index of the background in the textures cache */
