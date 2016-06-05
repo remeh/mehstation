@@ -36,7 +36,6 @@ static void meh_exec_list_destroy_resources(Screen* screen);
 static void meh_exec_list_load_resources(App* app, Screen* screen);
 static void meh_exec_list_start_executable(App* app, Screen* screen);
 static void meh_exec_list_select_resources(Screen* screen);
-static void meh_exec_list_start_bg_anim(Screen* screen);
 static void meh_exec_list_resolve_tex(Screen* screen);
 static void meh_exec_list_init_widgets_to_null(ExecutableListData* data);
 
@@ -182,22 +181,6 @@ static void meh_exec_create_widgets(App* app, Screen* screen, ExecutableListData
 	} else {
 		meh_cover_selec_create_widgets(app, screen);
 	}
-}
-
-/*
- * meh_exec_list_start_bg_anim slighty moves the background to give
- * an impression of dynamic.
- */
-static void meh_exec_list_start_bg_anim(Screen* screen) {
-	g_assert(screen != NULL);
-
-	ExecutableListData* data = meh_exec_list_get_data(screen);
-	g_assert(data != NULL);
-
-	// TODO(remy): add some random direction here.
-	data->background_widget->x = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 10000);
-	data->background_widget->y = meh_transition_start(MEH_TRANSITION_LINEAR, -50, 0, 10000);
-	meh_screen_add_image_transitions(screen, data->background_widget);
 }
 
 /*
@@ -740,16 +723,9 @@ void meh_exec_list_after_cursor_move(App* app, Screen* screen, int prev_selected
 		meh_cover_selec_adapt_view(app, screen, prev_selected);
 	}
 
-	/*
-	 * anim the bg
-	 */
-
-	if (data->background > -1 && data->background != MEH_PLATFORM_BG_ID) {
-		meh_exec_list_start_bg_anim(screen);
-	}
 
 	/*
-	 * animate a fade on the background
+	 * animate a fade on the background if it's not the platform background.
 	 */
 
 	if (data->background > -1 && data->background != MEH_PLATFORM_BG_ID) {
