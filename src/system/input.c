@@ -291,7 +291,6 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 		case SDL_JOYHATMOTION:
 			keyboard = FALSE;
 
-
 			/* DPAD support */
 			switch (sdl_event->jhat.value) {
 				case SDL_HAT_CENTERED:
