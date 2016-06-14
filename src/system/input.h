@@ -12,6 +12,10 @@
 #define MEH_INPUT_JUST_PRESSED 1
 #define MEH_INPUT_HOLD 2
 
+#define MEH_UNKNOWN 0
+#define MEH_HAT 1
+#define MEH_JOYSTICK 2
+
 #define MEH_INPUT_MAX_AXIS (32767-1000)
 
 struct DB;
@@ -39,6 +43,15 @@ typedef struct {
 	GQueue* gamepads;
 } InputManager;
 
+typedef struct {
+	int up;
+	int down;
+	int left;
+	int right;
+	int movement_type;
+	int tick;
+} InputDirectionMove;
+
 /*
  * InputState stores the information on pressed
  * buttons.
@@ -53,6 +66,8 @@ typedef struct {
 	Mapping* mapping;	
 	/* last pressed sdl key */
 	int last_sdl_key; 
+	/* true if the last move has been done by a hat, joystick or unknown */
+	InputDirectionMove last_movement;
 } InputState;
 
 typedef struct {
@@ -67,7 +82,6 @@ typedef struct {
 	int sdl_key;
 	gchar* guid;
 } InputMessageData;
-
 
 /* input manager */
 InputManager* meh_input_manager_new(struct DB*, Settings settings);

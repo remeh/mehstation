@@ -32,6 +32,11 @@ InputManager* meh_input_manager_new(DB* db, Settings settings) {
 	InputState* keyboard_state = g_new(InputState, 1);
 	keyboard_state->id = g_strdup("keyboard");
 	keyboard_state->mapping = NULL;
+	keyboard_state->last_movement.up =
+	keyboard_state->last_movement.down =
+	keyboard_state->last_movement.left =
+	keyboard_state->last_movement.right = 0;
+	keyboard_state->last_movement.movement_type = MEH_UNKNOWN;
 	g_queue_push_tail(input_manager->input_states, keyboard_state);
 	g_debug("Adding keyboard with id : %s", keyboard_state->id);
 
@@ -62,6 +67,11 @@ InputManager* meh_input_manager_new(DB* db, Settings settings) {
 		gamepad_state->id = g_strdup(guid);
 		gamepad_state->last_sdl_key = -1;
 		gamepad_state->mapping = NULL; /* NOTE will be assigned later */
+		gamepad_state->last_movement.up =
+		gamepad_state->last_movement.down =
+		gamepad_state->last_movement.left =
+		gamepad_state->last_movement.right = 0;
+		gamepad_state->last_movement.movement_type = MEH_UNKNOWN;
 
 		g_queue_push_tail(input_manager->gamepads, gamepad);
 		g_message("Using gamepad: %s", SDL_JoystickNameForIndex(i));
@@ -260,39 +270,46 @@ static InputState* meh_input_manager_get_input_state(InputManager* input_manager
 	return found;
 }
 
-static gboolean* meh_input_read_axis_events(InputState* state, SDL_Event* sdl_event) {
+static InputDirectionMove meh_input_read_axis_events(InputState* state, SDL_Event* sdl_event) {
 	g_assert(state != NULL);
 	g_assert(sdl_event != NULL);
 
-	gboolean* directions = g_new(gboolean, 4);
-	directions[0] = directions[1] =
-	directions[2] = directions[3] = FALSE;
+	InputDirectionMove move;
+
+	move.up = move.down = move.left = move.right = 0;
+	move.movement_type = MEH_UNKNOWN;
+	move.tick = SDL_GetTicks();
 
 	switch (sdl_event->type) {
 		/* DPAD support */
 		case SDL_JOYHATMOTION:
 			switch (sdl_event->jhat.value) {
 				case SDL_HAT_CENTERED:
-					directions[MEH_INPUT_BUTTON_UP] =
-					directions[MEH_INPUT_BUTTON_DOWN] =
-					directions[MEH_INPUT_BUTTON_LEFT] =
-					directions[MEH_INPUT_BUTTON_RIGHT] = FALSE;
+					move.movement_type = MEH_HAT;
+					move.up = -1;
+					move.down = -1;
+					move.left = -1;
+					move.right = -1;
 					break;
 				case SDL_HAT_UP:
 				case SDL_HAT_RIGHTUP:
 				case SDL_HAT_LEFTUP: // FIXME(remy): mehstation doesn't support diagonal
-					directions[MEH_INPUT_BUTTON_UP] = TRUE;
+					move.movement_type = MEH_HAT;
+					move.up = 1;
 					break;
 				case SDL_HAT_RIGHT:
-					directions[MEH_INPUT_BUTTON_RIGHT] = TRUE;
+					move.movement_type = MEH_HAT;
+					move.right = 1;
 					break;
 				case SDL_HAT_LEFT:
-					directions[MEH_INPUT_BUTTON_LEFT] = TRUE;
+					move.movement_type = MEH_HAT;
+					move.left = 1;
 					break;
 				case SDL_HAT_LEFTDOWN:
 				case SDL_HAT_RIGHTDOWN:
 				case SDL_HAT_DOWN:
-					directions[MEH_INPUT_BUTTON_DOWN] = TRUE;
+					move.movement_type = MEH_HAT;
+					move.down = 1;
 					break;
 			}
 			break;
@@ -301,29 +318,35 @@ static gboolean* meh_input_read_axis_events(InputState* state, SDL_Event* sdl_ev
 			switch (sdl_event->jaxis.axis) {
 				case 0: /* X axis */
 					if (sdl_event->jaxis.value > MEH_INPUT_MAX_AXIS) {
-						directions[MEH_INPUT_BUTTON_RIGHT] = TRUE;
+						move.movement_type = MEH_JOYSTICK;
+						move.right = 1;
 					} else if (sdl_event->jaxis.value < -MEH_INPUT_MAX_AXIS) {
-						directions[MEH_INPUT_BUTTON_LEFT] = TRUE;
+						move.movement_type = MEH_JOYSTICK;
+						move.left = 1;
 					} else if (sdl_event->jaxis.value > -MEH_INPUT_MAX_AXIS && sdl_event->jaxis.value < MEH_INPUT_MAX_AXIS) {
 						/* reset these directions */
-						directions[MEH_INPUT_BUTTON_LEFT] = FALSE;
-						directions[MEH_INPUT_BUTTON_RIGHT] = FALSE;
+						move.movement_type = MEH_JOYSTICK;
+						move.left = -1;
+						move.right = -1;
 					}
 					break;
 				case 1: /* Y axis */
 					if (sdl_event->jaxis.value > MEH_INPUT_MAX_AXIS) {
-						directions[MEH_INPUT_BUTTON_DOWN] = TRUE;
+						move.movement_type = MEH_JOYSTICK;
+						move.down = 1;
 					} else if (sdl_event->jaxis.value < -MEH_INPUT_MAX_AXIS) {
-						directions[MEH_INPUT_BUTTON_UP] = TRUE;
+						move.movement_type = MEH_JOYSTICK;
+						move.up = 1;
 					} else if (sdl_event->jaxis.value > -MEH_INPUT_MAX_AXIS && sdl_event->jaxis.value < MEH_INPUT_MAX_AXIS) {
-						directions[MEH_INPUT_BUTTON_DOWN] = FALSE;
-						directions[MEH_INPUT_BUTTON_UP] = FALSE;
+						move.movement_type = MEH_JOYSTICK;
+						move.down = -1;
+						move.up = -1;
 					}
 					break;
 			}
 	}
 
-	return directions;
+	return move;
 }
 
 
@@ -339,6 +362,7 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 	}
 
 	/* get the use 'input_state' having done the event */
+
 	InputState* input_state = meh_input_manager_get_input_state(input_manager, sdl_event);
 
 	int sdl_button = -1;
@@ -363,19 +387,38 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 
 	/* Read directions state */
 
-	gboolean* directions = meh_input_read_axis_events(input_state, sdl_event);
+	InputDirectionMove move = meh_input_read_axis_events(input_state, sdl_event);
 
-	if (directions[MEH_INPUT_BUTTON_UP]) {
-		sdl_button = SDLK_UP;
-	} else if (directions[MEH_INPUT_BUTTON_DOWN]) {
-		sdl_button = SDLK_DOWN;
-	} else if (directions[MEH_INPUT_BUTTON_LEFT]) {
-		sdl_button = SDLK_LEFT;
-	} else if (directions[MEH_INPUT_BUTTON_RIGHT]) {
-		sdl_button = SDLK_RIGHT;
+	if (SDL_GetTicks()-(input_state->last_movement.tick) > 200) { /* ignore jitter */
+		if (move.up > 0) {
+			input_state->last_movement = move;
+			sdl_button = SDLK_UP;
+		} else if (move.down > 0) {
+			input_state->last_movement = move;
+			sdl_button = SDLK_DOWN;
+		}  else if (move.left > 0) {
+			input_state->last_movement = move;
+			sdl_button = SDLK_LEFT;
+		} else if (move.right > 0) {
+			input_state->last_movement = move;
+			sdl_button = SDLK_RIGHT;
+		}
 	}
-
-	g_free(directions);
+	/* reset only if removed by the same input */
+	if (input_state->last_movement.movement_type == move.movement_type) {
+		if (move.up < 0) {
+			meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_UP);
+		}
+		if (move.down < 0) {
+			meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_DOWN);
+		}
+		if (move.left < 0) {
+			meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_LEFT);
+		}
+		if (move.right < 0) {
+			meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_RIGHT);
+		}
+	}
 
 	/* Apply the mapping */
 
