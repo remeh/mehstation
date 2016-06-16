@@ -11,6 +11,7 @@ If some of you want to contribute but don't know what to start with, that's a go
   * popup: entry to start the mapping configuration?
   * platform_list: better placeholder for platform without icons?
   * platform_list: add a random executable launcher (same as "last started" but with a random exec)
+  * platform_list: last started launcher only use screenshots for bg, it could also use fanarts.
   * executable_list: gray colors for the 'Unknown' metadata.
 
 ## System
