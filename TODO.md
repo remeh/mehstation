@@ -16,6 +16,7 @@ If some of you want to contribute but don't know what to start with, that's a go
 ## System
 
   * input: when plugging in a new input device, something should ask for its configuration if its not already done? (or directly send to the mapping screen if no devices are configured)
+  * input: when mehstation is starting, if unmapped device + keyboard are present, the mapping screen could be displayed with the caption "or use the keyboard to ignore this screen"
   * audio: finish audio sound playing implementation (sounds with many channels)
   * general: stronger method to shutdown the system?
   * app: the algorithm replacing the flags in the executable string could definitely be better
