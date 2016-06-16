@@ -32,6 +32,11 @@ InputManager* meh_input_manager_new(DB* db, Settings settings) {
 	InputState* keyboard_state = g_new(InputState, 1);
 	keyboard_state->id = g_strdup("keyboard");
 	keyboard_state->mapping = NULL;
+	keyboard_state->last_movement.up =
+	keyboard_state->last_movement.down =
+	keyboard_state->last_movement.left =
+	keyboard_state->last_movement.right = 0;
+	keyboard_state->last_movement.movement_type = MEH_UNKNOWN;
 	g_queue_push_tail(input_manager->input_states, keyboard_state);
 	g_debug("Adding keyboard with id : %s", keyboard_state->id);
 
@@ -62,6 +67,11 @@ InputManager* meh_input_manager_new(DB* db, Settings settings) {
 		gamepad_state->id = g_strdup(guid);
 		gamepad_state->last_sdl_key = -1;
 		gamepad_state->mapping = NULL; /* NOTE will be assigned later */
+		gamepad_state->last_movement.up =
+		gamepad_state->last_movement.down =
+		gamepad_state->last_movement.left =
+		gamepad_state->last_movement.right = 0;
+		gamepad_state->last_movement.movement_type = MEH_UNKNOWN;
 
 		g_queue_push_tail(input_manager->gamepads, gamepad);
 		g_message("Using gamepad: %s", SDL_JoystickNameForIndex(i));
@@ -260,9 +270,89 @@ static InputState* meh_input_manager_get_input_state(InputManager* input_manager
 	return found;
 }
 
+static InputDirectionMove meh_input_read_axis_events(InputState* state, SDL_Event* sdl_event) {
+	g_assert(state != NULL);
+	g_assert(sdl_event != NULL);
+
+	InputDirectionMove move;
+
+	move.up = move.down = move.left = move.right = 0;
+	move.movement_type = MEH_UNKNOWN;
+	move.tick = SDL_GetTicks();
+
+	switch (sdl_event->type) {
+		/* DPAD support */
+		case SDL_JOYHATMOTION:
+			switch (sdl_event->jhat.value) {
+				case SDL_HAT_CENTERED:
+					move.movement_type = MEH_HAT;
+					move.up = -1;
+					move.down = -1;
+					move.left = -1;
+					move.right = -1;
+					break;
+				case SDL_HAT_UP:
+				case SDL_HAT_RIGHTUP:
+				case SDL_HAT_LEFTUP: // FIXME(remy): mehstation doesn't support diagonal
+					move.movement_type = MEH_HAT;
+					move.up = 1;
+					break;
+				case SDL_HAT_RIGHT:
+					move.movement_type = MEH_HAT;
+					move.right = 1;
+					break;
+				case SDL_HAT_LEFT:
+					move.movement_type = MEH_HAT;
+					move.left = 1;
+					break;
+				case SDL_HAT_LEFTDOWN:
+				case SDL_HAT_RIGHTDOWN:
+				case SDL_HAT_DOWN:
+					move.movement_type = MEH_HAT;
+					move.down = 1;
+					break;
+			}
+			break;
+		/* Stick support */
+		case SDL_JOYAXISMOTION:
+			switch (sdl_event->jaxis.axis) {
+				case 0: /* X axis */
+					if (sdl_event->jaxis.value > MEH_INPUT_MAX_AXIS) {
+						move.movement_type = MEH_JOYSTICK;
+						move.right = 1;
+					} else if (sdl_event->jaxis.value < -MEH_INPUT_MAX_AXIS) {
+						move.movement_type = MEH_JOYSTICK;
+						move.left = 1;
+					} else if (sdl_event->jaxis.value > -MEH_INPUT_MAX_AXIS && sdl_event->jaxis.value < MEH_INPUT_MAX_AXIS) {
+						/* reset these directions */
+						move.movement_type = MEH_JOYSTICK;
+						move.left = -1;
+						move.right = -1;
+					}
+					break;
+				case 1: /* Y axis */
+					if (sdl_event->jaxis.value > MEH_INPUT_MAX_AXIS) {
+						move.movement_type = MEH_JOYSTICK;
+						move.down = 1;
+					} else if (sdl_event->jaxis.value < -MEH_INPUT_MAX_AXIS) {
+						move.movement_type = MEH_JOYSTICK;
+						move.up = 1;
+					} else if (sdl_event->jaxis.value > -MEH_INPUT_MAX_AXIS && sdl_event->jaxis.value < MEH_INPUT_MAX_AXIS) {
+						move.movement_type = MEH_JOYSTICK;
+						move.down = -1;
+						move.up = -1;
+					}
+					break;
+			}
+	}
+
+	return move;
+}
+
+
 /*
- * meh_input_read_event reads the given SDL event 
- * and do things accordingly.
+ * meh_input_read_event reads the given SDL event to finally change the state
+ * of key pressed / releaseed.
  */
 void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_event) {
 	g_assert(input_manager != NULL);
@@ -272,6 +362,7 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 	}
 
 	/* get the use 'input_state' having done the event */
+
 	InputState* input_state = meh_input_manager_get_input_state(input_manager, sdl_event);
 
 	int sdl_button = -1;
@@ -289,99 +380,73 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 			sdl_button = sdl_event->jbutton.button;
 			break;
 		case SDL_JOYHATMOTION:
-			keyboard = FALSE;
-
-			/* DPAD support */
-			switch (sdl_event->jhat.value) {
-				case SDL_HAT_CENTERED:
-					// back to center, reset the up down right and left directions.
-					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_UP);
-					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_DOWN);
-					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_LEFT);
-					meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_RIGHT);
-					break;
-				case SDL_HAT_UP:
-				case SDL_HAT_RIGHTUP:
-				case SDL_HAT_LEFTUP: // FIXME(remy): mehstation doesn't support diagonal
-					sdl_button = SDLK_UP;
-					break;
-				case SDL_HAT_RIGHT:
-					sdl_button = SDLK_RIGHT;
-					break;
-				case SDL_HAT_LEFT:
-					sdl_button = SDLK_LEFT;
-					break;
-				case SDL_HAT_LEFTDOWN:
-				case SDL_HAT_RIGHTDOWN:
-				case SDL_HAT_DOWN:
-					sdl_button = SDLK_DOWN;
-					break;
-			}
-
-			break;
 		case SDL_JOYAXISMOTION:
-			/* Converts the axis + value to a SDLK constant */
-			switch (sdl_event->jaxis.axis) {
-				case 0: /* X axis */
-					if (sdl_event->jaxis.value > MEH_INPUT_MAX_AXIS) {
-						sdl_button = SDLK_RIGHT;
-					} else if (sdl_event->jaxis.value < -MEH_INPUT_MAX_AXIS) {
-						sdl_button = SDLK_LEFT;
-					} else if (sdl_event->jaxis.value > -MEH_INPUT_MAX_AXIS && sdl_event->jaxis.value < MEH_INPUT_MAX_AXIS) {
-						/* A bit harsh : we there was a motion axis but no value, 
-						 * it means that the axis has returned to 0 and so we need
-						 * to reset the direction values. */
-						if (sdl_event->jhat.value == 0) {
-							meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_LEFT);
-							meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_RIGHT);
-						}
-					}
-					break;
-
-				case 1: /* Y axis */
-					if (sdl_event->jaxis.value > MEH_INPUT_MAX_AXIS) {
-						sdl_button = SDLK_DOWN;
-					} else if (sdl_event->jaxis.value < -MEH_INPUT_MAX_AXIS) {
-						sdl_button = SDLK_UP;
-					} else if (sdl_event->jaxis.value > -MEH_INPUT_MAX_AXIS && sdl_event->jaxis.value < MEH_INPUT_MAX_AXIS) {
-						/* A bit harsh : we there was a motion axis but no value, 
-						 * it means that the axis has returned to 0 and so we need
-						 * to reset the direction values. */
-						if (sdl_event->jhat.value == 0) {
-							meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_UP);
-							meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_DOWN);
-						}
-					}
-					break;
-			}
 			keyboard = FALSE;
-			break;
+		break;
+	}
+
+	/* Read directions state */
+
+	InputDirectionMove move = meh_input_read_axis_events(input_state, sdl_event);
+
+	if (SDL_GetTicks()-(input_state->last_movement.tick) > 200) { /* ignore jitter */
+		if (move.up > 0) {
+			input_state->last_movement = move;
+			sdl_button = SDLK_UP;
+		} else if (move.down > 0) {
+			input_state->last_movement = move;
+			sdl_button = SDLK_DOWN;
+		}  else if (move.left > 0) {
+			input_state->last_movement = move;
+			sdl_button = SDLK_LEFT;
+		} else if (move.right > 0) {
+			input_state->last_movement = move;
+			sdl_button = SDLK_RIGHT;
+		}
+	}
+	/* reset only if removed by the same input */
+	if (input_state->last_movement.movement_type == move.movement_type) {
+		if (move.up < 0) {
+			meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_UP);
+		}
+		if (move.down < 0) {
+			meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_DOWN);
+		}
+		if (move.left < 0) {
+			meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_LEFT);
+		}
+		if (move.right < 0) {
+			meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_RIGHT);
+		}
 	}
 
 	/* Apply the mapping */
+
 	if (input_state->mapping != NULL) {
 		pressed = g_hash_table_lookup(input_state->mapping->m, &sdl_button);
 	}
 
-	/* Not configured key pressed. Just store the last. */
-	if (sdl_button == -1) {
-		return;
-	}
+	input_state->last_sdl_key = sdl_button;
 
 	int key_pressed = MEH_INPUT_SPECIAL_UNKNOWN;
 	if (pressed != NULL) {
 		key_pressed = *pressed;
 	}
 
-	input_state->last_sdl_key = sdl_button;
+	/* Nothing known for which we want to change the state */
 
-	/* This is a known key set it as pressed / unpressed */
+	if  (key_pressed == MEH_INPUT_SPECIAL_UNKNOWN) {
+		return;
+	}
+
+	/* This is a known key set it as pressed / not pressed */
+
 	switch (sdl_event->type) {
 		case SDL_KEYDOWN:
 		case SDL_JOYBUTTONDOWN:
 		case SDL_JOYAXISMOTION:
 		case SDL_JOYHATMOTION:
-			// ignore on hat returned to center
+			/* ignore on hat returned to center */
 			if (sdl_event->type == SDL_JOYHATMOTION && sdl_event->jhat.value == SDL_HAT_CENTERED) {
 				break;
 			}
