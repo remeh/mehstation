@@ -337,7 +337,7 @@ static InputDirectionMove meh_input_read_axis_events(InputState* state, SDL_Even
 					} else if (sdl_event->jaxis.value < -MEH_INPUT_MAX_AXIS) {
 						move.movement_type = MEH_JOYSTICK;
 						move.up = 1;
-					} else if (sdl_event->jaxis.value > -MEH_INPUT_MAX_AXIS && sdl_event->jaxis.value < MEH_INPUT_MAX_AXIS) {
+					} else if (sdl_event->jaxis.value >= -MEH_INPUT_MAX_AXIS && sdl_event->jaxis.value <= MEH_INPUT_MAX_AXIS) {
 						move.movement_type = MEH_JOYSTICK;
 						move.down = -1;
 						move.up = -1;
@@ -404,7 +404,8 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 			sdl_button = SDLK_RIGHT;
 		}
 	}
-	/* reset only if removed by the same input */
+
+	/* reset only if removed by the same axis input */
 	if (input_state->last_movement.movement_type == move.movement_type) {
 		if (move.up < 0) {
 			meh_input_manager_reset_button_state(input_manager, MEH_INPUT_BUTTON_UP);
@@ -426,28 +427,29 @@ void meh_input_manager_read_event(InputManager* input_manager, SDL_Event* sdl_ev
 		pressed = g_hash_table_lookup(input_state->mapping->m, &sdl_button);
 	}
 
-	input_state->last_sdl_key = sdl_button;
-
 	int key_pressed = MEH_INPUT_SPECIAL_UNKNOWN;
 	if (pressed != NULL) {
 		key_pressed = *pressed;
 	}
 
-	/* Nothing known for which we want to change the state */
-
-	if  (key_pressed == MEH_INPUT_SPECIAL_UNKNOWN) {
+	if (sdl_button < 0) {
 		return;
 	}
 
-	/* This is a known key set it as pressed / not pressed */
+	input_state->last_sdl_key = sdl_button;
 
 	switch (sdl_event->type) {
 		case SDL_KEYDOWN:
 		case SDL_JOYBUTTONDOWN:
 		case SDL_JOYAXISMOTION:
 		case SDL_JOYHATMOTION:
-			/* ignore on hat returned to center */
+			/* ignore on hat returned to center and
+			 * axis released */
 			if (sdl_event->type == SDL_JOYHATMOTION && sdl_event->jhat.value == SDL_HAT_CENTERED) {
+				break;
+			}
+
+			if (move.up < 0 || move.down < 0 || move.right < 0 || move.left < 0) {
 				break;
 			}
 
