@@ -169,8 +169,6 @@ static guint meh_db_get_schema_version(DB* db) {
 	const char* sql = "SELECT \"value\" FROM mehstation WHERE \"name\" = \"schema\"";
 	int return_code = sqlite3_prepare_v2(db->sqlite, sql, strlen(sql), &statement, NULL);
 
-	/* TODO(remy): check the latest schema available (compare to MEH_DB_LATEST_VERSION) */
-
 	if (return_code != SQLITE_OK) {
 		/* we must setup from the start. */
 		sqlite3_finalize(statement);
