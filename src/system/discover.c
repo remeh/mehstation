@@ -16,7 +16,12 @@ static gboolean meh_discover_ext_is_valid(gchar* filename, gchar** extension);
 static GQueue* meh_discover_read_filenames(gchar* directory);
 static void meh_discover_update_platform_executables(App* app, const Platform* platform, GQueue* executables);
 
-/* TODO(remy): split the extensions per comma */
+/*
+ * meh_discover_scan_directory looks for files having one of the given extensions
+ * in the given directory.
+ * If some are found, it then check if we should add it to the given platform (it
+ * is not the case if it has already been discovered for this platform).
+ */
 void meh_discover_scan_directory(App* app, const Platform* platform, gchar* directory, gchar* extensions) {
 	g_assert(directory != NULL);
 
@@ -50,7 +55,7 @@ void meh_discover_scan_directory(App* app, const Platform* platform, gchar* dire
 				NULL,
 				NULL,
 				FALSE,
-				g_date_time_new_now_local() /* FIXME(remy): 0 is not a valid value. */
+				g_date_time_new_now_local()
 			);
 
 			g_queue_push_tail(executables, executable);
@@ -67,6 +72,11 @@ void meh_discover_scan_directory(App* app, const Platform* platform, gchar* dire
 	meh_model_executables_destroy(executables);
 }
 
+/*
+ * meh_discover_update_platform_executables checks in database for each executable
+ * given, if they're already known for this platform.
+ * If they're not, they're added.
+ */
 static void meh_discover_update_platform_executables(App* app, const Platform* platform, GQueue* executables) {
 	g_assert(app != NULL);
 	g_assert(platform != NULL);
@@ -98,6 +108,11 @@ static void meh_discover_update_platform_executables(App* app, const Platform* p
 	sqlite3_exec(app->db->sqlite, "COMMIT", NULL, NULL, NULL);
 }
 
+/*
+ * meh_discover_read_filenames creates a queue of string
+ * containing all the filenames inside the given directory.
+ * The memory of the returned queue must be freed by the caller.
+ */
 static GQueue* meh_discover_read_filenames(gchar* directory) {
 	g_assert(directory != NULL);
 
