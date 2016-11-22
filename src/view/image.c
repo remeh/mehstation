@@ -10,10 +10,7 @@
  */
 SDL_Texture* meh_image_load_file(SDL_Renderer* renderer, const char* filename) {
 	g_assert(renderer != NULL);
-
-	if (filename == NULL) {
-		return NULL;
-	}
+	g_assert(filename != NULL);
 
 	SDL_Surface* surface = IMG_Load(filename);
 	if (surface == NULL) {

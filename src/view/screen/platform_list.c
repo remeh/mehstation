@@ -167,7 +167,9 @@ static void meh_screen_platform_last_started_load(App* app, Screen* screen) {
 		// TODO(remy): we should use a placeholder image instead,
 		//             because the platform don't necessarily have
 		//             an icon.
-		icon = meh_image_load_file(app->window->sdl_renderer, platform->icon);
+		if (platform->icon != NULL) {
+			icon = meh_image_load_file(app->window->sdl_renderer, platform->icon);
+		}
 	}
 
 	if (icon == NULL) {
