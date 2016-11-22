@@ -11,6 +11,10 @@
 SDL_Texture* meh_image_load_file(SDL_Renderer* renderer, const char* filename) {
 	g_assert(renderer != NULL);
 
+	if (filename == NULL) {
+		return NULL;
+	}
+
 	SDL_Surface* surface = IMG_Load(filename);
 	if (surface == NULL) {
 		g_critical("Can't load the image '%s' : %s", filename, IMG_GetError());
