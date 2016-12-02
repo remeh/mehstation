@@ -12,7 +12,7 @@
 #include "system/utils.h"
 #include "system/db/models.h"
 
-static gboolean meh_discover_ext_is_valid(gchar* filename, gchar** extension);
+static gboolean meh_discover_ext_is_valid(const gchar* filename, gchar** extension);
 static GQueue* meh_discover_read_filenames(gchar* directory);
 static void meh_discover_update_platform_executables(App* app, const Platform* platform, GQueue* executables);
 
@@ -71,6 +71,45 @@ void meh_discover_scan_directory(App* app, const Platform* platform) {
 	/* free everything */
 	meh_model_executables_destroy(executables);
 }
+
+gboolean meh_discover_has_exec(struct App* app, const Platform *platform) {
+	g_assert(app != NULL);
+	g_assert(platform != NULL);
+
+	if (g_utf8_strlen(platform->discover_dir, 1) <= 0) {
+		return FALSE;
+	}
+
+	GDir *dir = NULL;
+	GError *error = NULL;
+	const gchar *filename = NULL;
+
+	/* split extensions */
+	gchar** exts = g_strsplit(platform->discover_ext, ",", -1);
+
+	/* open the directory */
+
+	dir = g_dir_open(platform->discover_dir, 0, &error);
+	if (error != NULL) {
+		g_critical("discover: can't look for filenames into '%s': %s", platform->discover_dir, error->message);
+		return FALSE;
+	}
+
+	/* read each filename and look for a valid ext */
+
+	gboolean found = FALSE;
+	while ((filename = g_dir_read_name(dir))) {
+		if (meh_discover_ext_is_valid(filename, exts)) {
+			found = TRUE;
+			break;
+		}
+	}
+
+	g_strfreev(exts);
+	g_dir_close(dir);
+	return found;
+}
+
 
 /*
  * meh_discover_update_platform_executables checks in database for each executable
@@ -141,7 +180,7 @@ static GQueue* meh_discover_read_filenames(gchar* directory) {
 
 /* meh_discover_ext_is_valid checks whether the given filename ends
  * with one of the given extensions */
-static gboolean meh_discover_ext_is_valid(gchar* filename, gchar** extensions) {
+static gboolean meh_discover_ext_is_valid(const gchar* filename, gchar** extensions) {
 	g_assert(filename != NULL);
 	g_assert(extensions != NULL);
 
