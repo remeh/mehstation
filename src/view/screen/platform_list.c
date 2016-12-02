@@ -18,6 +18,7 @@
 
 #include "system/app.h"
 #include "system/consts.h"
+#include "system/discover.h"
 #include "system/input.h"
 #include "system/message.h"
 #include "system/transition.h"
@@ -66,13 +67,27 @@ Screen* meh_screen_platform_list_new(App* app) {
 	data->no_platforms_widget = meh_widget_text_new(app->big_font, "No platforms configured. Use mehstation-config", 150, 330, MEH_FAKE_WIDTH-150, 50, white, FALSE);
 
 	/* Platforms */
-	data->platforms = meh_db_get_platforms(app->db);
+	data->platforms = g_queue_new();
 	data->icons_widgets = g_queue_new();
 	data->platforms_icons = g_queue_new();
 
 	/* TODO(remy): for each platform in discover mode,
 	 * ensure there is at least one file with
 	 * the good extension in the target directory. */
+	GQueue* unfiltered_platforms = meh_db_get_platforms(app->db);
+	for (unsigned int i = 0; i < g_queue_get_length(unfiltered_platforms); i++) {
+		Platform* platform = g_queue_peek_nth(unfiltered_platforms, i);
+
+		/* for discover platforms, checks for at least one executable. */
+		if (g_utf8_strlen(platform->discover_dir, 1) > 0 && g_utf8_strlen(platform->discover_ext, 1) > 0
+				&& !meh_discover_has_exec(app, platform)) {
+			meh_model_platform_destroy(platform);
+			continue;
+		}
+
+		g_queue_push_tail(data->platforms, platform);
+	}
+	g_queue_free(unfiltered_platforms);
 
 	/* Load the data / icons / widgets of every platforms */
 	for (unsigned int i = 0; i < g_queue_get_length(data->platforms); i++) {
