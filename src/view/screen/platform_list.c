@@ -70,6 +70,10 @@ Screen* meh_screen_platform_list_new(App* app) {
 	data->icons_widgets = g_queue_new();
 	data->platforms_icons = g_queue_new();
 
+	/* TODO(remy): for each platform in discover mode,
+	 * ensure there is at least one file with
+	 * the good extension in the target directory. */
+
 	/* Load the data / icons / widgets of every platforms */
 	for (unsigned int i = 0; i < g_queue_get_length(data->platforms); i++) {
 		Platform* platform = g_queue_peek_nth(data->platforms, i);

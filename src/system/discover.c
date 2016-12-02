@@ -22,20 +22,20 @@ static void meh_discover_update_platform_executables(App* app, const Platform* p
  * If some are found, it then check if we should add it to the given platform (it
  * is not the case if it has already been discovered for this platform).
  */
-void meh_discover_scan_directory(App* app, const Platform* platform, gchar* directory, gchar* extensions) {
-	g_assert(directory != NULL);
+void meh_discover_scan_directory(App* app, const Platform* platform) {
+	g_assert(platform != NULL);
 
 	GQueue *executables = g_queue_new();
 
-	if (g_utf8_strlen(directory, 1) <= 0) {
+	if (g_utf8_strlen(platform->discover_dir, 1) <= 0) {
 		return;
 	}
 
 	/* look for all files in the given directory */
-	GQueue* filenames = meh_discover_read_filenames(directory);
+	GQueue* filenames = meh_discover_read_filenames(platform->discover_dir);
 
 	/* split extensions */
-	gchar** exts = g_strsplit(extensions, ",", -1);
+	gchar** exts = g_strsplit(platform->discover_ext, ",", -1);
 
 	for (int i = 0; i < g_queue_get_length(filenames); i++) {
 		gchar* filename = g_queue_peek_nth(filenames, i);
@@ -45,7 +45,7 @@ void meh_discover_scan_directory(App* app, const Platform* platform, gchar* dire
 			Executable* executable = meh_model_executable_new(
 				-1,
 				meh_clean_filename(filename),
-				g_strdup_printf("%s/%s", directory, filename),
+				g_strdup_printf("%s/%s", platform->discover_dir, filename),
 				NULL,
 				NULL,
 				NULL,

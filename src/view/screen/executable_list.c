@@ -67,7 +67,7 @@ Screen* meh_exec_list_new(App* app, int platform_id) {
 				data->platform->name,
 				data->platform->discover_dir,
 				data->platform->discover_ext);
-		meh_discover_scan_directory(app, data->platform, data->platform->discover_dir, data->platform->discover_ext);
+		meh_discover_scan_directory(app, data->platform);
 	}
 
 	/* get the executables */
