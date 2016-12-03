@@ -85,7 +85,6 @@ void meh_audio_destroy(Audio* audio) {
 		audio->device = NULL;
 	}
 
-	// TODO(remy): test the GDestroyNotify cast
 	g_queue_free_full(audio->sounds, (GDestroyNotify)meh_sound_destroy);
 
 	/* delete the sources */
