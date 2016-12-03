@@ -71,7 +71,7 @@ Screen* meh_screen_platform_list_new(App* app) {
 	data->icons_widgets = g_queue_new();
 	data->platforms_icons = g_queue_new();
 
-	/* TODO(remy): for each platform in discover mode,
+	/* for each platform in discover mode,
 	 * ensure there is at least one file with
 	 * the good extension in the target directory. */
 	GQueue* unfiltered_platforms = meh_db_get_platforms(app->db);
