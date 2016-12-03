@@ -22,8 +22,8 @@ After having configured your platforms (Native, Emulators, ...) and the executab
     * Games view displaying screenshots, playing videos and showing description of executables
     * App mode focused on starting traditional apps (VLC, Firefox, Steam, etc.). Also more suitable for Raspberry Pi.
   * Multi-platform: Linux, Windows, (not tested on Mac yet).
-  * Easy configuration with the dedicated app : mehstation-config
-  * Automatic scraping of games resources
+  * Easy configuration and scraping with the dedicated app: [mehstation-config](https://github.com/remeh/mehstation-config)
+  * Command-line configuration and scraping also available: [mehtadata](https://github.com/remeh/mehtadata)
   * Import configuration from EmulationStation
   * Favorite your executables, launch random executables, etc.
   * Automatic detection and visual mapping of gamepads.
@@ -31,7 +31,9 @@ After having configured your platforms (Native, Emulators, ...) and the executab
 
 ## Configuration
 
-To configure your mehstation, the easiest solution is to use the dedicated tool shipped with mehstation called [mehstation-config](https://github.com/remeh/mehstation-config). The usage of this configuration tool is documented in the [mehstation wiki](https://github.com/remeh/mehstation/wiki).
+To configure your mehstation, the easiest solution is to use the dedicated graphical tool shipped with mehstation called [mehstation-config](https://github.com/remeh/mehstation-config). The usage of this configuration tool is documented in the [mehstation wiki](https://github.com/remeh/mehstation/wiki).
+
+However, the configuration sometimes need to be done in command-line. This is why there is also [mehtadata](https://github.com/remeh/mehtadata), a configuration and scraping command-line tool .
 
 ## Developer infos
 
