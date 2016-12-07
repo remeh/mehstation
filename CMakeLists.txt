@@ -130,7 +130,7 @@ ENDIF()
 # sources
 TARGET_LINK_LIBRARIES(
     ${PROJECT_NAME}
-    ${GLIB_LIBRARIES}
+    ${GLIB_LDFLAGS}
     ${sqlite3_LIBRARIES}
     ${SDL2_LIBRARIES}
     ${SDL2_ttf_LIBRARIES}
@@ -139,7 +139,8 @@ TARGET_LINK_LIBRARIES(
     ${libavcodec_LIBRARIES}
     ${libavformat_LIBRARIES}
     ${libavutil_LIBRARIES}
-    ${openal_LIBRARIES}
+    ${OPENAL_LIBRARY} # macos
+#   ${openal_LIBRARIES} # when was using pkg-config
 )
 
 INSTALL(DIRECTORY res DESTINATION /usr/share/mehstation)
