@@ -74,6 +74,8 @@ ENDIF()
 
 IF($ENV{MACOS})
   INCLUDE(FindOpenal)
+ELSE()
+  PKG_SEARCH_MODULE(openal REQUIRED openal)
 ENDIF()
 
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
@@ -84,10 +86,6 @@ PKG_SEARCH_MODULE(libavcodec REQUIRED libavcodec)
 PKG_SEARCH_MODULE(libavformat REQUIRED libavformat)
 PKG_SEARCH_MODULE(libavutil REQUIRED libavutil)
 PKG_CHECK_MODULES(GLIB REQUIRED glib-2.0>=2.0.0)
-
-IF(NOT $ENV{MACOS})
-    PKG_SEARCH_MODULE(openal REQUIRED openal)
-ENDIF()
 
 include_directories(
     ${SDL2_INCLUDE_DIRS}
