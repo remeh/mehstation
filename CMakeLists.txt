@@ -5,6 +5,10 @@ IF($ENV{MINGW_BUILD})
   SET(CMAKE_SYSTEM_NAME Generic)
 ENDIF()
 
+IF($ENV{MACOS})
+  MESSAGE("Building for macOS.")
+ENDIF()
+
 IF($ENV{DEBUG})
   MESSAGE("--- DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG DEBUG ---")
 ENDIF()
@@ -68,7 +72,9 @@ IF($ENV{MINGW_BUILD})
   SET (PKG_CONFIG_EXECUTABLE i686-w64-mingw32-pkg-config)
 ENDIF()
 
-INCLUDE(FindOpenal)
+IF($ENV{MACOS})
+  INCLUDE(FindOpenal)
+ENDIF()
 
 PKG_SEARCH_MODULE(SDL2 REQUIRED sdl2)
 PKG_SEARCH_MODULE(SDL2_ttf REQUIRED SDL2_ttf)
@@ -77,8 +83,11 @@ PKG_SEARCH_MODULE(sqlite3 REQUIRED sqlite3)
 PKG_SEARCH_MODULE(libavcodec REQUIRED libavcodec)
 PKG_SEARCH_MODULE(libavformat REQUIRED libavformat)
 PKG_SEARCH_MODULE(libavutil REQUIRED libavutil)
-#PKG_SEARCH_MODULE(openal REQUIRED openal)
 PKG_CHECK_MODULES(GLIB REQUIRED glib-2.0>=2.0.0)
+
+IF(NOT $ENV{MACOS})
+    PKG_SEARCH_MODULE(openal REQUIRED openal)
+ENDIF()
 
 include_directories(
     ${SDL2_INCLUDE_DIRS}
@@ -139,9 +148,19 @@ TARGET_LINK_LIBRARIES(
     ${libavcodec_LIBRARIES}
     ${libavformat_LIBRARIES}
     ${libavutil_LIBRARIES}
-    ${OPENAL_LIBRARY} # macos
-#   ${openal_LIBRARIES} # when was using pkg-config
 )
+
+IF($ENV{MACOS})
+    TARGET_LINK_LIBRARIES(
+        ${PROJECT_NAME}
+        ${OPENAL_LIBRARY} # macos
+    )
+ELSE()
+    TARGET_LINK_LIBRARIES(
+        ${PROJECT_NAME}
+        ${openal_LIBRARIES} # using pkg-config
+    )
+ENDIF()
 
 INSTALL(DIRECTORY res DESTINATION /usr/share/mehstation)
 INSTALL(PROGRAMS mehstation DESTINATION /usr/bin)

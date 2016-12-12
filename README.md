@@ -42,7 +42,7 @@ Please free to contribute and to send any pull requests, comments or issues.
 
 If some of you want to contribute but don't know what to start with, [TODO](https://github.com/remeh/mehstation/blob/master/TODO.md) is a good start.
 
-## How to compile
+## How to compile for Linux
 
 The dependencies are:
 
@@ -66,7 +66,6 @@ You can now type `mehstation` to start the app.
 Please create an issue if you have a problem compiling mehstation.
 
 For further infos, see the [compilation chapters in the wiki](https://github.com/remeh/mehstation/wiki).
-
 
 ## License
 
